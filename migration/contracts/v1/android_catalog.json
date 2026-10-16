@@ -1,0 +1,252 @@
+{
+  "commands": [
+    {
+      "category": "General",
+      "id": "help",
+      "kind": "c",
+      "title": "XBS help"
+    },
+    {
+      "category": "General",
+      "id": "status",
+      "kind": "c",
+      "title": "Runtime status"
+    },
+    {
+      "category": "General",
+      "id": "init",
+      "kind": "c",
+      "title": "Initialize XBS"
+    },
+    {
+      "category": "General",
+      "id": "paths",
+      "kind": "c",
+      "title": "Resolved paths"
+    },
+    {
+      "category": "General",
+      "id": "capabilities",
+      "kind": "c",
+      "title": "Compatibility contract"
+    },
+    {
+      "category": "General",
+      "id": "validate",
+      "kind": "c",
+      "title": "Validate configuration"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_get",
+      "kind": "c",
+      "title": "Read configuration"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_set",
+      "kind": "c",
+      "title": "Set configuration value"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_validate",
+      "kind": "c",
+      "title": "Validate JSON payload"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_edit_cli",
+      "kind": "c",
+      "title": "CLI configuration editor"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_native",
+      "kind": "special",
+      "title": "Native configuration editor"
+    },
+    {
+      "category": "Configuration",
+      "id": "config_schema",
+      "kind": "c",
+      "title": "Configuration schema"
+    },
+    {
+      "category": "Runtime",
+      "id": "runtime_reload",
+      "kind": "c",
+      "title": "Reload runtime"
+    },
+    {
+      "category": "Runtime",
+      "id": "runtime_pause",
+      "kind": "c",
+      "title": "Pause runtime"
+    },
+    {
+      "category": "Runtime",
+      "id": "runtime_resume",
+      "kind": "c",
+      "title": "Resume runtime"
+    },
+    {
+      "category": "Runtime",
+      "id": "runtime_safe",
+      "kind": "c",
+      "title": "Set safe mode"
+    },
+    {
+      "category": "Events",
+      "id": "event_list",
+      "kind": "c",
+      "title": "List events"
+    },
+    {
+      "category": "Events",
+      "id": "event_run",
+      "kind": "c",
+      "title": "Start standard event"
+    },
+    {
+      "category": "Events",
+      "id": "event_stop",
+      "kind": "c",
+      "title": "Stop standard event"
+    },
+    {
+      "category": "Events",
+      "id": "event_manage",
+      "kind": "special",
+      "title": "Manage events"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_help",
+      "kind": "ctl",
+      "title": "Controller help"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_start",
+      "kind": "ctlEvent",
+      "title": "Start event"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_stop",
+      "kind": "ctlEvent",
+      "title": "Stop event"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_reload",
+      "kind": "ctlWait",
+      "title": "Reload controller"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_pause",
+      "kind": "ctlWait",
+      "title": "Pause controller"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_resume",
+      "kind": "ctlWait",
+      "title": "Resume controller"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_safe",
+      "kind": "ctlWait",
+      "title": "Enter safe mode"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_active",
+      "kind": "ctl",
+      "title": "Active events"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_status",
+      "kind": "ctl",
+      "title": "Controller status"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_detail",
+      "kind": "ctl",
+      "title": "Detailed controller status"
+    },
+    {
+      "category": "Controller",
+      "id": "ctl_validate",
+      "kind": "ctl",
+      "title": "Controller validation"
+    },
+    {
+      "category": "Developer",
+      "id": "schema_root",
+      "kind": "c",
+      "title": "Complete schema"
+    },
+    {
+      "category": "Developer",
+      "id": "schema_commands",
+      "kind": "c",
+      "title": "Command schema"
+    },
+    {
+      "category": "Developer",
+      "id": "schema_command",
+      "kind": "c",
+      "title": "Inspect command schema"
+    },
+    {
+      "category": "Developer",
+      "id": "schema_output",
+      "kind": "c",
+      "title": "Inspect output schema"
+    },
+    {
+      "category": "Developer",
+      "id": "schema_config",
+      "kind": "c",
+      "title": "Inspect config key"
+    },
+    {
+      "category": "Developer",
+      "id": "completion_zsh",
+      "kind": "c",
+      "title": "Generate Zsh completion"
+    },
+    {
+      "category": "Developer",
+      "id": "completion_install",
+      "kind": "c",
+      "title": "Install Zsh completion"
+    },
+    {
+      "category": "Developer",
+      "id": "completion_complete_zsh",
+      "kind": "c",
+      "title": "Resolve Zsh completion"
+    },
+    {
+      "category": "Developer",
+      "id": "manpage_show",
+      "kind": "c",
+      "title": "Show manpage"
+    },
+    {
+      "category": "Developer",
+      "id": "manpage_install",
+      "kind": "c",
+      "title": "Install manpage"
+    }
+  ],
+  "schema_version": 1,
+  "source": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCliCatalog.java"
+}

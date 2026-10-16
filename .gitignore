@@ -1,0 +1,17 @@
+# Local Devtool, Go, Android and release outputs
+.devtool/
+.devtool-artifact/
+.devtool-wrapper-cache/
+.tmp/
+out/
+dist/
+**/.gradle/
+**/build/
+**/.kotlin/
+**/.cxx/
+**/.externalNativeBuild/
+local.properties
+*.log
+__pycache__/
+.pytest_cache/
+.DS_Store

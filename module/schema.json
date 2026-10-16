@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "XtremeBS Config",
+  "type": "object",
+  "required": [
+    "header",
+    "events"
+  ],
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "enum": [
+            2
+          ]
+        },
+        "delay": {
+          "type": "integer"
+        },
+        "log_file": {
+          "type": "string"
+        },
+        "log_level": {
+          "type": "integer"
+        },
+        "log_json": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "ctl_file": {
+          "type": "string"
+        },
+        "lock_file": {
+          "type": "string"
+        },
+        "essentials_allowlist": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "allowlist": {
+            "type": "string",
+            "description": "Managed allowlist file path."
+          },
+          "denylist": {
+            "type": "string",
+            "description": "Managed denylist file path."
+          },
+          "proc_file": {
+            "type": "string",
+            "description": "Managed process-rule file path."
+          },
+          "keep_on_charge": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "quit": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "handle_cores": {
+            "type": [
+              "string",
+              "boolean"
+            ]
+          },
+          "disable_cores": {
+            "type": [
+              "string",
+              "boolean"
+            ]
+          },
+          "handle_apps": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "false",
+                  "nice",
+                  "kill",
+                  "suspend"
+                ]
+              },
+              {
+                "const": false
+              }
+            ]
+          },
+          "handle_gms": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "false",
+                  "nice",
+                  "kill"
+                ]
+              },
+              {
+                "const": false
+              }
+            ]
+          },
+          "handle_proc": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "low_ram": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "doze": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "false",
+                  "light",
+                  "deep"
+                ]
+              },
+              {
+                "const": false
+              }
+            ]
+          },
+          "kill_wifi": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

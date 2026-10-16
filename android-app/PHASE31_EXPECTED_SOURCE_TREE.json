@@ -1,0 +1,4611 @@
+{
+  "algorithm": "sha256-path-size-content-v1",
+  "excluded": [
+    ".devtool",
+    ".devtool-artifact",
+    ".devtool-artifact.json",
+    ".git",
+    ".gradle",
+    ".idea",
+    ".pytest_cache",
+    "PHASE31_EXPECTED_SOURCE_TREE.json",
+    "__pycache__",
+    "build",
+    "local.properties"
+  ],
+  "file_count": 918,
+  "files": [
+    {
+      "path": ".devtool.toml",
+      "sha256": "3c4c7941460274973623271c0c0fc718aae211d9281ef4a63e37913345719e45",
+      "size": 17169
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "bdfa014d0755f88290e6921d981a694fbe7385e999d5d8f27252fa292845b8ac",
+      "size": 1795
+    },
+    {
+      "path": ".in",
+      "sha256": "586025ed00bb0e98612b5d0e41d904e4ef52e67581c436ee418c0b551d102a20",
+      "size": 346
+    },
+    {
+      "path": "KSU_WEBUI_AUDIT.md",
+      "sha256": "143c149ede91aae43ecd7672cfd64ba3cfb11d5f31893d22a51103ac530f2002",
+      "size": 1887
+    },
+    {
+      "path": "README.md",
+      "sha256": "e38ea3acb3f5cbb448f70e09f7224dfa416bf2204cbaa50a83cb463630fdf15c",
+      "size": 7031
+    },
+    {
+      "path": "apps/bootmanager/README.md",
+      "sha256": "3556990d8415f002ac3bb7e21c6dfc20225bef7d8bde4a384aeb52c070dc9b5b",
+      "size": 647
+    },
+    {
+      "path": "apps/bootmanager/TEST_RESULTS.txt",
+      "sha256": "aece641a9d12eb1bb6389dce122ca88970c53d2acfd3e655b8a284a6391f0781",
+      "size": 11
+    },
+    {
+      "path": "apps/bootmanager/USAGE_EXAMPLES.md",
+      "sha256": "0d21f0308d8b427173d4879edb710f3a4af064d75248acc3190647bad1eba924",
+      "size": 13363
+    },
+    {
+      "path": "apps/bootmanager/install.py",
+      "sha256": "f93b45949d193f2fcafdb563540f999b473b2fe00d680584fe3bdad53b5992d3",
+      "size": 265
+    },
+    {
+      "path": "apps/bootmanager/module/META-INF/com/google/android/update-binary",
+      "sha256": "de259f25a243a3c14cfd76291b54ad986e94eeed99a44d8dd59aac78d526e257",
+      "size": 355
+    },
+    {
+      "path": "apps/bootmanager/module/META-INF/com/google/android/updater-script",
+      "sha256": "d2b8203193a083e43ad076fde01b9c7821e0aa521e1f8077b8628fb1cdb70c60",
+      "size": 8
+    },
+    {
+      "path": "apps/bootmanager/module/bin/bootmanager",
+      "sha256": "866ffaf4b4c6822077cf64b3e5d1568a2a602a9e7ba0f85bc05af3e97ea49308",
+      "size": 420
+    },
+    {
+      "path": "apps/bootmanager/module/bin/bootmanager-webui",
+      "sha256": "76708f8b0bc741d5ce0a443d76d946fdb0449a732ec1ea9ca4c19e809d837ef3",
+      "size": 85
+    },
+    {
+      "path": "apps/bootmanager/module/bin/bootmanager_webapi",
+      "sha256": "01efed23c6a44135bb0cb9ed57e28a96053d426932234646278c64e39897f03c",
+      "size": 80
+    },
+    {
+      "path": "apps/bootmanager/module/bin/python3",
+      "sha256": "d55b464c1a68b607dc90b58442362e47295216558db6ed96a68bedff8ee8cc7e",
+      "size": 205
+    },
+    {
+      "path": "apps/bootmanager/module/customize.sh",
+      "sha256": "e265102d04066626a8350018b457d0649574ee11e8a84209e5e93303f5284dda",
+      "size": 1175
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/common.sh",
+      "sha256": "16b2d188fd658405621a026e2adea6eaba5021c02316d33370a72167ef160af1",
+      "size": 1097
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/post-fs-data.sh",
+      "sha256": "f4dfd0b73cbb97e6c9238e81ed2916c2240c85f452cf67cc2e1285cca27a77e5",
+      "size": 672
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/service.sh",
+      "sha256": "5b29628deb4223194474c8a0c09a427375a2555d24c37e534c6da84f3e50c3dc",
+      "size": 1399
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/utils.sh",
+      "sha256": "ec9065a1e560a4206b9286aa989d947ce8ff347d3d83fba42d5d838504ee0ab8",
+      "size": 1010
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/webui/bootmanager-bridge.css",
+      "sha256": "a378a098f0814d8ba49522b596710d5050a84c53a462c8813c2fe73dc778d6f0",
+      "size": 37
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/ashrexcue/webui/bootmanager-bridge.js",
+      "sha256": "62650dbc3b6df1c91d5b988f480d0e0291081a42b3bed2c535e67ef3c0f7b5e7",
+      "size": 1736
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/common.sh",
+      "sha256": "a79a1bfdd7dc3fdd80673d8de8ac84c4f0eae990a2ca8f6ccdd87f0115ce4944",
+      "size": 366
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/nuke.sh",
+      "sha256": "3c602c6f76b6e8045c878c2725c4f426d531db60755aa1c8a6fbdbb7143c8165",
+      "size": 688
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/post-fs-data.sh",
+      "sha256": "f913c09615542da9b70e69e660a3bef500252cad9bb438373680b4d180b90c8a",
+      "size": 467
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/service.sh",
+      "sha256": "4238b7a6b8011dc0f14ea504d6f8bbd27056f4689b104af3616f1a151d27bf31",
+      "size": 642
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/webui/bootmanager-bridge.css",
+      "sha256": "6d5a8370d649f0fb754a3b71dc5c3415efeb429758f6008e5e384faf86762bcd",
+      "size": 332
+    },
+    {
+      "path": "apps/bootmanager/module/hooks/san/webui/bootmanager-bridge.js",
+      "sha256": "f74ae426a26c804173011e377ba7a90c2963ea7d8232a80ccf0e68e9a7b44168",
+      "size": 898
+    },
+    {
+      "path": "apps/bootmanager/module/module.prop",
+      "sha256": "bf0bf804a76cb42667965a8deeb4cadeec7a5b9d9b27a7bc3e106b3c1e284842",
+      "size": 230
+    },
+    {
+      "path": "apps/bootmanager/module/post-fs-data.sh",
+      "sha256": "a3781c947b02e30a41c56ea9916979bf473591f5f7aba2d69093a21a367af271",
+      "size": 544
+    },
+    {
+      "path": "apps/bootmanager/module/service.sh",
+      "sha256": "eeecf4215b9d792f7d315fd91b0702ce8842d22d848462e7d5e3f04b17bd6958",
+      "size": 431
+    },
+    {
+      "path": "apps/bootmanager/module/system/bin/bootmanager",
+      "sha256": "9f6e5cb96f2b9e7e91e9b73f05289defb12dccc114700a543938ff1c2295b593",
+      "size": 73
+    },
+    {
+      "path": "apps/bootmanager/module/system/bin/bootmanager-webui",
+      "sha256": "e045160d5a6c598295ca5ad7f01b172e96bd10fa594f357d27a5505126170e5d",
+      "size": 79
+    },
+    {
+      "path": "apps/bootmanager/module/uninstall.sh",
+      "sha256": "6e2715bc2b7026e0526b573783788712d51fba70f113b0d29f0348afa334a04d",
+      "size": 46
+    },
+    {
+      "path": "apps/bootmanager/module/webroot/app.js",
+      "sha256": "0c0ec5f6236a384dcc0f99ce1a47526c5dbc60fbd80c1a4877873474ae9bd778",
+      "size": 3950
+    },
+    {
+      "path": "apps/bootmanager/module/webroot/cgi-bin/api",
+      "sha256": "43d78c6e5fc88125b5a77e7dc1fba0ed4c39aab64270d5958e37b286741e4703",
+      "size": 1569
+    },
+    {
+      "path": "apps/bootmanager/module/webroot/index.html",
+      "sha256": "89f7d5df2f0c140632b5e0caa7ce43c162e9d311880110f06ad095a371bfaa62",
+      "size": 3411
+    },
+    {
+      "path": "apps/bootmanager/module/webroot/style.css",
+      "sha256": "6d96213cc14e3b6c721f856935db602f21df8ca3fadee301d5ef9146124bd882",
+      "size": 4560
+    },
+    {
+      "path": "apps/bootmanager/pyproject.toml",
+      "sha256": "a3d44c7e2f3f8c5db33531c4e3def52f9f0dad9efe7fa4069eb1df40a9129ba7",
+      "size": 465
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/__init__.py",
+      "sha256": "88f95809c233bb35bb4f61ca0e499894c911239d5d04b7cd4713cf896adfc3d5",
+      "size": 22
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/__main__.py",
+      "sha256": "054b506e9e3627f300edb83d5192d1c1b231f2012580163408e25382ea2e7cbf",
+      "size": 90
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/adapters/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/adapters/ashlooper.py",
+      "sha256": "457324075459909f5032b9272fdfaf9683c06a8ffd6a296234fda00a4d8bbb62",
+      "size": 7394
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/adapters/san.py",
+      "sha256": "8029c7757f5bdb3871989819f1286fcffa66b92ba82fb16509551b083c2acb87",
+      "size": 9064
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/cli.py",
+      "sha256": "0ef321e6442a38143418c47fd3c22db9387de376ad4744a0ed993774bc875479",
+      "size": 33138
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/core.py",
+      "sha256": "47bd0c7d1376db6c55e47816fdb974b4592e4850589b7919d491bf3b01caf9ba",
+      "size": 16480
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/detect.py",
+      "sha256": "57eda9f28a0d39d7ce2b6391bf681dadbffb291d2db31a721b674aef315ecad0",
+      "size": 11304
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/jsonout.py",
+      "sha256": "6cba181ff1b36fddb0f0a0bc6c114738999318bd38839230493b0c4910757d9a",
+      "size": 738
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/patcher.py",
+      "sha256": "9ca5d2b7af6b43de8d6e27cf131bcdf26c15c9cda56a7fffd6b91555ac4e0c8c",
+      "size": 19555
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/schemas.py",
+      "sha256": "135a40b59d5706a6ec6c32605ea334df052a927082566051f839b1b6036cf4af",
+      "size": 1813
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/state.py",
+      "sha256": "d37db3e4a61ac09329a9f15beab979e3dec93b24a1062039adb07a975f73fda6",
+      "size": 4744
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/update.py",
+      "sha256": "75ad9c7160e042e1a6c6965a0f263717bf321e8dac727a8c52e6c8596a82518c",
+      "size": 7163
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/webapi_entry.py",
+      "sha256": "584ea608d35cd35baca8545968d0ae562712a3d517e5eb45ed3367b5d441e74a",
+      "size": 123
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/webui_entry.py",
+      "sha256": "bc1d213e4e65dcf34098578f0d7b926ac1bc328ea48f9009ac1f48718b7731e9",
+      "size": 131
+    },
+    {
+      "path": "apps/bootmanager/src/bootmanager/webui_server.py",
+      "sha256": "2d514f89d3b2812349525fab439995db07c06129bc9b2c23464a1fbfbca0750b",
+      "size": 5332
+    },
+    {
+      "path": "apps/bootmanager/tests/test_bootmanager.py",
+      "sha256": "d543c1349d696965b4a2f8f25abb7c905b20c3642585024bd7d1120af02bdcbe",
+      "size": 11582
+    },
+    {
+      "path": "apps/flowspace/.gitignore",
+      "sha256": "97ab2f0d30478a4c78a8b28d7f9a702156fc9b6a2d0ade0d5bf57960e6239a09",
+      "size": 49
+    },
+    {
+      "path": "apps/flowspace/CLI_COVERAGE.md",
+      "sha256": "f182c98321959e6705057ac2979956efc26b9ad9eec9ed6a7aec6a69218d6746",
+      "size": 2212
+    },
+    {
+      "path": "apps/flowspace/IMPLEMENTATION_STATUS.md",
+      "sha256": "b62cec1a3fe73e65f66c6e56de7cd3a2d08f565656ef024f2798ca43b9dcea1a",
+      "size": 1172
+    },
+    {
+      "path": "apps/flowspace/LICENSE",
+      "sha256": "3d79215641fea7b177b254b4d799569dc5d1a6f414cd5ce1c3426250b867436c",
+      "size": 690
+    },
+    {
+      "path": "apps/flowspace/README.md",
+      "sha256": "5db2ae5e4d25781938a6996388c7554d25795807571f6bc7f3ba7045284370fb",
+      "size": 4676
+    },
+    {
+      "path": "apps/flowspace/VALIDATION.md",
+      "sha256": "22f280bc98f2c14ae3ac17f8d99fa31b6f680951879f5a5dc30e2275816c8daa",
+      "size": 1874
+    },
+    {
+      "path": "apps/flowspace/app/build.gradle",
+      "sha256": "77e54b54bc41543c585d1ca392dbf9ad949c054bdf9c4cc1b9d17731aa0b95b6",
+      "size": 2874
+    },
+    {
+      "path": "apps/flowspace/app/proguard-rules.pro",
+      "sha256": "1efe921398995b32832bc7e9240bbf7e2f277bdf55d27fe6863346f6b5a51c7f",
+      "size": 175
+    },
+    {
+      "path": "apps/flowspace/app/src/main/AndroidManifest.xml",
+      "sha256": "3555cf46da6f4885f04e997e2ff3a96a92a333f33cee365209263e0eb6b8b607",
+      "size": 6727
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/AppPalette.java",
+      "sha256": "d4a7694177291688d56b0c668ca1ab5126c83e0512715017a8a48d3121af995b",
+      "size": 2154
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/AppSettings.java",
+      "sha256": "f6a92d4609276ca1ec5a77e569051a8cd5905be7337ba336cfa4ca6fcba2f2b7",
+      "size": 5196
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/AutomationService.java",
+      "sha256": "872d08e60e39e5c41a4999c0d2586a3ee85111b8ee62314e384298d8349ca844",
+      "size": 4993
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/BootReceiver.java",
+      "sha256": "52615ae3fb65ab8b67470d7aa1e027df4a845ae8816d29de1bb409079490ad67",
+      "size": 417
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/CliCommand.java",
+      "sha256": "dad1803289c8b86c7f9ab351fa28bec605546b6656f881053623098a996d93a7",
+      "size": 2551
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/CliField.java",
+      "sha256": "e499280ad61dd7380b02dc56206ab235c4bf5f90d15513ed4009d0f616b440cb",
+      "size": 1604
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/CommandCenterActivity.java",
+      "sha256": "8ab4269161091418c3113efdf3f398b6c64a83e3010f17d1fad4adc0c0979d2b",
+      "size": 6819
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/DownloadCompleteReceiver.java",
+      "sha256": "fc509248a29af469c2deb140cb1d59bdee5edd4931ea68e8b12ee2bce6bd2515",
+      "size": 661
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/EventFeedbackController.java",
+      "sha256": "ac24dcb11a9e0d18c2e70806a9a8f4a77e33a585f4e4e17820235309f792f214",
+      "size": 913
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/EventStore.java",
+      "sha256": "47aaf57173464faf8c2b3b37758c2060234a766d7019ce71be8376c6cafdbc9b",
+      "size": 1490
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowAction.java",
+      "sha256": "a8d44d9fc60f5765eaf18e54a0df20665ca892c76cba82a74329587d1317bcfe",
+      "size": 1437
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowCatalog.java",
+      "sha256": "6ebba7d65e7e2d31067931d48fabc61b27ba1884b5a32c1bbf9196c85ffc34c0",
+      "size": 6020
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowCli.java",
+      "sha256": "4849312ac0ad78eebca3f815e4375126489e4bf47cc92027fc2626a076a68182",
+      "size": 2617
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowCliCatalog.java",
+      "sha256": "1dc9e915e541e05ab604d2a02669035b4a24a24df4e27862f10c586e08a9d349",
+      "size": 20035
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowEvent.java",
+      "sha256": "6fe32afdcfa12bdc9b328c1edafc49b0a9e1f8e1289d28b91e17393f170f1260",
+      "size": 3434
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowSnapshot.java",
+      "sha256": "7b9bbb63bfc1c2e5f79949f42141a96f0d1678f2a0cc7389a4dca1d48b78a8f1",
+      "size": 2773
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowspaceActivity.java",
+      "sha256": "4ba9761a2919053ae1150d60227ca34f882a08449c0bc36cba25440e9020272a",
+      "size": 450
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/FlowspaceWidget.java",
+      "sha256": "0d3b36086962dc7b90399886cb6cb993b107f7eb01188be53ae11c7b0d7b15f1",
+      "size": 2108
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/InboxStore.java",
+      "sha256": "496cfa6587a7598db89c0edd0778a56d384150886e4f8c11961c2bf39fb7321b",
+      "size": 1550
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/JsonPreview.java",
+      "sha256": "4ccc669e0cc44aacd3dd477702e523c90d960b7f048c40a35246930476ae119d",
+      "size": 2135
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/MachineResult.java",
+      "sha256": "19c54f76bf6d129dd8eed68907bf5c8e4ec56458f9ff9d9939f4da5e014ab5d5",
+      "size": 4116
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/MainActivity.java",
+      "sha256": "bb2e2ff5b8a76d1c6add9e0fb867575a8b92b3e1b5ac99a36aa3328326d23e0f",
+      "size": 33450
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/NotificationActionReceiver.java",
+      "sha256": "62cb9895e32b9300191613e54619b069a07792067b8603d3b03dba3ff1a48f2b",
+      "size": 1225
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/NotificationController.java",
+      "sha256": "1a6e77fb47a92e9572f89695db1770c195a186ef9e1c319ed447bd9d1c412ca0",
+      "size": 6671
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/PauseTileService.java",
+      "sha256": "7a82ba8fa51ee97b7ac4d49e5c1a4a1d21c5edfff1fef455761ebbaa953cfd60",
+      "size": 805
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/PayloadStore.java",
+      "sha256": "5d3600a0d86f0428705d32a6cd6a4eeb0e9ce48b9c5c00b4cea89e73af126321",
+      "size": 654
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/ResultFormatter.java",
+      "sha256": "8de8b51bc4457c6a014496252561ec7c822d0d4a9c57848736b600ba66d08dc4",
+      "size": 9032
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/ResultProcessor.java",
+      "sha256": "1e84c64835b4361e589484b48cc3d29e5b252690b5fc970b98be9b87db0b4b5d",
+      "size": 7155
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/RunRecord.java",
+      "sha256": "f848f21e09a67921ca6b3cc2f9a9a8b1f1fbc3b664004371b47de47be88019d5",
+      "size": 1476
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/RunStore.java",
+      "sha256": "7579bbdf8eef175dff59fa1c7d3a7bec6096ed6b33d82118b3dc421f46be6241",
+      "size": 3420
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/ShareActivity.java",
+      "sha256": "f06bdb40e9dd678e90824259b9569502392ea54eac0f13d32cfc568af0a545b7",
+      "size": 4159
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/SortTileService.java",
+      "sha256": "66b5e1ad8727ca7f41b7f2d770efcb837d6d8a8e539ea75b924234166d9b9de6",
+      "size": 626
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/SortifySettingsActivity.java",
+      "sha256": "5e97fa148883fd99a5347d9340c8908d4ada17bf3cee8eb01ee43e78fe9c2420",
+      "size": 7610
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/StateStore.java",
+      "sha256": "af3681ec3b2bfc12df39f6133bb41b822b7a554a370882f317cf4a3ba716c524",
+      "size": 950
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerAuthorization.java",
+      "sha256": "97dde1f80f320c7e1805fe7032dde5fd2ae796007faa02ee1c0e561e23b56e1d",
+      "size": 1005
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerConditionProtocol.java",
+      "sha256": "4c0c4a5e59d68575c8360cc90890118cbe9d5891521c63f389b7c2dcecf154d3",
+      "size": 2094
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerConditionReceiver.java",
+      "sha256": "2e37a0b1f81d1a4e0d4551b7b7cd821def8a20906b45e1104458fc38e3d706e8",
+      "size": 2599
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerEventDispatcher.java",
+      "sha256": "447262c883397881aa35e362748bdc1cf17c751a19842497ffba0c72e4f80b12",
+      "size": 1616
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerEventEditActivity.java",
+      "sha256": "b37696ffc10eec31c8903e4da6f4dfe6d338fe5a9de357759dd24ff30b5836a7",
+      "size": 3357
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerPluginActivity.java",
+      "sha256": "127a9aaff0900f8a9bce838b3e9d62ec022bd9021387dd9e33c6ba869e636e80",
+      "size": 6769
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerPluginReceiver.java",
+      "sha256": "f8dc92777f89678658e3a5c7cbfe309ee537f6675d140db676fd4dda7d244cc1",
+      "size": 2165
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerProtocol.java",
+      "sha256": "a5c6d18d83144df5b51f67e25126e190f60a7a93a6f77e869fa134ac890082e5",
+      "size": 4408
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TaskerStateEditActivity.java",
+      "sha256": "82a41cd8e7a0d9150be1bf0f61915aca2647efb9ab29796b4af3c8a4d9f8d5f6",
+      "size": 2743
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TermuxCommandRunner.java",
+      "sha256": "bd1a3fc7ea6c32c0d115a4ebd614fde4a763b948421cb84e45bf2b34d794cd12",
+      "size": 5874
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TermuxPaths.java",
+      "sha256": "bdcd3d75c069ad592ff8c289bd38c6338c63a84292d17d7ea7bda8c0c9e13306",
+      "size": 1138
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/TermuxResultService.java",
+      "sha256": "bf2c428ee41d672c84b1d37b4621a445e4656a441004aa24f61af272a35223a3",
+      "size": 2281
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/UiKit.java",
+      "sha256": "327e98dbecda87746134bc1797366240daebafb7c2b9e29e28be42e25049f566",
+      "size": 4019
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/WallLibraryActivity.java",
+      "sha256": "4343da52365e955141ba20c2d7a540a6fcdbb5a178dbb93107dbcba6fcbd33f6",
+      "size": 9934
+    },
+    {
+      "path": "apps/flowspace/app/src/main/java/io/github/mikeceead/flowspace/WallTileService.java",
+      "sha256": "412617747e00ae72c83a8e84a859f584bd87ab10aeab603afab28dc4fbc88386",
+      "size": 723
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/drawable/ic_flowspace_foreground.xml",
+      "sha256": "4d868510e787232120bff961d64a9d102002dc64e56ed7389df3bd2c6cc02760",
+      "size": 781
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/drawable/ic_flowspace_notification.xml",
+      "sha256": "a03f4bedd52f6d4fcbe9ef27654367f5c820b889814e4c670ef2bdabf1032e11",
+      "size": 313
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/drawable/ic_pause_tile.xml",
+      "sha256": "76706ff5e4f3c2a3324cc500b5f09e431332b8ac9c22e859fa3aa78f10d19e4d",
+      "size": 259
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/drawable/ic_sort_tile.xml",
+      "sha256": "a74c4623a3b7935e37d4c5a8d8ce66ea3cbf95745ea4fad6459b87276fea92da",
+      "size": 275
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/drawable/ic_wall_tile.xml",
+      "sha256": "af571abc0ff29b3b43cf5183f40f8e39f64e18a48a5a76612bae2c20d2ae46ab",
+      "size": 306
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/layout/widget_flowspace.xml",
+      "sha256": "049e46f5df917d3f6608504c6532a199ae567ef921c99d743494f9e64be46901",
+      "size": 1650
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/mipmap/ic_launcher.xml",
+      "sha256": "5e8943edeae0967f2437aaba03518eab8a0b8e63ceb9ffbd45f09734d6aaeef8",
+      "size": 303
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/mipmap/ic_launcher_round.xml",
+      "sha256": "5e8943edeae0967f2437aaba03518eab8a0b8e63ceb9ffbd45f09734d6aaeef8",
+      "size": 303
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/values-v27/styles.xml",
+      "sha256": "fcf9149893b9e764f27df884912fac25fed414200cdf35269edbe66fb71eb24e",
+      "size": 697
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/values/colors.xml",
+      "sha256": "d46ad0cf882f4607769c373905729af29d23c333c089c61c9299340f083815a3",
+      "size": 79
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/values/strings.xml",
+      "sha256": "22b88d78cb54fb840a68c2a60f193f3fc92781c5e069b462a6c57864b855480d",
+      "size": 373
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/values/styles.xml",
+      "sha256": "e8104ea87d783746b03ea939da37b3e6f846ed7a7ba9b8bf325f7bb7bc43fdaf",
+      "size": 630
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/xml/flowspace_data_extraction_rules.xml",
+      "sha256": "a889bb6786c08db95008bc93fa5d48a3226902deb380f28c8a15153c9a02ff3f",
+      "size": 393
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/xml/flowspace_full_backup_content.xml",
+      "sha256": "2661380338a2d19f8581aa2b768c0d560f0277a39d9e5b522c2a5545039fa156",
+      "size": 166
+    },
+    {
+      "path": "apps/flowspace/app/src/main/res/xml/flowspace_widget_info.xml",
+      "sha256": "66b66290f389608e8c33c2f59d67ee6b631cc48b82a7b57f1ac890da79d97c5d",
+      "size": 297
+    },
+    {
+      "path": "apps/flowspace/app/src/test/java/io/github/mikeceead/flowspace/FlowCatalogTest.java",
+      "sha256": "59ad40387b59a4361fdb5466ea5ecd615725e3ef534b7d8185d42e2ac5f3fc79",
+      "size": 2329
+    },
+    {
+      "path": "apps/flowspace/app/src/test/java/io/github/mikeceead/flowspace/FrontendContractTest.java",
+      "sha256": "e1f8ded8cd283ec9c61059416223541c73aef9b8a23a777301fb32eda3e4e046",
+      "size": 2552
+    },
+    {
+      "path": "apps/flowspace/build.gradle",
+      "sha256": "ade6ab9b1e3614499c4d6ddecf6ead7f4dcdb33ddefd2b83de1fa67515137d45",
+      "size": 2682
+    },
+    {
+      "path": "apps/flowspace/desktop/CHANGELOG.md",
+      "sha256": "601443ad9dbbf9b18e6a4f596f49b1d4f567a3ff03ab0f5f5a029fe6335f03a5",
+      "size": 1363
+    },
+    {
+      "path": "apps/flowspace/desktop/README.md",
+      "sha256": "a2d748c288677c6ae39fb7f517175f66765ab21fdf7d9536e422121d24314462",
+      "size": 3209
+    },
+    {
+      "path": "apps/flowspace/desktop/VALIDATION.md",
+      "sha256": "329f060ffff33185fe897d9bd3341f8a856d198d2e621632e12af21bf352851c",
+      "size": 1044
+    },
+    {
+      "path": "apps/flowspace/desktop/data/icons/hicolor/scalable/apps/io.github.mikeceead.Flowspace.svg",
+      "sha256": "802a70fb2d8a13bfa2f439bc5155ffa972badd76eb1d39af3220d3abd632e3e8",
+      "size": 703
+    },
+    {
+      "path": "apps/flowspace/desktop/data/io.github.mikeceead.Flowspace.desktop",
+      "sha256": "a230171803cb40eb8357a5f97697a95c1e3c3b6e67214c29304b38d5ab9eceb2",
+      "size": 305
+    },
+    {
+      "path": "apps/flowspace/desktop/data/io.github.mikeceead.Flowspace.metainfo.xml",
+      "sha256": "f53ecbe2576bdb52376eff24158ee4e3c506f03dbb7e49e6eb281a5550d32d28",
+      "size": 891
+    },
+    {
+      "path": "apps/flowspace/desktop/data/systemd/flowspace-service.service",
+      "sha256": "1c42a5a46c13337231c4217e4868ce92a4b0bdec21a54ab7a1c2cedc7ac8b49c",
+      "size": 503
+    },
+    {
+      "path": "apps/flowspace/desktop/install.py",
+      "sha256": "3d4ab58af2462adc26a555ee3ccfdf76bb56c4d070f75bdb734de5ef5d1eb033",
+      "size": 399
+    },
+    {
+      "path": "apps/flowspace/desktop/packaging/build_deb.py",
+      "sha256": "286c7741549a4b22134fce70f586c47b310c7ce78cfceec422cb9215700bdd4a",
+      "size": 5640
+    },
+    {
+      "path": "apps/flowspace/desktop/pyproject.toml",
+      "sha256": "b1b1a5baa580023c896d10687e4d0b34bba987dbf0328db9f00d9b848a8ffc0d",
+      "size": 820
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/__init__.py",
+      "sha256": "0754c9fd805176cf3e2b45b46ca3dcd444040a71b1a8ca4c972920b9b18268f8",
+      "size": 129
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/__main__.py",
+      "sha256": "11ef489104e67b03da63923be7104baee511491c7273884cd4141b3fb52834b2",
+      "size": 2531
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/application.py",
+      "sha256": "88e1074ca28b539826d0fa37d365796c08861856924395ae0cdb1a95e32f615c",
+      "size": 1550
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/backend.py",
+      "sha256": "af34d222b0166b1d9fedb795a5bc099dbde1f755e69601d1f72028474ddf7f53",
+      "size": 12629
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/diagnostics.py",
+      "sha256": "464726d7826595e5b0df2cf736296bec8782d296d33e38a744cfe3e6a8abb25e",
+      "size": 4152
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/domain.py",
+      "sha256": "684ae9725db1593b50dfda92b1dcf3c021da4a604dfd9bc7d771afabb76c919c",
+      "size": 6136
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/history.py",
+      "sha256": "1f0c3f67bf3bcf4a91a2a6f713b1927fea0ed020d76c04793fbfb39e1ec80d11",
+      "size": 3967
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/models.py",
+      "sha256": "9046ba05a54e156cc1eda20e02f79746e0ddae49023778b424557831946d3301",
+      "size": 2630
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/runtime.py",
+      "sha256": "b41cfc12d1ba89df523601adc3e956414df0d5389758c03fae59ce1fc0dfa167",
+      "size": 3239
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/service.py",
+      "sha256": "afac1db74b082e433b939d545c343675d5eadb6a314ca9f8003dfd9ee7eb9049",
+      "size": 8165
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/settings.py",
+      "sha256": "ef260f116ce53cce73431bca4ad2887f26c1ba309a78202ce5b2ac8eff04ceaf",
+      "size": 1169
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/systemd.py",
+      "sha256": "0ef398ed9d9a6144a902b9db62c0c8e8bc030188318ef3ed013fe1ef2d603100",
+      "size": 2533
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/activity.py",
+      "sha256": "4d211b3fd58209dbb152a4d299b3dd60ccc84c4b93b9f3a66d31656e3e70a7e6",
+      "size": 5385
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/automation.py",
+      "sha256": "71bafb7046c0068888f4a1fb2f06330bd3ecb46c18dfc75cd7f73729d7f15615",
+      "size": 9562
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/common.py",
+      "sha256": "1c56277f0e053c8d99de25aa1749797d6ac86fe610994af4087cbf04122b2959",
+      "size": 8423
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/editors.py",
+      "sha256": "5b6a0e5b209e0e7774bed6999ca377af814fba0071d069123a360703a79181da",
+      "size": 15248
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/files.py",
+      "sha256": "ba2790e7cf0db94b30228fea1e1adbcd28fc536fe678aad866d8a2840e7894d7",
+      "size": 14547
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/overview.py",
+      "sha256": "7b8d7bd79d56b7586bbeae5faeb1957e1d37ee0c111df8451dc898f90847cd85",
+      "size": 9935
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/settings_page.py",
+      "sha256": "83ff7b98ee35ac9202fe2ad155234ed328a82b1883291a0461841481f6552312",
+      "size": 11962
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/wallpapers.py",
+      "sha256": "706c629df7776a2ed3a06e1a884fe193637ebd7bdc1274586fa235a8637f7e46",
+      "size": 16500
+    },
+    {
+      "path": "apps/flowspace/desktop/src/flowspace_desktop/ui/window.py",
+      "sha256": "547d5365c32002ee7ed5d424c68b7f6340bec4750b113180cad790e636259c08",
+      "size": 13605
+    },
+    {
+      "path": "apps/flowspace/desktop/tests/test_backend.py",
+      "sha256": "340bb14dacc79d9efa8c85fcc550f071fdfdd8b1f08b4c89fa4bdb87241c8d0e",
+      "size": 6266
+    },
+    {
+      "path": "apps/flowspace/desktop/tests/test_domain.py",
+      "sha256": "5975c181914618d1a69457959fe662a986e361b2b41030e8aa0ccaa10bba6965",
+      "size": 2297
+    },
+    {
+      "path": "apps/flowspace/desktop/tests/test_gtk_startup_regressions.py",
+      "sha256": "78e0ce655681cfc4ba418c8a3be7b4933a82862e10e45a589c298a0ef948b514",
+      "size": 1669
+    },
+    {
+      "path": "apps/flowspace/desktop/tests/test_release.py",
+      "sha256": "1704a47a3b026fb3fbbbdc91c82c4c03c4e621ef9132a227b8eb58bf03762881",
+      "size": 2697
+    },
+    {
+      "path": "apps/flowspace/gradle-build.py",
+      "sha256": "a56427b0c78c14a466992c531c65ac333175cb5a58cb6dd9cdbedfc83775fa5a",
+      "size": 55138
+    },
+    {
+      "path": "apps/flowspace/gradle.properties",
+      "sha256": "e6b436ff6a08da8b8c05e0e2fc1a7f40f41701bb506cd80fc2ddfd7b6e3b3b2b",
+      "size": 109
+    },
+    {
+      "path": "apps/flowspace/settings.gradle",
+      "sha256": "ddffbd018d93f1b099af09d2701e6481e5933dbeab8038aad6e16b07f9e69c0f",
+      "size": 270
+    },
+    {
+      "path": "apps/http-cmd/.gitignore",
+      "sha256": "fe07aeae2cfd1ff2ce4c0c5911dfbb550a3f1065e213175039abadfc3a5a15bb",
+      "size": 4628
+    },
+    {
+      "path": "apps/http-cmd/README.md",
+      "sha256": "a2fb15ac86d481862bbf3fc35bb673d58176c91f36527ebf59a9bcac20c4565a",
+      "size": 3512
+    },
+    {
+      "path": "apps/http-cmd/install.py",
+      "sha256": "9c5f5f07c82e62bc9e69caef4dfc61c95241355ffb2ba8167892457acddaad92",
+      "size": 478
+    },
+    {
+      "path": "apps/http-cmd/pyproject.toml",
+      "sha256": "d72c8a6ae1e11292c5738e03989fd4b0f08fce0358f2e0fcf910b61382751cdd",
+      "size": 654
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/__init__.py",
+      "sha256": "0d9f2565d0ef7e42396ce31c08f4da053c0eddcf0a4902b29ed03c59837432ac",
+      "size": 48
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/body.py",
+      "sha256": "a0a340c0e423c528f4549dbf7ead1baf619244b325cb4bf008d4361810debe51",
+      "size": 918
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/cli.py",
+      "sha256": "284ec01532d31f81c9ebcf004e9ac29b3a3dd3e49369506cefa9abb4a0f2e69a",
+      "size": 77396
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/envelope.py",
+      "sha256": "5d9aa16f2deb65a90f10d290a7b22a2f47edd04a126f1ef071b55b15b2f9c4d3",
+      "size": 8836
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/exporter.py",
+      "sha256": "fd1c417c1996df4addfcc9f3c393fde9ee0fade6b22bcb3695e0adf9f7d0943f",
+      "size": 1032
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/importer.py",
+      "sha256": "6537a2b49057ec7fbc760d6ea1feb7673ec4f1c1db72080629f45e181908ad3a",
+      "size": 2540
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/interactive.py",
+      "sha256": "2ebd77e5b5270e6a334aed89c6fe42f7f78d8c683b5df8a7813c7861f6da72ee",
+      "size": 6704
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/models.py",
+      "sha256": "30f51fe7a987e523b5a55638dc0f53c981f89b0e434fff41f5115d6a5fb2db35",
+      "size": 5370
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/parser.py",
+      "sha256": "25395da3854e2c1a94b823dd1945624f02a3f894cd363bcf4e253ace5146c9b3",
+      "size": 11404
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/repository.py",
+      "sha256": "166184fd4d11bae0e78168bebcfd5a6cacfebf4e179fe6ff2fd548f485407625",
+      "size": 10822
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/seeds.py",
+      "sha256": "0b9a560d1925b7bf0fe7e01ce5edaef70c97b20ee4404aaa66c04745b3855c18",
+      "size": 2906
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/sender.py",
+      "sha256": "501242f2483f5f3267a85fcf76b9051ac57cccb4b3228042b795863fa0225654",
+      "size": 8983
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/storage.py",
+      "sha256": "02c993402a74202b75ce386d67656decd1ee678c9f2df24cef71c8b14f56cee8",
+      "size": 11334
+    },
+    {
+      "path": "apps/http-cmd/src/http_commands/validator.py",
+      "sha256": "d89fbf0b6af8f3be163ec1dfb74083a7c94b48c3c9a97ff6ef28f9955689c4b0",
+      "size": 9721
+    },
+    {
+      "path": "apps/http-cmd/tests/conftest.py",
+      "sha256": "007bea6e85f192618b2fa054f97c81b5e609baae33c3059fc99bd6cfbfa9dc4d",
+      "size": 721
+    },
+    {
+      "path": "apps/http-cmd/tests/test_cli.py",
+      "sha256": "02a5f76a20347675b8a1ea9ad0f712822c7190f969ceea05b01f349cb36c3438",
+      "size": 11873
+    },
+    {
+      "path": "apps/http-cmd/tests/test_completion.py",
+      "sha256": "f31625814501af85c804db5805e83d9cdb194cc31e6b2e2ec59cdc21b1dab89d",
+      "size": 2493
+    },
+    {
+      "path": "apps/http-cmd/tests/test_correctness_regressions.py",
+      "sha256": "18be6badc149f8a2bf3f4f16fc9e6ca0f59cf9cbe449393018158c2e33a3656d",
+      "size": 19731
+    },
+    {
+      "path": "apps/http-cmd/tests/test_sender.py",
+      "sha256": "4af6f40af3718c6effd952edcebbf9b97c87aef4a91ae4382b96c68d7ef9ab47",
+      "size": 1880
+    },
+    {
+      "path": "apps/http-cmd/tests/test_tasker_and_tools.py",
+      "sha256": "8294e858dd4e79bf0f0f8c97ba206352565fa24d9330db382687626a4d15068a",
+      "size": 1618
+    },
+    {
+      "path": "apps/ksun/README.md",
+      "sha256": "e7eb1ddf86eeaf9a2e2c56497acf477508e1a09057f3542dfca729d126b78349",
+      "size": 703
+    },
+    {
+      "path": "apps/ksun/completions/zsh/_ksun",
+      "sha256": "9c1c50c76e801c7b8a57c423c10dc88b161c277ecd15a61b33e488b4058fb066",
+      "size": 345
+    },
+    {
+      "path": "apps/ksun/customize.sh",
+      "sha256": "fa1ed826427f2ba7bf1310ab4e9ac5ed0d179673ccec06820bf7d8f4099a9441",
+      "size": 1339
+    },
+    {
+      "path": "apps/ksun/install.py",
+      "sha256": "ea4bae087c87adb5a6702e36cedb93c6226d309ddb27f4fa869e5ef2afa51f3f",
+      "size": 473
+    },
+    {
+      "path": "apps/ksun/module/META-INF/com/google/android/update-binary",
+      "sha256": "4d0062c57726ea4fa712cea6f087abe73d9ed10c1ec0291397d27f1ee4516c92",
+      "size": 1822
+    },
+    {
+      "path": "apps/ksun/module/META-INF/com/google/android/updater-script",
+      "sha256": "d2b8203193a083e43ad076fde01b9c7821e0aa521e1f8077b8628fb1cdb70c60",
+      "size": 8
+    },
+    {
+      "path": "apps/ksun/module/customize.sh",
+      "sha256": "fa1ed826427f2ba7bf1310ab4e9ac5ed0d179673ccec06820bf7d8f4099a9441",
+      "size": 1339
+    },
+    {
+      "path": "apps/ksun/module/module.prop",
+      "sha256": "db89a35a50e49fbc869e1fe3f2ca63e6001d7b49fc96e095ce6f77b11baf6443",
+      "size": 151
+    },
+    {
+      "path": "apps/ksun/module/system/bin/ksun",
+      "sha256": "75174b2c86bf6aada0a90d03a73435c487ea8627928e8c9ce1c09b7c429bb458",
+      "size": 1230
+    },
+    {
+      "path": "apps/ksun/pyproject.toml",
+      "sha256": "6bd04056060456389f6349a2f7281445e1663a1729d53be50b17464b94291428",
+      "size": 546
+    },
+    {
+      "path": "apps/ksun/src/ksun/__init__.py",
+      "sha256": "5380b10b7cf3d81f0033a832bcb19bed5382ae1960054a0e78256284d28d1d7b",
+      "size": 41
+    },
+    {
+      "path": "apps/ksun/src/ksun/cli.py",
+      "sha256": "ba5857586864822f7b5f24cb85587717b8bd3049077f6d84c811acc400715035",
+      "size": 35494
+    },
+    {
+      "path": "apps/ksun/system/bin/ksun",
+      "sha256": "75174b2c86bf6aada0a90d03a73435c487ea8627928e8c9ce1c09b7c429bb458",
+      "size": 1230
+    },
+    {
+      "path": "apps/sortify/Makefile",
+      "sha256": "6880deb249b97f108d37a91ff7e5a907f6cf93715091079727032b9f6c24d61d",
+      "size": 346
+    },
+    {
+      "path": "apps/sortify/README.md",
+      "sha256": "073e05bcc520c29e6970a0de70a0f0e90492bb142aaf1093be809d9936c9ff40",
+      "size": 1716
+    },
+    {
+      "path": "apps/sortify/STANDARDIZATION_NOTES.md",
+      "sha256": "9d4931b8da2cc6b1a98a772ca28e3a4e12ed75814d4baa7d44d0b5629d62dba1",
+      "size": 826
+    },
+    {
+      "path": "apps/sortify/build.sh",
+      "sha256": "0750d6f280de3690a78bb9e6790a2f66385b3cad720f91cf077ff2c3b4dbf49a",
+      "size": 3279
+    },
+    {
+      "path": "apps/sortify/build_support.py",
+      "sha256": "5b6cf9a48eb2a26c39f988a71b93a1e88da6d068830ca3cfd876f8aa16a4f6e5",
+      "size": 3511
+    },
+    {
+      "path": "apps/sortify/common/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/sortify/common/assets/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/sortify/common/assets/bin/yq",
+      "sha256": "03061b2a50c7a498de2bbb92d7cb078ce433011f085a4994117c2726be4106ea",
+      "size": 12779682
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/app-domain.js",
+      "sha256": "5cd470dcab6395b779e72110a482a6402ca6eef5d1d8f42e8605df6c1732eb05",
+      "size": 974
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/app.js",
+      "sha256": "780e8f25acaf10fc7924c1a4643ecffe4b68f5115f59261a38be6202c54f88c3",
+      "size": 76132
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/base-webui.css",
+      "sha256": "ce291a73261ee95948ec7325b05149b4e62dc02170b34f78d51b53533b0127e2",
+      "size": 1485
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/base-webui.js",
+      "sha256": "dec6792014a9faed30754b2ce1fc85ccbb773915aeaa937767ae5cec9051f8ec",
+      "size": 11983
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/README.md",
+      "sha256": "65325cb71eed92223453df7d67c0447cea48f5fac453ac3bfec33b7d9e575b7a",
+      "size": 42
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/categories.js",
+      "sha256": "1ab8a8634dad11542e49c02bb1721fc6e278e2159d00b82665c42f9290cf60ed",
+      "size": 107
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/config.js",
+      "sha256": "36b9638ab2abaea25f555af30d8e6097ddaf72dd6a7a66a19e7cce56ecb7bacc",
+      "size": 168
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/diagnostics.js",
+      "sha256": "1dbc91553615cb9db6668ac3f038cded1c9c7b326f1b8c9356542c2bd2e4cce3",
+      "size": 447
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/editor.css",
+      "sha256": "cd9d41af43a13cd625a7f5c7339d035e7fbdfe639c1c6362dddf6c463530e9fc",
+      "size": 38
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/editor.js",
+      "sha256": "9e2fa61cd89c0305f6d1a4820afa13828edb3158d0c427a1dfa14be57fec03e0",
+      "size": 427
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/inspect.css",
+      "sha256": "7ef689a291a9997ebcdb71d8e9079713d69e656c4341c4d236c1b910cc32aba0",
+      "size": 39
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/inspect.js",
+      "sha256": "9447566f7965d54a48cfbc73de3ea056a761bbd6a46c5ce6323a005f412a21c2",
+      "size": 431
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/logs.css",
+      "sha256": "a369ade72f6ab46ed62e15b5ce3f931e6213e2dd11aa0a4565bcc1061d238625",
+      "size": 36
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/logs.js",
+      "sha256": "3625eb6b6137577157eeb26932663ace5de995e1974d835c011bd60e213d7dea",
+      "size": 419
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/options.css",
+      "sha256": "fdb85c3bbf3f3a34ee7ed25e30c3a7cdcd9df848210b91177374f8e01581aadf",
+      "size": 39
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/options.js",
+      "sha256": "50ba34516779c841e7dea6ec4f763df3b0c380c5129e4c077dfdd6a7cc4a5eb8",
+      "size": 431
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/overview.css",
+      "sha256": "d8d75f107d99d99abd0a535666eb2e420f259d1e39fec0b35513ce4e5d332f63",
+      "size": 40
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/overview.js",
+      "sha256": "fea0ac31661454902b583d284efab4f86564e88c7b0a58ca47d3ecb6284aaceb",
+      "size": 435
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/paths.css",
+      "sha256": "1a91652a79e5fd4828527d28d62df24cc2eb121755253776374c4f00b745e56c",
+      "size": 37
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/paths.js",
+      "sha256": "75f550231cc6f867f0cf62e5525ef14cbec6616d98482816e3f344e430211c31",
+      "size": 423
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/rules.css",
+      "sha256": "12470e479f5c9e6708ef2155672304239b2bb352a2a0c0479816fe2f13bdb64f",
+      "size": 37
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/components/rules.js",
+      "sha256": "ce313f8d7a598be0793add214f510ada03daaef9b2eaecc11e87e4c2a3e713b0",
+      "size": 423
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/actions.js",
+      "sha256": "6c63db768311a484cae1dfaaa52c5d15f9b711929e5a53e1ee1ba08bc1c69d9e",
+      "size": 338
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/api.js",
+      "sha256": "072eb7c4ed797ec61b829380c90d615888a38f0e620506b9f7caeba51e073e52",
+      "size": 280
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/formatters.js",
+      "sha256": "5d6f86ffe700ce9cf894653cb983eb3865d497dfcaee21aa700d9dbb801223f7",
+      "size": 306
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/renderers.js",
+      "sha256": "18d9d7e29bdaa693b7971a26da163d95e2419ba6e6405b5647eabc4c61699bf4",
+      "size": 69
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/state.js",
+      "sha256": "21e206881799ae3d75d4c2322f2e6826a089305f93ebf667cbc07bc0f777df42",
+      "size": 84
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/diagnostics.js",
+      "sha256": "cade710890dd68728223a71933fb651376685678c8142bc8e54e059eeccf3fe5",
+      "size": 226
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/editor.js",
+      "sha256": "1693d7c529ffcc26ffd6447be4c5332db2f90af328789f3c18f3eb3bd8ecab8e",
+      "size": 211
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/inspect.js",
+      "sha256": "ecde3c8d7a990955c34336b21a747d297a8e7d876826de5d4f7c107ab5d523bf",
+      "size": 214
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/logs.js",
+      "sha256": "61033f1d2f68f119fa5ba29c743eb61bd8b24d24108aba623922481711404e21",
+      "size": 205
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/options.js",
+      "sha256": "445290280eba4b5d26e2109b01e4e36685ec4ee905936ac18749bd12468b2a59",
+      "size": 214
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/overview.js",
+      "sha256": "3a842261924da4548cc3f28ea7b67e8dedae443b143bb2c49d86ac624bc2e474",
+      "size": 217
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/paths.js",
+      "sha256": "965af2eb1dcf825f5834d460ca5f6594f5870bb98b7ca01c1f88298190169a3a",
+      "size": 208
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/tabs/rules.js",
+      "sha256": "f75e761073e106fccfe50535c110a53ce1b002fb05b634e2a940d3797540cac2",
+      "size": 208
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/domain/validators.js",
+      "sha256": "63fc2c5c2c2d0471e0f17be08c93d6ad2db20f0d5d05769f87d023e0511cd429",
+      "size": 231
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/assets/style.css",
+      "sha256": "6f0a823b201c33f29148aae66da218948a67fe3bdd8dab64a102606713598573",
+      "size": 15148
+    },
+    {
+      "path": "apps/sortify/common/assets/webroot/index.html",
+      "sha256": "d1dd001dc3eb6cde4ad04a81cfc31aad3dc7d3f1f0074550f6914a3aa411599a",
+      "size": 6144
+    },
+    {
+      "path": "apps/sortify/common/config/categories.yaml",
+      "sha256": "a86297e51aec00b0f93a4179e2988c0004cf9e977b7970423bbfea3d6fac94e0",
+      "size": 664
+    },
+    {
+      "path": "apps/sortify/common/config/sortify.yaml",
+      "sha256": "e666e21501505783816c89ea31975c820a9047585d484087e2daca88e6cab239",
+      "size": 872
+    },
+    {
+      "path": "apps/sortify/completions/zsh/_sortify",
+      "sha256": "46bcd35e7603c3fa6fae44955b40ac39c25f0463b0fbd879c8a4b1b187e7fca5",
+      "size": 360
+    },
+    {
+      "path": "apps/sortify/install.py",
+      "sha256": "a26806adc358231d0275bf0c880f7b1103544004ca6294ff170f4e9373d5eef0",
+      "size": 476
+    },
+    {
+      "path": "apps/sortify/justfile",
+      "sha256": "38a3c7ccaedc3c8c8c8ec24a5c13e462dfef083a572a6b829ec4e00cfb8b6ef7",
+      "size": 74
+    },
+    {
+      "path": "apps/sortify/pyproject.toml",
+      "sha256": "fd2d7987972fa3e2d82943f37d4fac543beff2c1f22cd47e4dd379209918500a",
+      "size": 808
+    },
+    {
+      "path": "apps/sortify/scripts/dev.sh",
+      "sha256": "29173ded72207fff7e8a49c80debd9b040abac24aa721cca53dafbc7ff701d9b",
+      "size": 245
+    },
+    {
+      "path": "apps/sortify/setup.py",
+      "sha256": "74e2d89f51ed55b54334735f25392fb666d25c93f758391aee46bef6b732c5e5",
+      "size": 470
+    },
+    {
+      "path": "apps/sortify/src/sortify/__init__.py",
+      "sha256": "3c950f09a2e51dd046a04a5538855f2f68ff11d804e88e0c13efe0f95ac47b09",
+      "size": 172
+    },
+    {
+      "path": "apps/sortify/src/sortify/__main__.py",
+      "sha256": "d9719ec22c81c269c6bf05c38048743597c40044d04dc4992e5585e129384e23",
+      "size": 54
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/tasker/Sortify/README.md",
+      "sha256": "f4b8a5cc86a21b6afebee656f055a81ded33cd7857cff8002a734c4bd1ed5cbb",
+      "size": 513
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/tasker/Sortify/Sortify.prj.xml",
+      "sha256": "ccfebd06f0585a8cbea3c3bb4192bc3d6171157d7bfc072bc3c54fcd28c3af3f",
+      "size": 2116
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/tasker/Sortify/run-sortify.sh",
+      "sha256": "082e94c0d3b75f54efc9164a648fca5e45454807952cd7703361fbaa11454a41",
+      "size": 1011
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/tasker/Sortify/src/sortify_toast.js",
+      "sha256": "57902adf4b70f9cdc28fed56fdde418958b2627fb83479d93e1b3861c433179d",
+      "size": 43335
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/app-domain.js",
+      "sha256": "5cd470dcab6395b779e72110a482a6402ca6eef5d1d8f42e8605df6c1732eb05",
+      "size": 974
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/app.js",
+      "sha256": "780e8f25acaf10fc7924c1a4643ecffe4b68f5115f59261a38be6202c54f88c3",
+      "size": 76132
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/base-webui.css",
+      "sha256": "ce291a73261ee95948ec7325b05149b4e62dc02170b34f78d51b53533b0127e2",
+      "size": 1485
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/base-webui.js",
+      "sha256": "dec6792014a9faed30754b2ce1fc85ccbb773915aeaa937767ae5cec9051f8ec",
+      "size": 11983
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/README.md",
+      "sha256": "65325cb71eed92223453df7d67c0447cea48f5fac453ac3bfec33b7d9e575b7a",
+      "size": 42
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/categories.js",
+      "sha256": "1ab8a8634dad11542e49c02bb1721fc6e278e2159d00b82665c42f9290cf60ed",
+      "size": 107
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/config.js",
+      "sha256": "36b9638ab2abaea25f555af30d8e6097ddaf72dd6a7a66a19e7cce56ecb7bacc",
+      "size": 168
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/diagnostics.js",
+      "sha256": "1dbc91553615cb9db6668ac3f038cded1c9c7b326f1b8c9356542c2bd2e4cce3",
+      "size": 447
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/editor.css",
+      "sha256": "cd9d41af43a13cd625a7f5c7339d035e7fbdfe639c1c6362dddf6c463530e9fc",
+      "size": 38
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/editor.js",
+      "sha256": "9e2fa61cd89c0305f6d1a4820afa13828edb3158d0c427a1dfa14be57fec03e0",
+      "size": 427
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/inspect.css",
+      "sha256": "7ef689a291a9997ebcdb71d8e9079713d69e656c4341c4d236c1b910cc32aba0",
+      "size": 39
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/inspect.js",
+      "sha256": "9447566f7965d54a48cfbc73de3ea056a761bbd6a46c5ce6323a005f412a21c2",
+      "size": 431
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/logs.css",
+      "sha256": "a369ade72f6ab46ed62e15b5ce3f931e6213e2dd11aa0a4565bcc1061d238625",
+      "size": 36
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/logs.js",
+      "sha256": "3625eb6b6137577157eeb26932663ace5de995e1974d835c011bd60e213d7dea",
+      "size": 419
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/options.css",
+      "sha256": "fdb85c3bbf3f3a34ee7ed25e30c3a7cdcd9df848210b91177374f8e01581aadf",
+      "size": 39
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/options.js",
+      "sha256": "50ba34516779c841e7dea6ec4f763df3b0c380c5129e4c077dfdd6a7cc4a5eb8",
+      "size": 431
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/overview.css",
+      "sha256": "d8d75f107d99d99abd0a535666eb2e420f259d1e39fec0b35513ce4e5d332f63",
+      "size": 40
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/overview.js",
+      "sha256": "fea0ac31661454902b583d284efab4f86564e88c7b0a58ca47d3ecb6284aaceb",
+      "size": 435
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/paths.css",
+      "sha256": "1a91652a79e5fd4828527d28d62df24cc2eb121755253776374c4f00b745e56c",
+      "size": 37
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/paths.js",
+      "sha256": "75f550231cc6f867f0cf62e5525ef14cbec6616d98482816e3f344e430211c31",
+      "size": 423
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/rules.css",
+      "sha256": "12470e479f5c9e6708ef2155672304239b2bb352a2a0c0479816fe2f13bdb64f",
+      "size": 37
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/components/rules.js",
+      "sha256": "ce313f8d7a598be0793add214f510ada03daaef9b2eaecc11e87e4c2a3e713b0",
+      "size": 423
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/actions.js",
+      "sha256": "6c63db768311a484cae1dfaaa52c5d15f9b711929e5a53e1ee1ba08bc1c69d9e",
+      "size": 338
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/api.js",
+      "sha256": "072eb7c4ed797ec61b829380c90d615888a38f0e620506b9f7caeba51e073e52",
+      "size": 280
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/formatters.js",
+      "sha256": "5d6f86ffe700ce9cf894653cb983eb3865d497dfcaee21aa700d9dbb801223f7",
+      "size": 306
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/renderers.js",
+      "sha256": "18d9d7e29bdaa693b7971a26da163d95e2419ba6e6405b5647eabc4c61699bf4",
+      "size": 69
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/state.js",
+      "sha256": "21e206881799ae3d75d4c2322f2e6826a089305f93ebf667cbc07bc0f777df42",
+      "size": 84
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/diagnostics.js",
+      "sha256": "cade710890dd68728223a71933fb651376685678c8142bc8e54e059eeccf3fe5",
+      "size": 226
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/editor.js",
+      "sha256": "1693d7c529ffcc26ffd6447be4c5332db2f90af328789f3c18f3eb3bd8ecab8e",
+      "size": 211
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/inspect.js",
+      "sha256": "ecde3c8d7a990955c34336b21a747d297a8e7d876826de5d4f7c107ab5d523bf",
+      "size": 214
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/logs.js",
+      "sha256": "61033f1d2f68f119fa5ba29c743eb61bd8b24d24108aba623922481711404e21",
+      "size": 205
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/options.js",
+      "sha256": "445290280eba4b5d26e2109b01e4e36685ec4ee905936ac18749bd12468b2a59",
+      "size": 214
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/overview.js",
+      "sha256": "3a842261924da4548cc3f28ea7b67e8dedae443b143bb2c49d86ac624bc2e474",
+      "size": 217
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/paths.js",
+      "sha256": "965af2eb1dcf825f5834d460ca5f6594f5870bb98b7ca01c1f88298190169a3a",
+      "size": 208
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/tabs/rules.js",
+      "sha256": "f75e761073e106fccfe50535c110a53ce1b002fb05b634e2a940d3797540cac2",
+      "size": 208
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/domain/validators.js",
+      "sha256": "63fc2c5c2c2d0471e0f17be08c93d6ad2db20f0d5d05769f87d023e0511cd429",
+      "size": 231
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/assets/style.css",
+      "sha256": "6f0a823b201c33f29148aae66da218948a67fe3bdd8dab64a102606713598573",
+      "size": 15148
+    },
+    {
+      "path": "apps/sortify/src/sortify/assets/webroot/index.html",
+      "sha256": "d1dd001dc3eb6cde4ad04a81cfc31aad3dc7d3f1f0074550f6914a3aa411599a",
+      "size": 6144
+    },
+    {
+      "path": "apps/sortify/src/sortify/cli.py",
+      "sha256": "b71adf43383dce6aa978f3a45dd4f93c15e908fb8d4ea9fab105c77ac97c49a8",
+      "size": 61479
+    },
+    {
+      "path": "apps/sortify/src/sortify/config.py",
+      "sha256": "df6111fe160073964ed3f904e9b90190c3776c7051fddb6da093ad2523ef7e7c",
+      "size": 2723
+    },
+    {
+      "path": "apps/sortify/src/sortify/core.py",
+      "sha256": "3f9aa7274b48bc5c301adf03a7ee339fb0ccc93d8dde31d1f27ecce3dc8bec9d",
+      "size": 214437
+    },
+    {
+      "path": "apps/sortify/src/sortify/ops.py",
+      "sha256": "f9914d1bf52a518b09770f8758d1f6f91e2dae723c2c4cf47759629aa41912d8",
+      "size": 2061
+    },
+    {
+      "path": "apps/sortify/src/sortify/platform.py",
+      "sha256": "9d6a7e4b9a8d54dbb75a49d7347f910384c582f8aed2750d979e6eeaad519b6a",
+      "size": 9976
+    },
+    {
+      "path": "apps/sortify/src/sortify/report.py",
+      "sha256": "bfd10a19c3ee4431f7867f5630790ab2b472d4dd003a638177e82a3dba489143",
+      "size": 911
+    },
+    {
+      "path": "apps/sortify/src/sortify/state.py",
+      "sha256": "0b2924f2d17d01c3e17b9a8dec21a27afd2aa746f8f137f383ee2aa27554e2af",
+      "size": 773
+    },
+    {
+      "path": "apps/sortify/targets/systemd/config/categories.yaml",
+      "sha256": "a86297e51aec00b0f93a4179e2988c0004cf9e977b7970423bbfea3d6fac94e0",
+      "size": 664
+    },
+    {
+      "path": "apps/sortify/targets/systemd/config/sortify.system.yaml",
+      "sha256": "21cc6b2a813cfb635114007d247f222390dfa2f637d94f8b1c2c0841bb91eb91",
+      "size": 863
+    },
+    {
+      "path": "apps/sortify/targets/systemd/config/sortify.user.yaml",
+      "sha256": "e666e21501505783816c89ea31975c820a9047585d484087e2daca88e6cab239",
+      "size": 872
+    },
+    {
+      "path": "apps/sortify/targets/systemd/config/sortify.yaml",
+      "sha256": "dc4db1e824af7557cd9846634cc34b8c2b0d5e4aac192d0921141914db0e4b4a",
+      "size": 883
+    },
+    {
+      "path": "apps/sortify/targets/systemd/install.sh",
+      "sha256": "6fe70f0f64317a0a829da911a6fbe9a5af18cebeabdc46424577ca87bc890c6d",
+      "size": 8068
+    },
+    {
+      "path": "apps/sortify/targets/systemd/launcher/sortify",
+      "sha256": "fdd5971bca73babfb2c6ece823d773bbaf3103723bfee33a800fed302598d82c",
+      "size": 114
+    },
+    {
+      "path": "apps/sortify/targets/systemd/units/sortify.system.service.in",
+      "sha256": "5408e0091ad8f1b7ce35eb946b31c50ee1edd926e923b9aad8adb2cdb1a4b5c6",
+      "size": 451
+    },
+    {
+      "path": "apps/sortify/targets/systemd/units/sortify.timer",
+      "sha256": "b1534e6e077f9ba82f0597f40a1db7fcaecc7de6769c07c90d131235362658f1",
+      "size": 176
+    },
+    {
+      "path": "apps/sortify/targets/systemd/units/sortify.user.service.in",
+      "sha256": "70e23c689c538c9a6616207dd267c7c8dfed26925bd6321ae3a8e67f25ae8d5a",
+      "size": 465
+    },
+    {
+      "path": "apps/sortify/tasker/Sortify/README.md",
+      "sha256": "f4b8a5cc86a21b6afebee656f055a81ded33cd7857cff8002a734c4bd1ed5cbb",
+      "size": 513
+    },
+    {
+      "path": "apps/sortify/tasker/Sortify/Sortify.prj.xml",
+      "sha256": "ccfebd06f0585a8cbea3c3bb4192bc3d6171157d7bfc072bc3c54fcd28c3af3f",
+      "size": 2116
+    },
+    {
+      "path": "apps/sortify/tasker/Sortify/run-sortify.sh",
+      "sha256": "082e94c0d3b75f54efc9164a648fca5e45454807952cd7703361fbaa11454a41",
+      "size": 1011
+    },
+    {
+      "path": "apps/sortify/tasker/Sortify/src/sortify_toast.js",
+      "sha256": "57902adf4b70f9cdc28fed56fdde418958b2627fb83479d93e1b3861c433179d",
+      "size": 43335
+    },
+    {
+      "path": "apps/sortify/tests/systemd_sandbox.sh",
+      "sha256": "2613832d23e9032f81005466349cc31879e7b2208970c9acd5782970cc5e3eb2",
+      "size": 1788
+    },
+    {
+      "path": "apps/sortify/tests/test_config_check.py",
+      "sha256": "e7580979fd8c56317554819fda21ecce3b30a61141ab268886a14f3252ff77a1",
+      "size": 1493
+    },
+    {
+      "path": "apps/sortify/tests/test_double_extensions.py",
+      "sha256": "643765d3dc41e322dd1926150a639d745e583cd8acc33aade21c87a7a8db9407",
+      "size": 981
+    },
+    {
+      "path": "apps/sortify/tests/test_env_overrides.py",
+      "sha256": "a37275a1bdeda759461e56c8341335deb4b7cbc0391ae9d5a098bcd51e186ee3",
+      "size": 1568
+    },
+    {
+      "path": "apps/sortify/tests/test_exclusions.py",
+      "sha256": "17ea8c3d9ecf6657c02e2c47fba5302155fb1d1ec0cd02efaea08e924352793a",
+      "size": 5430
+    },
+    {
+      "path": "apps/sortify/tests/test_exclusions_new.py",
+      "sha256": "8e70ad115f6c6fc2b06e81a0fa4f5f6335c116176fd969327c67ff4d56458c96",
+      "size": 2737
+    },
+    {
+      "path": "apps/sortify/tests/test_home_path.py",
+      "sha256": "d8fb0e81a735580261d323f29b87fd7ba517e51d966aaf1b084abf22d0f2e7ef",
+      "size": 621
+    },
+    {
+      "path": "apps/sortify/tests/test_interval_scheduler.py",
+      "sha256": "634a2d78a02309d4316c4569947127e2c43b7e99c9a9b7f352ae43841e56c41c",
+      "size": 464
+    },
+    {
+      "path": "apps/sortify/tests/test_migration_split_config.py",
+      "sha256": "ab8a40d0812bff2f398a2344362d1c56326d6295cf463e6fff059949aaa73d62",
+      "size": 1659
+    },
+    {
+      "path": "apps/sortify/tests/test_ov06_config_classification_regressions.py",
+      "sha256": "1e6a08effaeeddd32df956904a0ed5c536a797898ffc5b55e9abadb0707543fd",
+      "size": 13932
+    },
+    {
+      "path": "apps/sortify/tests/test_ov07_file_transaction_state_regressions.py",
+      "sha256": "276ee8e4cec4cb305eed3818eee911fcf0fe3fbbb0072e1f5bba08fbf009984b",
+      "size": 26150
+    },
+    {
+      "path": "apps/sortify/tests/test_ov08_integrations_regressions.py",
+      "sha256": "cb2f01eb490a1ac559ba43fb542bef13d999f0656d0a082848307592b12be799",
+      "size": 21673
+    },
+    {
+      "path": "apps/sortify/tests/test_paths_expanduser.py",
+      "sha256": "90da4f2886c86ac8d15c24f7a71fb52f6ec5278aa8384d318e38da7ad98f4db2",
+      "size": 630
+    },
+    {
+      "path": "apps/sortify/tests/test_portable_paths.py",
+      "sha256": "0b2f3d0f8a911f7d80bbed12c23cc63dda4e11af584e4b38eceafde8027c4263",
+      "size": 1173
+    },
+    {
+      "path": "apps/sortify/tests/test_split_config.py",
+      "sha256": "54e0f09875cb349ca676a8e5b6994098acf59b0bd37a5f488318695ef04f0d6e",
+      "size": 2295
+    },
+    {
+      "path": "apps/sortify/tests/test_webui_commands.py",
+      "sha256": "6805bdb9bea9b21971faef85a230c0c3f7ca34bcc0f41bf2d489f56c7acfb20c",
+      "size": 7970
+    },
+    {
+      "path": "apps/sortify/tools/install/common.sh",
+      "sha256": "804ae15d5511e6fcfac0495aede005e84fb972adb67aee2b076a1bf6ddf5d45d",
+      "size": 2519
+    },
+    {
+      "path": "apps/wallglide/README.md",
+      "sha256": "d5cdc9b1a4f48fbe0b0d111287d4d0529787564d67d51d20117faa73275b5741",
+      "size": 2516
+    },
+    {
+      "path": "apps/wallglide/STANDARDIZATION_NOTES.md",
+      "sha256": "4d89d731d7451881beeb6132578b854438b8e6260b7a2332984e1b2eec4fb7c0",
+      "size": 828
+    },
+    {
+      "path": "apps/wallglide/build.sh",
+      "sha256": "b6022fd74ac26fcfd521dd29f15316e7849fdbc4658aaa9a46e470139ffecb92",
+      "size": 495
+    },
+    {
+      "path": "apps/wallglide/completions/zsh/_wallglide",
+      "sha256": "0402704dc17df7e5761d222977b5f22de0b926ec14a28cd3024fa5663be1a5bb",
+      "size": 370
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/README.md",
+      "sha256": "9b1dab738d4e2b77da1a20da73f964885cc1bab32409ea7523fea43a4160a87f",
+      "size": 779
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/buildzip.sh",
+      "sha256": "8887b4ee7193c81e792535ba10b7db54c92417b9e9aa987f7e0c9f3fe5964092",
+      "size": 359
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/extension.js",
+      "sha256": "62d538c48c4e418499aa15b24b64cbf97fbadcd5cc83ef721bbdbe08ddc82eaf",
+      "size": 21066
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/install.sh",
+      "sha256": "f3701e1ba65e6284294c46a22bb17476c763fcf86b6fb2ea9ab1bfa231de9c56",
+      "size": 574
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/metadata.json",
+      "sha256": "2272afee478276f356ead8e08a27e9aa9231b533657e90b9342f5ded10614588",
+      "size": 366
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/prefs.js",
+      "sha256": "07e17072b1a1117ee981f70ed47e9ec310aa2e40269da1d53f854b6ec1a06d6f",
+      "size": 1957
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/schemas/org.gnome.shell.extensions.wallglide.gschema.xml",
+      "sha256": "48626d03356a4f9a5d0d758f3655f922799155159319201f2bdab58fbdc633af",
+      "size": 389
+    },
+    {
+      "path": "apps/wallglide/extensions/gnome/wallglide@mikeyphw.github.io/stylesheet.css",
+      "sha256": "99986f208e51821cd95f4f2e78cfb2f4a3211b7321df0a92a5c0dea7438651d1",
+      "size": 1113
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/README.md",
+      "sha256": "9b1dab738d4e2b77da1a20da73f964885cc1bab32409ea7523fea43a4160a87f",
+      "size": 779
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/buildzip.sh",
+      "sha256": "8887b4ee7193c81e792535ba10b7db54c92417b9e9aa987f7e0c9f3fe5964092",
+      "size": 359
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/extension.js",
+      "sha256": "62d538c48c4e418499aa15b24b64cbf97fbadcd5cc83ef721bbdbe08ddc82eaf",
+      "size": 21066
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/install.sh",
+      "sha256": "f3701e1ba65e6284294c46a22bb17476c763fcf86b6fb2ea9ab1bfa231de9c56",
+      "size": 574
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/metadata.json",
+      "sha256": "2272afee478276f356ead8e08a27e9aa9231b533657e90b9342f5ded10614588",
+      "size": 366
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/prefs.js",
+      "sha256": "07e17072b1a1117ee981f70ed47e9ec310aa2e40269da1d53f854b6ec1a06d6f",
+      "size": 1957
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/schemas/org.gnome.shell.extensions.wallglide.gschema.xml",
+      "sha256": "48626d03356a4f9a5d0d758f3655f922799155159319201f2bdab58fbdc633af",
+      "size": 389
+    },
+    {
+      "path": "apps/wallglide/gnome-extension/wallglide@mikeyphw.github.io/stylesheet.css",
+      "sha256": "99986f208e51821cd95f4f2e78cfb2f4a3211b7321df0a92a5c0dea7438651d1",
+      "size": 1113
+    },
+    {
+      "path": "apps/wallglide/install.py",
+      "sha256": "25f5565baa8bc2327b588f1957a75485903c5fefa34a312a0e3a0126069675e9",
+      "size": 478
+    },
+    {
+      "path": "apps/wallglide/packages/mike-web-walls/README.md",
+      "sha256": "f7c6e559eff3020bbdbde81ad7eeb19a693041786a7528ba7f4390ddf1b6703a",
+      "size": 446
+    },
+    {
+      "path": "apps/wallglide/packages/mike-web-walls/pyproject.toml",
+      "sha256": "a636528ef85720603277773a47cfbaf52522ecd29d39f3d8beca4ee016fd61d7",
+      "size": 532
+    },
+    {
+      "path": "apps/wallglide/packages/mike-web-walls/src/mike_web_walls/__init__.py",
+      "sha256": "a45fd6a3ac510a7638455a7ac2cfa87be3d325b03457da88a8734fc6d4322e1a",
+      "size": 379
+    },
+    {
+      "path": "apps/wallglide/packages/mike-web-walls/src/mike_web_walls/cli.py",
+      "sha256": "1f77e836c4de0f5922d786bd27a02a16d4bbf5714b965a03fd9da679f65ea72a",
+      "size": 1501
+    },
+    {
+      "path": "apps/wallglide/packages/mike-web-walls/src/mike_web_walls/themes.py",
+      "sha256": "ea7bafb6fcd9417999bfd38db30eaa3829c48732315592a287c096efb85ac5b6",
+      "size": 5739
+    },
+    {
+      "path": "apps/wallglide/pyproject.toml",
+      "sha256": "d4d255b3c6cc24fed87c282ef4b44f04c1837ace989ae781f09c8212a8ac575d",
+      "size": 1158
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/README.md",
+      "sha256": "56eeff83d6cfc49691e21c00b8fb1b33f358307ab7e07c3bf6bb4044120949b6",
+      "size": 2383
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/__init__.py",
+      "sha256": "ad941a3f83b47f306b56cd644aa87b01909350613f0614fba704cc4a30282e94",
+      "size": 48
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/__main__.py",
+      "sha256": "bd045ddd5242d002f692dac452be9afba38deef5cde541a5fc074bfef5987b91",
+      "size": 79
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/apply.py",
+      "sha256": "1e11984a2a45b8849d68dd8cee198a1be41f08b063b98ca1ec6ccddf208c40cd",
+      "size": 17401
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/app-domain.js",
+      "sha256": "945c9c87fd431945915324f4b0ae9e28d2024ef907675ee21d58d853221527b7",
+      "size": 17494
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/base-webui.css",
+      "sha256": "ce291a73261ee95948ec7325b05149b4e62dc02170b34f78d51b53533b0127e2",
+      "size": 1485
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/base-webui.js",
+      "sha256": "dec6792014a9faed30754b2ce1fc85ccbb773915aeaa937767ae5cec9051f8ec",
+      "size": 11983
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/README.md",
+      "sha256": "65325cb71eed92223453df7d67c0447cea48f5fac453ac3bfec33b7d9e575b7a",
+      "size": 42
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/activity.css",
+      "sha256": "fc36e010b1659d049d5c1c42cacd034f8514985dd58aef349103199683234b99",
+      "size": 42
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/activity.js",
+      "sha256": "5b2f05fcbc301941869d7ffe91d6a14af5124e9536fe654687e2fd61107fa9db",
+      "size": 493
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/config.css",
+      "sha256": "4470f0710ad6eee7927df5ef2b62733bea3058dc7b6843c5257bceb3b9c21980",
+      "size": 40
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/config.js",
+      "sha256": "0587e39ff3ba965596b05fb200ceb5c0edcb8327d703ae0c01372141a36d860c",
+      "size": 483
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/library.css",
+      "sha256": "04bff24927374426d234406e7c1395387fc77bffdf2278b152ebd9c67a0a0e12",
+      "size": 41
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/library.js",
+      "sha256": "56801c4359812c051771d8dc60e0d645ba2d2a344621367c454abaf831f43140",
+      "size": 488
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/overview.css",
+      "sha256": "99a768d5262961064ae9073614753747ff728c2b91df5655b30c866a789258d0",
+      "size": 42
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/overview.js",
+      "sha256": "15feb443e897f75b487b2e74756758cb9c4b8e656904cd888678cb4f3e49b065",
+      "size": 493
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/reports.css",
+      "sha256": "4b61edd25e52ed678734f7e4cbb780c789d1b8defc2080b602fa2689e734d45b",
+      "size": 41
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/reports.js",
+      "sha256": "f8609df3c9a64e3eb479a5774bfe6e6602309ced1e0d14d3208bbfac721d8b57",
+      "size": 488
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/themes.css",
+      "sha256": "eb9ceb80cb8c80310abe25010a05d8f65b2bf3e523f496507823e7a4f5f8743b",
+      "size": 40
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/components/themes.js",
+      "sha256": "afa55cdc3e59688a7424f840a939c2917e2bd25ebc8f58c476f5ec8f503b164d",
+      "size": 483
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/actions.js",
+      "sha256": "477df31d4ec1724c2f3885e6631670e6061d94140d1a2b46ccfd2e0e4ca09628",
+      "size": 1240
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/api.js",
+      "sha256": "58aed0c59e9bada6abc1b9345a77a4f4d800e8729fc8b401aefc318c62055abb",
+      "size": 68
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/formatters.js",
+      "sha256": "d52d019b65a9b5dc7698db5016db8b99fd7803310d9e0874024b62618ce8b61b",
+      "size": 486
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/renderers.js",
+      "sha256": "a0fa5f660238cd14e6c929331f4e68cfc74bcc2a6207e0fa92098f8930b64c6c",
+      "size": 81
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/state.js",
+      "sha256": "b8686dda84e413d30ab609cf526fc7b072b1d01e466a523e4fb210ec4f2ff109",
+      "size": 985
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/activity.js",
+      "sha256": "7875694bfc196044358c60acd2b0dea05666a8b83336934a66d41240cb0ebc46",
+      "size": 1177
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/config.js",
+      "sha256": "c5ef5da70fc556ef94f8c2e743ce1a37b3d491b9c134104ba59e543f48679771",
+      "size": 4471
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/diagnostics.js",
+      "sha256": "09818d7dc3e89d16ef0ca0219e86a48de63e4748d492ef88cba1d129b2cc363c",
+      "size": 2829
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/library.js",
+      "sha256": "5ea81d21ecc0f5ad782b4cc82aee68099e64ce320d5f6e1635276b171346b55d",
+      "size": 3396
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/overview.js",
+      "sha256": "9e9f501373ed8f1507fd2e86238d6268ec8f3ce8dce14666611781835dd0f484",
+      "size": 2908
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/reports.js",
+      "sha256": "99737159724f1d296c6b13f81ac98e58c1aa638da7da67eb4281d9479ee0942b",
+      "size": 1320
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/tabs/themes.js",
+      "sha256": "15e72caa01fd543524db9923c15ec73fa1e7679c65fe20761c9002cf6e734cd0",
+      "size": 2722
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/assets/domain/validators.js",
+      "sha256": "9e5411a4e235a9b6aee13891f4fd1dd829aa16f539997ee1994380b01c280fab",
+      "size": 550
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/assets/webroot/index.html",
+      "sha256": "eb7d328de6be5a873372351a418e5820b6b4c06bc8aeacaecb8ea7c153145326",
+      "size": 8132
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/bing.py",
+      "sha256": "9560cc69d8af3793e4779854d9f4171cd4f01de0ffdb6229401320f22a47e43c",
+      "size": 2780
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/cli.py",
+      "sha256": "5822744dd26da1be0c41191ea94558ebfaa9e0710f63f7e761a00b584ec21b42",
+      "size": 32100
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/collections.py",
+      "sha256": "7e67cd091ed918b2a248d294dfd753054675e634728323e59fdc159132137ccf",
+      "size": 4665
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/commit.py",
+      "sha256": "ac179ce50af49263ae39d0df16f2194d0262c96994b3deb6e1f28be049d23cf5",
+      "size": 3353
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/config.py",
+      "sha256": "6513e0d2c6b5a639fcaf71cdb909c570ebeaca7c5bebe7ab952a556dd6bc6230",
+      "size": 14685
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/core.py",
+      "sha256": "f72a0eedbc9ce151ce004774a73c7ea7d260d25cd512c49f2d33e08979801b92",
+      "size": 16555
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/doctor.py",
+      "sha256": "4bebbe0bb06c06787e0ba96ebc02d82eeb0acfcc3d8612734b112e2091ad4531",
+      "size": 1447
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/domain.py",
+      "sha256": "5b7119a3e3091ef640a86e8aeb9e7a16bdcb73e9c51ce0aef08c3a40dc2999e0",
+      "size": 6979
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/favorites.py",
+      "sha256": "02ef997293192c28b6926ecb5e5ee34e4e3bd2e7dee7fb01b770792bec120e4f",
+      "size": 4550
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/installers.py",
+      "sha256": "38e74ffefb0cb3dc385c8fddfe4c23540358338c21105d2f6149d45c0e9784ff",
+      "size": 1785
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/io.py",
+      "sha256": "01d64996fd402dd4ce5280319d5af153a6a836baddee7d9c0682b1e369723cd0",
+      "size": 10955
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/menu.py",
+      "sha256": "db4efdfae4847dd9a26ba298bacc55432164288265b7319728bc62c3bd5560f1",
+      "size": 3351
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/models.py",
+      "sha256": "d01d617f96e51fe97766645a462f08656ec412aa61d51dab2e26e33b636e779f",
+      "size": 599
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/pending.py",
+      "sha256": "811b074210b04babcb0e96610dd785c969d7be38c8e122b8b4b906af04074b87",
+      "size": 4973
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/platforms.py",
+      "sha256": "e5067adb753f6462a25a1c39de0ee21f412aeedaea457091035df37754a94c5b",
+      "size": 3754
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/py.typed",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/reddit.py",
+      "sha256": "836d016363a4c32676667d5eb8814df5ced48ceeaacca06f289461507c01b09d",
+      "size": 14744
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/rotation.py",
+      "sha256": "d0b77b641c3a1b13b03e29d23d1b01c92aad5983f6279a727fc1524058c3ed94",
+      "size": 4369
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/server.py",
+      "sha256": "c10420814054ea3c3478accb59f11ce1be046664949b9a15ab398e9e7a1b9897",
+      "size": 23880
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/sources.py",
+      "sha256": "70a8e4d27caa04d2829434e4d09763b56817cfc9b662d30b27e15b57d7cb1d60",
+      "size": 25399
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/state.py",
+      "sha256": "62f51418afc1b2689c51a345854201ba6ce5f95d1033b362cfc2655be0192941",
+      "size": 8095
+    },
+    {
+      "path": "apps/wallglide/src/wallglide/templates.py",
+      "sha256": "025970a172541daf16ef2833a821520705b75f74b82aec0985c7eef8a5fe444a",
+      "size": 2802
+    },
+    {
+      "path": "apps/wallglide/tasker/WallGlide/README.md",
+      "sha256": "04fb4b1ae43ec8094853966638ba903a7be849b7eb3ca67b05ee3b590f489f16",
+      "size": 358
+    },
+    {
+      "path": "apps/wallglide/tasker/WallGlide/WallGlide.CLIApp.prj.xml",
+      "sha256": "c25787d47382f05cc66c67d84d80c341e883460aeaed89a167e203c0cc350cf6",
+      "size": 429
+    },
+    {
+      "path": "apps/wallglide/tasker/WallGlide/WallGlide.Scheduler.prj.xml",
+      "sha256": "4765bb218a19239b1478434a9aa1594c52943acd935dfdcf5a605598277b1f27",
+      "size": 432
+    },
+    {
+      "path": "apps/wallglide/tasker/WallGlide/WallGlideCLI.README.md",
+      "sha256": "c45fee25ce22269248def71649e514e693af190d642da746ccb8f17b65cee6dc",
+      "size": 506
+    },
+    {
+      "path": "apps/wallglide/tasker/WallGlide/WallGlideCLI.scenev2.json",
+      "sha256": "7b57f65b9d06035566b77e0bce6f986fa65398c47e7ec79a188201220e2272eb",
+      "size": 18066
+    },
+    {
+      "path": "apps/wallglide/tools/install/common.sh",
+      "sha256": "804ae15d5511e6fcfac0495aede005e84fb972adb67aee2b076a1bf6ddf5d45d",
+      "size": 2519
+    },
+    {
+      "path": "apps/xbs/META-INF/com/google/android/update-binary",
+      "sha256": "bcf4b1d9913f3af17755569c853e0b5a75b8005f6a18eb3f86dadcc0e968c29d",
+      "size": 612
+    },
+    {
+      "path": "apps/xbs/META-INF/com/google/android/updater-script",
+      "sha256": "d2b8203193a083e43ad076fde01b9c7821e0aa521e1f8077b8628fb1cdb70c60",
+      "size": 8
+    },
+    {
+      "path": "apps/xbs/PHASE_23_SCHEMA_CAPABILITY_CONTRACT.md",
+      "sha256": "eaa3db6d94e8aedd7c8029650cf1afb1bbceea1ccc9278e31bbcf2af9ee41141",
+      "size": 1562
+    },
+    {
+      "path": "apps/xbs/PHASE_26_AUTHENTICATED_EVENT_BRIDGE.md",
+      "sha256": "69c7138e3222708d72e8a40fcb00aaf75263cbbdfa8f4860ac198f438f9a945e",
+      "size": 1750
+    },
+    {
+      "path": "apps/xbs/README.md",
+      "sha256": "0cd988433c9eea65e9e2ea004f44ea1c28f64fb37491c217f2e5cf3502a8a051",
+      "size": 1137
+    },
+    {
+      "path": "apps/xbs/STANDARDIZATION_NOTES.md",
+      "sha256": "9dc3f4e67c818c940b9382996b30b5e6173900117c05777abe54f22e195b1217",
+      "size": 227
+    },
+    {
+      "path": "apps/xbs/XBS_PATCHES_APPLIED.txt",
+      "sha256": "797018484c373c22c368398774d99bd44300de580461cd1fc89b66a02377063b",
+      "size": 14227
+    },
+    {
+      "path": "apps/xbs/action.sh",
+      "sha256": "b13cf01151d0d994c500558dd917fc56a25de6a4bb0d79f819bcc6858b15efb2",
+      "size": 271
+    },
+    {
+      "path": "apps/xbs/android-app/.gitignore",
+      "sha256": "2382223add9be95a8cff93df53667a056c369b7310b93f63b5e6ec7192afabcc",
+      "size": 162
+    },
+    {
+      "path": "apps/xbs/android-app/CLI_COVERAGE.md",
+      "sha256": "10c6849a9d784dab85c8f3dbcec9ea9dc6c4e92ae639c274ba03b622c4f95ed4",
+      "size": 1425
+    },
+    {
+      "path": "apps/xbs/android-app/LICENSE",
+      "sha256": "2ae469ad5ea5ba9dd90cfaf2556748def3256d1a19305375328f4f255ddea89d",
+      "size": 1067
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE31_FINAL_REGRESSION_RELEASE_SEAL.md",
+      "sha256": "d424c221674fb5683f73905003173f6654efab8c0f330efd3d26c073cff288b1",
+      "size": 3209
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE31_PROMISE_CONTRACT.json",
+      "sha256": "273154222162462070fd44c2e3d91f3375b5f36c70cdb782144e8d6f21e6528d",
+      "size": 2934
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE32B_R4_GRADLE_TESTKIT_LIFECYCLE_HOTFIX.md",
+      "sha256": "177522eeb99dab01906c19d4191a5057238d358dea7bd1873a69c1b11d1c6408",
+      "size": 1184
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE32B_RUNTIME_BRIDGE_PARSER_HOTFIX.md",
+      "sha256": "73ccfd29ac825ad2535ce6d068aae82b2965cc8067d388d37aaa64b08627f580",
+      "size": 1650
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE32D_ROOT_MODULE_RUNTIME_RESOLVER.md",
+      "sha256": "49aeefd72dcfbf947a889e439db4de34a8b25b974eff4954338aa30e9dde5ad9",
+      "size": 3606
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE32_ANDROID_STABILIZATION.md",
+      "sha256": "10e260278ab3552712f79c87043d10b2d3d7bb526ee2a64204ca588854ff15c9",
+      "size": 1264
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_00_01_BASELINE_ANDROIDX_MATERIAL_FOUNDATION.md",
+      "sha256": "ddadcb85ad9d3bec7616ff908d8fb5758323fb822e2f8463a81656fae1e53459",
+      "size": 3345
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_02_LOCALE_SDK_CLEANUP.md",
+      "sha256": "647fef19aa829656cdc0a9af57b2e0da12cc19baa94bfffba6d00183e7100800",
+      "size": 1684
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_03_STORAGE_BACKUP_RULES.md",
+      "sha256": "6631ee67dda5d83780052debe0e5a46a65d066c60fa60d2cc803b070750b6999",
+      "size": 1228
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_04_UI_WIDGET_I18N_CLEANUP.md",
+      "sha256": "b59d8ae0838b679c2d727275f7a202807169219efe9d4c291ad7dd7563b56220",
+      "size": 1144
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_05_WARNING_POLISH.md",
+      "sha256": "a83100fd0a0ad2b1ade0d8530380bfe97327b416fd49776d2893d530c59fc384",
+      "size": 794
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_06_FINAL_RESOURCE_WARNING_SEAL.md",
+      "sha256": "b800f39f5cdb5aaa6646a252867e7ceab0bd1e01876e26c8129da12f5a97a667",
+      "size": 961
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_07_COMMAND_POLICY_TIMEOUT.md",
+      "sha256": "19989b785d256a61223cb714ad12067afb5f703729bc45c576cc26016904a42c",
+      "size": 1347
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_08_FOREGROUND_COMMAND_SERVICE.md",
+      "sha256": "978a3e03fa52a3bb2dbc0be2b6b232d2800f390f50af5b6e9b25fd43d173c917",
+      "size": 1094
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_09_ACTIVE_COMMAND_UI.md",
+      "sha256": "70f874c93b36c090ccad158ebcb6a9841a139a50921bbfdaf145cbe82458b2cd",
+      "size": 1032
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_10_RUN_HISTORY_FILTERING.md",
+      "sha256": "82ff56f4ee35865fa3905226453fb2c2c77933ec352255f2b051e790f52de18f",
+      "size": 1215
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_11_SAFE_RETRY_GUARDS.md",
+      "sha256": "2addb4aa2244d9978282de0aacad16fbdd52279202b386c41a43039e0f577d98",
+      "size": 833
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_12_SUPPORT_BUNDLE_EXPORT.md",
+      "sha256": "65d326698ab7ae716aedf293f86f0c4be401fbafacec0515183fd78252aa248f",
+      "size": 580
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_13_ROOT_DIAGNOSTICS_WORKBENCH.md",
+      "sha256": "3b937ab2a042408079c7f8b43e54993740546791e71c302f80fff38d38940263",
+      "size": 652
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_14_CONFIG_TRANSACTION_JOURNAL_ROLLBACK.md",
+      "sha256": "2e3cdbd8bf49660574d49cce2048240faaf2b5334b789accb0633e3726a29f9e",
+      "size": 1827
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_15_EVENT_EDITOR_VALIDATION_POLISH.md",
+      "sha256": "12b277859c099103863d0d39677dd8310b2ebea11baa2888edff02e7e38ff5f9",
+      "size": 1925
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_16_PROCESS_MONITOR_CORRECTNESS.md",
+      "sha256": "09ae9b92b072c6b2b487e157aec73b6451e8772566f0cb5439c74d39bc504936",
+      "size": 2098
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_17_NOTIFICATION_UX_FINALIZATION.md",
+      "sha256": "c0630e5c629c69ec84bba5769d658ed17e9d999f17d17840930d65bdf9bbc6c9",
+      "size": 1565
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_18_RELEASE_READINESS_SEAL.md",
+      "sha256": "297c893c7894ae1708ca8699fd1a04d0d7b5d7040d2ad1c7a743f8b995a4938b",
+      "size": 2179
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_19_ROOM_HISTORY_MIGRATION.md",
+      "sha256": "4e392751b8cac793d9dc5090d44b117716671a2c9295030a2640bcb0b07a2224",
+      "size": 2206
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_20_ACTIVITY_WORKBENCH.md",
+      "sha256": "a117821653ea53a3322a584af67a36a9539eced17e8670dcd9deb0f85572ca73",
+      "size": 1790
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_21_COMMAND_CENTER_QUICK_ACTIONS.md",
+      "sha256": "593d9ac73ef3588a5d49d6275fa728daecd636ed17cd0632e35bfdeaac432081",
+      "size": 1938
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_22_MORE_SETTINGS_INFORMATION_ARCHITECTURE.md",
+      "sha256": "0df200fd1aee5256896e4ff322a9b0e10079a21bacf9f4d3e766b8025aa258e3",
+      "size": 1644
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_24_DEBUG_WORKBENCH_HEALTH_MODEL.md",
+      "sha256": "0c6bf73ded25b6bf45d035d11f3607f8e948ca6cb17eb39a98dbbfebb13ff49a",
+      "size": 1844
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_25_GUIDED_FIXES_REDACTED_SUPPORT.md",
+      "sha256": "126cf8c2eb331947a63a3c90691776c9d0147773a1fe222a9b560e210ebb3d74",
+      "size": 1288
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_27_RUNTIME_NOTIFICATION_2.md",
+      "sha256": "39526c13a112e5c863d7c618df354be2e8dee990d1c663fd2651f784540ec403",
+      "size": 636
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_28_TASKER_EXTERNAL_ENTRY_HARDENING.md",
+      "sha256": "f1b0c801f486b2c2d220a1ce0c02b87a7332ea2f6aeedb83a8ae1bb54c0b1b23",
+      "size": 1708
+    },
+    {
+      "path": "apps/xbs/android-app/PHASE_29_30_SECURITY_ACCESSIBILITY_ADAPTIVE_PERFORMANCE.md",
+      "sha256": "ad1b15915e62d072d5bb928795d5baeaf3a3daa468575583a02cd884e1848b61",
+      "size": 1298
+    },
+    {
+      "path": "apps/xbs/android-app/README.md",
+      "sha256": "45f3591f1418bbb5425bddd64e7e26bf989b85f6542ad30676d3972427663305",
+      "size": 24247
+    },
+    {
+      "path": "apps/xbs/android-app/RELEASE_CHECKLIST.md",
+      "sha256": "18eb28a4f4d146183f8c7eeb1aeefcfb018f09dc4b25ef842eeb2e2d95ad50ef",
+      "size": 6603
+    },
+    {
+      "path": "apps/xbs/android-app/VALIDATION.md",
+      "sha256": "af84a34706a2232ea42c52a7487bd35c10975d242d5399be10da392eed507b50",
+      "size": 26007
+    },
+    {
+      "path": "apps/xbs/android-app/app/build.gradle",
+      "sha256": "0aa778e0fd143c563f73db8fce2ae69d1c71055184d9b3d4aff9660cc9b103ee",
+      "size": 13671
+    },
+    {
+      "path": "apps/xbs/android-app/app/lint.xml",
+      "sha256": "06a8d19c4fce172e7fc697596d4e044460c856ec22b5561d78cbcb147b7bdc61",
+      "size": 502
+    },
+    {
+      "path": "apps/xbs/android-app/app/proguard-rules.pro",
+      "sha256": "5919ac558bc7382d12078984409926614986d75f4a02a9a2bd39b0c5003f559d",
+      "size": 130
+    },
+    {
+      "path": "apps/xbs/android-app/app/schemas/io.github.mikeceead.xbscompanion.XbsHistoryDatabase/1.json",
+      "sha256": "d8212f6162462ff237fe3bd072c0c555f04e1e2b258c386637c53d5a6b45515d",
+      "size": 9419
+    },
+    {
+      "path": "apps/xbs/android-app/app/schemas/io.github.mikeceead.xbscompanion.XbsHistoryDatabase/2.json",
+      "sha256": "c1ba8b3a2b56a4f4cf25cb25986e09560c303cc9ab27366abe5235310cdf6c6c",
+      "size": 9999
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/AccessibilityAdaptiveInstrumentedTest.java",
+      "sha256": "593b47a3cfa4da6fd0ab895fec305ec3a03edd2d9ea2046811778f08b3329693",
+      "size": 4423
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/DebugHealthReadOnlyInstrumentedTest.java",
+      "sha256": "250acfcdfa0525cc7645eac60b332fc4529921cd75636d6f8803ed9155775f6a",
+      "size": 3032
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Phase31AccessibilityInstrumentedTest.java",
+      "sha256": "401a67fb44a57a552b849fc210828af419c774f9a5e03be8602cdd2ac2c00cad",
+      "size": 3399
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Phase31RoomMigrationInstrumentedTest.java",
+      "sha256": "cbc0c80fe3a6289f408c4d9586cdbde6df4af0ecafb3c723c36a02a07f7ce705",
+      "size": 2839
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/AndroidManifest.xml",
+      "sha256": "fa4d3184567da6724ee0c4f09e5204423bf5e825ca0633ecb8f318843df682e4",
+      "size": 7026
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AccessibilityUiPolicy.java",
+      "sha256": "9f0d6c03966900471ca36b7ea732221d3acbb9b0eef26d858fd74f94fa3c5a27",
+      "size": 5752
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ActivityExportFormatter.java",
+      "sha256": "8fa099069d5edf1ce0e653e444d132503558484594001e011c6540ce0259f0c4",
+      "size": 4513
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ActivityQuery.java",
+      "sha256": "f2384592fb72307fbd8635245256aa52bd42256d70932ecbcacb408918470cdc",
+      "size": 6939
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ActivityWorkbenchActivity.java",
+      "sha256": "69867e3e85d11d4dddd56006a1f6297280fa84b7dcbffbc366df5b61f222354c",
+      "size": 21063
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AdaptiveLayoutPolicy.java",
+      "sha256": "1f32f186574ec036c9149f9bf464a6e48446be356c008ecd0929768bd03c68b4",
+      "size": 1311
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AppCatalog.java",
+      "sha256": "abb0d55b61a5b87e3f3bbf58c01ee72a4e4abf2651681bde04922fac73198475",
+      "size": 4060
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AppPalette.java",
+      "sha256": "1e59a83708670317b7d0a3e3602398ef9aadc6a28b41a03f10c39e3a50cdf4f1",
+      "size": 2157
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AppPickerActivity.java",
+      "sha256": "3e6cdb08713be42cc09ce9b9f8643c4091a237e90a9a54596625aa6671f8f645",
+      "size": 10836
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/AppSettings.java",
+      "sha256": "8fd698dc672a08b0a95cab3d409a53c0dd4d9576cf69b9447e2e63892eae8acb",
+      "size": 4179
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/BootReceiver.java",
+      "sha256": "183f9a52bbb5472370f60be2702dc909e80c36ac703544afa1efc6a26ac328c0",
+      "size": 504
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/CliCommand.java",
+      "sha256": "7f55aa2d20b39388866449ef5aaa8e0323f366f9315dbe8a5161803a3d5bba52",
+      "size": 3304
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/CliCommandActivity.java",
+      "sha256": "5350f396c4ab5faf1bfa43151ae81dd5fa35b385f6af276ebca1cf2586e4c28a",
+      "size": 20042
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/CliField.java",
+      "sha256": "e9d3cbd2c21ae32e246d56768aede8574cecdd46192d69b9ec13e8f8bf85c75e",
+      "size": 5612
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/CommandCenterPolicy.java",
+      "sha256": "78d7953c5f64c08da7b86411d2d6a4a91943329e027260724ab7a6313c9a9cd0",
+      "size": 11229
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/CommandLaunchResult.java",
+      "sha256": "46011923fb0172a44a5711364f2d0786cacf25ad2b210860b307456e5a44c17f",
+      "size": 574
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/DebugHealthEvaluator.java",
+      "sha256": "4741980ac1accaf6cafa7f331d06e242052ff455fdc232a0d8f78d42676a38e7",
+      "size": 5391
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/DebugHealthPolicy.java",
+      "sha256": "90b57ac48c8d9cfaf871b27ef38f1ba5c2fafc9052d0f7de12ed1424c4ab614d",
+      "size": 21448
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/DebugHealthReport.java",
+      "sha256": "cd407dae38f3a492eff79fce14a3da2e537ffe672a7a003ada8952c7926c53d4",
+      "size": 8575
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/DebugHealthStore.java",
+      "sha256": "f8f1f9a6366681731d41a8ab841e70d4f603bee439dc311ff6168ec23494d713",
+      "size": 1281
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/DebugWorkbenchActivity.java",
+      "sha256": "23a443c4c3e2f2e922b233a5d4b71f8cca9948c700e079140814f82d3f1d4732",
+      "size": 9765
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventBridgeEnvelope.java",
+      "sha256": "7a9006052b4c20b5bf10ce6aae69cd9f8da5475c324f81034c00489212cfdd2d",
+      "size": 11602
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventBridgePolicy.java",
+      "sha256": "7e931ee19289d11e3d2a29a8bd5d3c21eb254a2b5b624bbd3ca3c2da52639770",
+      "size": 4215
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventBridgeReader.java",
+      "sha256": "8bb919d5f326b8e8e346968eb68f2ddc881068015936b0a18ce716fb5210622e",
+      "size": 4745
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventBridgeReport.java",
+      "sha256": "004002934a6381781bb2a4728449fa9763aada86af94693536de051bb718f128",
+      "size": 8647
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventBridgeStore.java",
+      "sha256": "dd9db09eb3641cc74ab212ebbe3ff20ccc74a4241816b665159439db2b4703d8",
+      "size": 3191
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventControlActivity.java",
+      "sha256": "84202923f5e470fb0fa4f142fe1041d45c45fca94eb7d55ea953e2482da743ce",
+      "size": 2384
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventFeedbackController.java",
+      "sha256": "5d95991e3f56bf02fb2a242c722b24888e2494440fa0ae0af698d8ea1577f56c",
+      "size": 1126
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EventMonitorService.java",
+      "sha256": "40ff684243606f8c98db5cdbe4d233641cfdd06fc1b0df02ce14c80b542dbfac",
+      "size": 5049
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ExecutionSource.java",
+      "sha256": "7197cc8c8cdde4f79cb334b4f8a121da7bd3df86cc1c605c2ed9274cee72d483",
+      "size": 538
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryExecutor.java",
+      "sha256": "8b844de13ebaa10994cac60f508bcecc0cfe57b31a5944e896c7948f75734277",
+      "size": 733
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryReport.java",
+      "sha256": "27d1e0e5b4d570e7b1ab03cb7ad25104b01f245bf520e6592c60b2475d35f922",
+      "size": 1257
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryStore.java",
+      "sha256": "7a72a5905ec769c395ab30c09ca69fd41a9ad9c3fbe237231e1ddcb8ae3d65e3",
+      "size": 1052
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealActivity.java",
+      "sha256": "3d6b7d599ce4962c03985e26eb31693302f48282e5d93580724ee5e50cec1f49",
+      "size": 3827
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealPolicy.java",
+      "sha256": "f19d6917877e48d2f7e166a32d0284a22b9ffe4a2396989eaa62b207e98232f8",
+      "size": 9616
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealReport.java",
+      "sha256": "84243266d0ba2a340e920eb6c091c1362429d46667134417ca876be064fc4a86",
+      "size": 3513
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealStore.java",
+      "sha256": "7937875ca4b253028b03c566393ebf13615b27eedbe62de5c4de463946c58f29",
+      "size": 11717
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ForegroundServiceLaunchResult.java",
+      "sha256": "29f7829fcaa9bb1926ea1421e79de0403e8385dbb4d92377357234fc1e6968ff",
+      "size": 1671
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ForegroundServiceLauncher.java",
+      "sha256": "cb089b1b98d85d26ec262f62e4252faae538c268a4c9916b259c30d210c6a275",
+      "size": 3322
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/GuidedFixActivity.java",
+      "sha256": "e2fffb6f341e7674dcc41e6a4eeff77f213f8634d071290873fd7e829638fe46",
+      "size": 8500
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/GuidedFixExecutor.java",
+      "sha256": "3e2a1ef994c8262c440df5d02fe702ad0b4129683393cf106cbcd6d96184341a",
+      "size": 5589
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/GuidedFixPolicy.java",
+      "sha256": "f9b27cf4fd1e2fdf6d42fc5920f9e234eb44cf39345a45bb2cd49070c454f486",
+      "size": 5923
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/GuidedFixResult.java",
+      "sha256": "98aeb33513265459aa74f787739bca321204340748f87184eb497078da2d2511",
+      "size": 2988
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/GuidedFixStore.java",
+      "sha256": "87f0b8d2e51d83a1a73fb2da23798bd1fe7ed714e37982b53a25712e8e9a902c",
+      "size": 953
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/HistoryDao.java",
+      "sha256": "65cca6af98fcbbc9e3457b653d68d3e3b59fb9472dd6947ee32d58625b9f09d4",
+      "size": 2216
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/HistoryMetadataEntity.java",
+      "sha256": "2e4849677513f9e266b20a536d43ccbafc6232717f0b426f6d6d3ac01c2893cd",
+      "size": 629
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/HistoryRunEntity.java",
+      "sha256": "dc33c9cca6c0f96072eb6eae4559c5db5eebe55c4ca9608ad544f90d89d2e301",
+      "size": 4424
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/HistoryTransactionEntity.java",
+      "sha256": "99bc1726d25a1366ebe759a61ac4709a8e0900c3bcdbbc30a5fa20225988e608",
+      "size": 2127
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/InstalledApp.java",
+      "sha256": "f91d4ca0206b5234d3e302422dc26cc79d768d085f37b5f09ebdc5729ded6345",
+      "size": 933
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/IntentSecurityPolicy.java",
+      "sha256": "9b6478bb86944890de68552b4bb48fd4c32ca364f71acb38c17217d578fe21e7",
+      "size": 2732
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/MachineResult.java",
+      "sha256": "1568a454865b0b1b88a983225f0def0b5aeba3eaebe309d79054f0cc2e3242a6",
+      "size": 4119
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/MainActivity.java",
+      "sha256": "a7cbc6339f70ffc195fc6f9acf3d100082ba7a95d71032ef95ba343e944f20d5",
+      "size": 30220
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ManagedPathPolicy.java",
+      "sha256": "e73c40664fa980d5d0a55881c94fc9fe9d4c9152986f229196e477b6a35b7b0d",
+      "size": 2295
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/MoreSettingsActivity.java",
+      "sha256": "35492175ab7e3e6f47ff295b605657066b68eabefd0053bc69339d47c187c471",
+      "size": 28152
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/MutationClass.java",
+      "sha256": "651203dbae81437f4932f621ce910caebf100882abdf492c15db32eda7e28359",
+      "size": 903
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/NotificationActionReceiver.java",
+      "sha256": "efd51747d190cda37e2c25802ed988dd3a02b7c8a345e151e68509643d1c921f",
+      "size": 4879
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/NotificationController.java",
+      "sha256": "3452f1cdef7766fe1018279da76b6b56756ea41075ebf4bf93c0c2ecda45c98a",
+      "size": 22631
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/NotificationIds.java",
+      "sha256": "3dfc5220d4cafcbc9edbfb8126b2825ab9c96bec791f4c370dfb2011daf8c0f8",
+      "size": 1056
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/NotificationUxPolicy.java",
+      "sha256": "8803226247f2d47aea6b56e40a08d67552db8c2f1f31a21a4f7a41dbd82373b8",
+      "size": 2682
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/PerformanceReport.java",
+      "sha256": "db707d2c9034e02c4e8f9ad563654ee90f60d4a5bc672121a3c39dba3250417c",
+      "size": 1533
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/PerformanceStore.java",
+      "sha256": "595f0ff6167194ea19f0211dfbf676a36be11f02f5b1ddc6ebbae42c71f444bb",
+      "size": 1894
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ProcessMonitorActivity.java",
+      "sha256": "a3bd00fafc6fed7cf56291fbbe60b50334b1da27a53ec3dd299365b05790affb",
+      "size": 14760
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ProcessRepository.java",
+      "sha256": "bdc35d3eab981e8d6022a81980838ee9dccf7e6ebb1536cecd9f89b6f8defac9",
+      "size": 9915
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ProcessSampleParser.java",
+      "sha256": "aa718a1c5e7a73c798a13d421401d7d6522c7f9b1e2413366631260d18bd3b13",
+      "size": 14396
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ProcessScanDiagnostics.java",
+      "sha256": "4a6fa2a24bcb2a29a564178f6eb13108d593e5e921796143404680d3adb291aa",
+      "size": 3046
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ProcessSnapshot.java",
+      "sha256": "a981d8bd900845442ff88f91a843456e1ccf1ea9fc206c1b200bd241800e04b3",
+      "size": 2479
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/QuickActionsSheet.java",
+      "sha256": "4f5fda261f274a76afa2b94d5566592d3d272b35cf8f73bcca73373e9c3f5776",
+      "size": 7198
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessActivity.java",
+      "sha256": "29ba811b672144f5417a78df0f94c5e9905f8dd312f6e2e50887ceb14048728a",
+      "size": 7856
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessEvaluator.java",
+      "sha256": "f891d667606ea35e7dbb9fa0f4aaf4e91665a6631101c84073e85764b52e0f96",
+      "size": 4336
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessPolicy.java",
+      "sha256": "6cc1dca7bb83086074f6fea85d36bf5acc6b069bdf9ee1ae9e4e1b3dbd57fecd",
+      "size": 13811
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessReport.java",
+      "sha256": "732892213f6db26a382c7f7cbbd81e900b1c1c01aabb33fff2cfd5f4508c297c",
+      "size": 4144
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ResultFormatter.java",
+      "sha256": "c04a02fbc07cdda9815392f34c62467b8cc68511e58450d3d8d96cedab248107",
+      "size": 9021
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootCommandOutputBuffer.java",
+      "sha256": "461b325a411dc41fde1f027000361a3eb498efb564823b663d8848e2cdfe9f15",
+      "size": 1190
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootCommandRunner.java",
+      "sha256": "0a81e8a95838ec4aee5cd09518640f2114c84f589e9c1c31c3fa0b363a8da737",
+      "size": 12729
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootCommandService.java",
+      "sha256": "7ab7bdccf877e3558ca4aae5d2e9a7bf5fb5e0ce2f39ebb36a4733cac2412351",
+      "size": 8605
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootDiagnosticsActivity.java",
+      "sha256": "e84f560576fca38d70fa422e7360f8c7aa54b6a0a9959f57af8983e15064fc32",
+      "size": 15796
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootDiagnosticsProbe.java",
+      "sha256": "d261461d25083786c13ea5339aabd266c35142261b8e675a8072d306e54a9a2a",
+      "size": 9690
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootDiagnosticsReport.java",
+      "sha256": "0c4c424901520bdc090d03f5e1eea4cfa290c2a20a2d0a07c49cd1d054a07bee",
+      "size": 12256
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootDiagnosticsStore.java",
+      "sha256": "98ec59a8dea84ab4bc80da83b5826b8395eb27b291cf45a1771337500897402f",
+      "size": 847
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RootStatus.java",
+      "sha256": "f16a5dd2662d293a0438bb65da0ceff67923a74a487896f73c5a27eabca6410e",
+      "size": 2165
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunDetailFormatter.java",
+      "sha256": "707ea18e904adbb7fdf5889c7d21e4196a930d71aabdcc75ed7b1e5f83d8d3d1",
+      "size": 3049
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunFilter.java",
+      "sha256": "46bc1e7a128fd5029c0ed2efc9f67a3a16c4f89810af239c63c8997f34420cb4",
+      "size": 3025
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunLivenessMonitor.java",
+      "sha256": "35449ceb360fd3247a8565a69fc599d8860066a4bb2ef3bc67a5e9d3adf1e045",
+      "size": 384
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunRecord.java",
+      "sha256": "135955c3c81d665220e7922277d045a4c39108f619acdc429dbb98d040b29bb4",
+      "size": 3765
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunRetentionPolicy.java",
+      "sha256": "776a7fb3343c52776980bfeb932cc0fb79679b71a7840e6e495ed032c0842072",
+      "size": 2354
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunRetryPolicy.java",
+      "sha256": "3bcb4dc59395a0bcaa5d948077e4d2797422fa50d28c4effe3cd9ed75818ceb4",
+      "size": 4783
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RunStore.java",
+      "sha256": "bd4fa447e0970fa533456b4de6643bd1f128692a72f2bdddcb4d1de00cbef82c",
+      "size": 9379
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationPolicy.java",
+      "sha256": "398e78a5c94c5af8af8c8ad5d2049b4d4dd763b9b4165d5123e2c5d31bd245bd",
+      "size": 3915
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationReport.java",
+      "sha256": "b230663eb34234fca8d689dc1e5f19a89840050cf534a868ee080f21b6007f1b",
+      "size": 3775
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationStore.java",
+      "sha256": "179600518823b278d7363a92e9052fd2e1e14339fc4ecdaad873d0cf0ba2602c",
+      "size": 8372
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SecuritySealActivity.java",
+      "sha256": "5b92b1bff1eb1700e14bb04769c5b54bfe0385eb4eb65e0617ed3a76d1c6bf50",
+      "size": 2312
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SecuritySealEvaluator.java",
+      "sha256": "b6a2c6d5d4dbb2f95fab9c742e11020e9abed437f49212430febce20e468ffe7",
+      "size": 3100
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SecuritySealPolicy.java",
+      "sha256": "556b3b933ad3610653ec4281c67c5ab84ff239b565908185d39f8e6081e36050",
+      "size": 3559
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SecuritySealReport.java",
+      "sha256": "0eb65dae68bf5508bcc792c4ab96c2b3dca3ec0a6e16c039d76de206631a3483",
+      "size": 1591
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SecuritySealStore.java",
+      "sha256": "3330ec71b89e069f2c745bdc158e910c5643feb3ee6de1e06b89a0c06818d7fc",
+      "size": 1509
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SettingsCatalog.java",
+      "sha256": "8c50c60e75bd8e3df3f5c399ca0156ba4f52a49746e874aeb2f5c419b5a98fca",
+      "size": 3308
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SettingsDestination.java",
+      "sha256": "624c60ce2695d28a069427c5f630b98173c2cb1a2c50c75ae764596dcbbcb84a",
+      "size": 2785
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SettingsHubView.java",
+      "sha256": "32010edc541cc964f277fa14b6db209d39a2b16128c0d3a9f1c96f5f925235a7",
+      "size": 6071
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SuiteAction.java",
+      "sha256": "e462b27c4dc3a1becef98155b999ab1f95e01c5feade80dfdfc4ea5711ed63eb",
+      "size": 2335
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SuiteCatalog.java",
+      "sha256": "1c901eb47521d51619f075aa6cdd33f23938afe5dc988172179853abf5c590d5",
+      "size": 2282
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SupportBundleBuilder.java",
+      "sha256": "318ac8df820e6fd40f44d97e425b3b5e7c9175f8e05cca3e062b1e4b6a95e7db",
+      "size": 16665
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/SupportRedactor.java",
+      "sha256": "7b36388faf5f328f63204f36c534854ce90fed3fcf190ed190b1f3eb5278fe17",
+      "size": 7867
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerAuthorization.java",
+      "sha256": "877d4d4895cf833f6ef54cf16a84285b6437af266b7ce7bdefd68e17952ed0ce",
+      "size": 6891
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerCompletionPolicy.java",
+      "sha256": "74e9cb4394da5abf652f89a0936cb0bebe0ddc7273001d03e4e04d6909d4c142",
+      "size": 4296
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerConditionProtocol.java",
+      "sha256": "a9f9febac2bff3fc1c26225df023d6d4f69f7bb084ffa0f74e3cd4d5e0962aac",
+      "size": 4177
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerConditionReceiver.java",
+      "sha256": "39c0c089550e469b9dcd817023cb5f3f805221c4cfa85524e34d2c1cbf6c1299",
+      "size": 4398
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerConfigCodec.java",
+      "sha256": "29d1674c69828c8ac9e531fc03d23205c7eaecfc318c628c27f87f17343e4b1e",
+      "size": 4446
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerEventDispatcher.java",
+      "sha256": "aba6bc3e48194c0ed78142d1e4ca382f7157546e61726ae0bc0f7b42a3a50b09",
+      "size": 1814
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerEventEditActivity.java",
+      "sha256": "5b6c779dc6a3af2115971829129668bb1c02aa238c25edfe6633c8158eb7bff0",
+      "size": 3420
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerHostIdentity.java",
+      "sha256": "ac73dc019422f5db224dbc2bcde3292a38e78823f22f95f9bf09125cd9b1b658",
+      "size": 3844
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerPluginActivity.java",
+      "sha256": "70e7ca53a76718b88d0b37f6db32e5aebf965860f59e641d99e1e4661ca15437",
+      "size": 8639
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerPluginReceiver.java",
+      "sha256": "b0254c4b3f2d07195aa80e35a0d007b4a5347fe865dea5a6995d5332d8817240",
+      "size": 4476
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerProtocol.java",
+      "sha256": "a2e67e546f4e2f7152f6fb0f1139a766d3da3826644343ddf64068bca8fab1ea",
+      "size": 4880
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerRequestPolicy.java",
+      "sha256": "6716552950cae71bcba53ab9b45b4d98a7dc1bf1a21d449c55f93c19686c1676",
+      "size": 9811
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerStateEditActivity.java",
+      "sha256": "23b94141613e26bf0d49f43538e8665e5e46f3baf011d3966af928c66eb9ffd2",
+      "size": 2906
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TimeoutPolicy.java",
+      "sha256": "b9871fb1d1fb98d629d40c4ab9cb033e7351c00dad20a5edd0df281ef3a36d97",
+      "size": 961
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/UiKit.java",
+      "sha256": "95a5447e801fe4a2c79eae3165e63af3a3cf0e7947e3313f62101d6016c99956",
+      "size": 4512
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/UiQualityReport.java",
+      "sha256": "192a75756a9ba21c39668685e928d7a25461221c49bb949536160bbf8d99c177",
+      "size": 3172
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/UiQualityStore.java",
+      "sha256": "e3bdac318aad4d21387502d84d7a324aabc9459f94e4fcf7eb036f6dbd3c6b39",
+      "size": 1674
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/UiUpdateDebouncer.java",
+      "sha256": "dfdd1a19ed878729be4d1b73b2ea77de4a599bb8ee74b69e802741b28590f865",
+      "size": 799
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsActivity.java",
+      "sha256": "d873bd348a33dbc2552c96383a888630fba58f81410572aa0acd993a24fc9503",
+      "size": 2932
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsApplication.java",
+      "sha256": "1d7caf4fbe502e590a3502132a7e4ed1d40e655bb491914d52332b9eaae4e8ec",
+      "size": 539
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCache.java",
+      "sha256": "936cb89662a239569beac684bf866991362c674bd7be4529782d02311a6430e1",
+      "size": 1553
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCapabilityRegistry.java",
+      "sha256": "60afaa60210f206c14f0a8a8a0ca2b3264001c4ce36025d899694806a91b54be",
+      "size": 1662
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCliCatalog.java",
+      "sha256": "364677c3f37ca9ccba51629242efd9c21bb3a06c75c9620412176d3362fab21a",
+      "size": 9909
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCommandSpec.java",
+      "sha256": "43ac9299b0d77d59d253047010796955cfce0012f9436fe58c1dc0d44feaef9a",
+      "size": 3221
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityProbe.java",
+      "sha256": "54e0259ee584970712aca57a24b07fb79debbed59fa0f92a0a1595bedd27c7bc",
+      "size": 2054
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityReport.java",
+      "sha256": "abd3ea135761b9fd569d171812c36652f503d6f3b4918053ae79997763b27791",
+      "size": 16467
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityStore.java",
+      "sha256": "9e29d2b275b85a3c390eabe4b5c85546f536523b77ccd2ff3d2008304c077774",
+      "size": 1668
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigActivity.java",
+      "sha256": "bb77c5190ec2277f2f3f1c6506a05b34bebb49863a2f5868e4dc0218824b30f9",
+      "size": 16974
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigApi.java",
+      "sha256": "92b94e6dfe0778ec8d61d8b07170d4f3bc7ed15a377514e336fff9c9baa189d1",
+      "size": 13914
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigTransaction.java",
+      "sha256": "3946310ce02a47904391b38eee6ec91b6b236d318be3edb2a9b3d7bc52c0080e",
+      "size": 45861
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigTransactionStore.java",
+      "sha256": "bce227ca1d08a1eda6a6c8d28c40bc54ddeb71ab8e379bed870f16d1f5cfd41e",
+      "size": 2580
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEssentialsActivity.java",
+      "sha256": "2722c1bfd9b1c700ea054d8cb1fe234db26462f2527d16d753c14be73176a1b5",
+      "size": 7743
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEvent.java",
+      "sha256": "c9ea337d1622262f5eb35919d3d8d61e0c2af926b7dd3f97aa7b104767eae121",
+      "size": 7865
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEventDraftValidator.java",
+      "sha256": "07b2c97d84690e6df6d456c5f1898a1928bd594f48c69a35ad4efdc3aef5937d",
+      "size": 18368
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEventEditorActivity.java",
+      "sha256": "40f1716781e595b30f5dce22e3487f9ab38908d714565f3c867d66515bc6e86b",
+      "size": 36978
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryDatabase.java",
+      "sha256": "b2d709640b77d03ecda2c69b870500f09708b8292ffa1a6af2798a9880ba6101",
+      "size": 1886
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryStatus.java",
+      "sha256": "f9b8acc396a0182446ba074f70416c2b6fb47018bd42ceab7524aa4c6f045b68",
+      "size": 4879
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryStore.java",
+      "sha256": "1b85290099a0cff234adfbd50f584c5bff386b18c72255585b77d7416a374339",
+      "size": 16859
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsProcess.java",
+      "sha256": "702947db61edb6fc6fce1fedce9c023fdaec023d580110879f93754a95f0162b",
+      "size": 4783
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsRootApi.java",
+      "sha256": "1684c8f1b4d6cc67e8d72941bb3c7f9ff1a3a1cb5aeef08aa539fec94475e145",
+      "size": 6859
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsRuleIndex.java",
+      "sha256": "936ebda7d08ef5beb8d9a77aedca9423ee59d05a284eea37540b7641c980eb65",
+      "size": 3220
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsRuntimeResolver.java",
+      "sha256": "8fb9ed13090a1cb013f4ff8206f3e20f44d1f16311ae2efafedd3a30dd3ad977",
+      "size": 5783
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsSnapshot.java",
+      "sha256": "4d28936e0dd2c52d5981d330834c7ce1130de02b5cb85b9646e646540dacf547",
+      "size": 8108
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsStateProcessor.java",
+      "sha256": "f828a92ec32faea56a40fe9f041c9ac5ed6ced74489437afa0eb5615a7a7ffee",
+      "size": 3040
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsStateStore.java",
+      "sha256": "4ca8fae9b8ec955fc8a078a35a75d0c3aaaec4376085f6910ff071c705638a35",
+      "size": 3516
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_devtool_foreground.xml",
+      "sha256": "2aabbfdfe99fe00e4ae884718233d57b78fa3d952d16531322823b042d8b7587",
+      "size": 456
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_devtool_notification.xml",
+      "sha256": "12946b6201512c6b87f40105d761c1b7bb82289cd2e72a3b1f94ff277019a18f",
+      "size": 293
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_events.xml",
+      "sha256": "f7293c6ed50539fe0f291a7f5d4292813f577c77066b0ddf057d6b917cc4ef4e",
+      "size": 272
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_pause.xml",
+      "sha256": "251cd962cfa1120a1258f52df2ae291526ffde1b0afa6e6aef8cda1d80524dc9",
+      "size": 258
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_resume.xml",
+      "sha256": "742f0887398d7ed8907168b766f7fa0c45260ce6c6530cfb4d757943418ad403",
+      "size": 246
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_shield.xml",
+      "sha256": "c4246d6ca5c292b2ceb1df136673223bc3f052d13c0f382829da4f6e550e0008",
+      "size": 292
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_shield_off.xml",
+      "sha256": "0d1730283f4a0ea86bf6e8acbf52a0a0623304cc8f9e4bdf30393163697ad09c",
+      "size": 363
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/drawable/ic_xbs_stop.xml",
+      "sha256": "e1b33552f93a109ad493699aef15803ee6249510289e2b4bffbefc81e05d1139",
+      "size": 245
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/mipmap/ic_launcher.xml",
+      "sha256": "690dde244022b09a05da8163759a5b89f1f7001993a5467a9396439bad2a9d5d",
+      "size": 338
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/mipmap/ic_launcher_round.xml",
+      "sha256": "690dde244022b09a05da8163759a5b89f1f7001993a5467a9396439bad2a9d5d",
+      "size": 338
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/values-v27/styles.xml",
+      "sha256": "bfe36f30773fe7571ea656e6ccf78c70037acd412b1d5ccd980eb08d32e5bed4",
+      "size": 1412
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/values/colors.xml",
+      "sha256": "3d1709ed1f7c3971ac5bf9ea029e5db6ccf6451fec53e88de4cd4ba54ec26c76",
+      "size": 409
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/values/strings.xml",
+      "sha256": "4bc9c5710e6efb18ba8bfa96356aa2a4167e0a1a29de9ee6e109ebdd54e4020e",
+      "size": 3072
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/values/styles.xml",
+      "sha256": "a12fe75669581cdc5ccac8d04390203105e31cfcd59cf4eca1e39f85741c7ca6",
+      "size": 1345
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/xml/xbs_data_extraction_rules.xml",
+      "sha256": "a889bb6786c08db95008bc93fa5d48a3226902deb380f28c8a15153c9a02ff3f",
+      "size": 393
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/xml/xbs_full_backup_content.xml",
+      "sha256": "2661380338a2d19f8581aa2b768c0d560f0277a39d9e5b522c2a5545039fa156",
+      "size": 166
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/main/res/xml/xbs_network_security_config.xml",
+      "sha256": "dea35ebed76536c24c13f74036f02dc874f944147cb3a49c2ad0550f71e3e0c7",
+      "size": 146
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/ActivityQueryTest.java",
+      "sha256": "27a5a27be1135444e25b15dcd8f85c125f27596c1b94ba964502de1976f95575",
+      "size": 5778
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/AdaptiveLayoutPolicyTest.java",
+      "sha256": "b88662ba7be8947195fa8e94e049e8a513abd2537a290644093d9ebd499d20f2",
+      "size": 773
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/CommandCenterPolicyTest.java",
+      "sha256": "14aabe30f69e7dfc8cebf899fdef59651d467aa05fee8d8e57cb624da1a20064",
+      "size": 3801
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/DebugHealthPolicyTest.java",
+      "sha256": "8df5a37909a428b184ac474c5984a24c0d9320339ce7cd8558ab4a1fb1be2335",
+      "size": 10851
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/EventBridgeEnvelopeTest.java",
+      "sha256": "7187229f7d5300ac99ffac4c6dbf7ab68675eb208f8f0202d8a301e832a3037e",
+      "size": 5204
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/EventBridgePolicyTest.java",
+      "sha256": "a1d9a5f821dab5536987acc617b4867e965a73843dc62fcb41a6612313d92196",
+      "size": 3559
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/FinalReleaseSealPolicyTest.java",
+      "sha256": "1367779e492b38223b541304cee948add7840427ecd32f7dbf7807713b1ed542",
+      "size": 4743
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/FrontendContractTest.java",
+      "sha256": "fe1954c8686bfc528426e9aedb5d64ec10d4fb44ccb894a69c5379812da203f7",
+      "size": 2469
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/GuidedFixPolicyTest.java",
+      "sha256": "c9f64f8ec054cb0171366a0e042a42c41b2efe61249b535ce4387097f388b48c",
+      "size": 1911
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/ManagedPathPolicyTest.java",
+      "sha256": "65bbe3a9bcea6fe0a6a0482ce9a19c4f7d66bfe98f0cb3151ef96c354fad0a89",
+      "size": 803
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/NotificationUxPolicyTest.java",
+      "sha256": "c1781f9c7c622e2b92ea09028f2dcf7ee7d1f97ba6152623ca3c85e4b3d03d0a",
+      "size": 4085
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/PerformanceReportTest.java",
+      "sha256": "0f1410c0f840d8e933f629273ac540b07ccd4f2d7d64c3b1417f8b5c3811082b",
+      "size": 393
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/ProcessSampleParserTest.java",
+      "sha256": "83af0a59167965298d4fbb1840ac6d971b461be8d5298cb5b7cdabcacd79c8ca",
+      "size": 5464
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/ReleaseReadinessPolicyTest.java",
+      "sha256": "f2863b28f3cf7270f3493d7cfb36c0a92a9ab0c0ccb2bd3431f39b92e6cad5de",
+      "size": 8659
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RootCommandServiceContractTest.java",
+      "sha256": "174b50640a745c17827a0d9cb1e2987c55f325d8a288e661303e71897dba881f",
+      "size": 1096
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RootDiagnosticsReportTest.java",
+      "sha256": "629405f5cd1a320dcf635ba93241eb61970d0595683aa4b23555db2790388d1a",
+      "size": 1974
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RunDetailFormatterTest.java",
+      "sha256": "dbddea195cc1fd067e039df6ed438968e642de53afd79d99d96eb69c0a33c870",
+      "size": 1860
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RunHistoryPolicyTest.java",
+      "sha256": "7d7a3482839e509e7da97ed1e208a0c3ff702c79b3fb526faab8a040c765f4ee",
+      "size": 5377
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RunRetryPolicyTest.java",
+      "sha256": "5b5e93c09011e45fb316a4dc0d67813c768ef48a476c960ee94336132922aae3",
+      "size": 2454
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/RuntimeNotificationPolicyTest.java",
+      "sha256": "f22363dc8fd1b89b12662d58a55cbd129da6703dca567e0a7f0f44d97bd9f335",
+      "size": 4040
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/SecuritySealPolicyTest.java",
+      "sha256": "e02e6cf3c6d90c1b745bfe4e4dded344e3f6e58153c92a27f91a71a5b1639251",
+      "size": 1199
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/SettingsCatalogTest.java",
+      "sha256": "f3641cfd91b0e5d9140b2cf56ffa4ec2539c99abb2a49adbe26b3da1bc520411",
+      "size": 3419
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/SuiteCatalogTest.java",
+      "sha256": "fc17aa5d7a934ec8fbd76094753b89913af4a3eb12b4dee6e922895e806eedf9",
+      "size": 1710
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/SupportBundleBuilderContractTest.java",
+      "sha256": "499bd27de0ebe71a7833ad833ba4be6c5905ce885af5ca4298fc363be085252b",
+      "size": 772
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/SupportRedactorTest.java",
+      "sha256": "b3289e6cc1ad446fec8a0a771828c5efff146a0898806602dbb6a8c483fcbaf1",
+      "size": 3809
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/TaskerRequestPolicyTest.java",
+      "sha256": "961a0f904ce3a7fa98fcd67023362b08bfb1c9df1cf35b7adc4dd1326e754e4e",
+      "size": 3860
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/UiQualityReportTest.java",
+      "sha256": "73ec364e17bf81179318f95cd0cf19534f4a2b2c6c9fa3144fcec2bbf721b7d1",
+      "size": 732
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsCliCatalogTest.java",
+      "sha256": "152858a60fca6d24fdf7ce3dcc15b5cf343a5db9ab9811789195aea0eb1a0bdb",
+      "size": 2190
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsCommandPolicyTest.java",
+      "sha256": "256e8f05bb137b389ba46d2f2856ac09cabb562deb2219409aaf0d7a04b4021c",
+      "size": 2610
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsCompatibilityReportTest.java",
+      "sha256": "ccb061659c64cea2dcf791358fade00eaa32ce55f6424ab7e39acdf0ef5bd8b4",
+      "size": 5217
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsConfigTransactionTest.java",
+      "sha256": "1ebe718ca6c85b1906a36d36f3dda1111b702e5fbf79ccb1f3483e5340e89de9",
+      "size": 8975
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsEventDraftValidatorTest.java",
+      "sha256": "25d22b6eb155ee3febad26174e0d186433200959c85546730147c43afaec87fd",
+      "size": 7683
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsHistoryStatusTest.java",
+      "sha256": "4a92df17002785af2eefe2244e00db483c824a337642856b2637427f24264b46",
+      "size": 2106
+    },
+    {
+      "path": "apps/xbs/android-app/app/src/test/java/io/github/mikeceead/xbscompanion/XbsRuntimeResolverTest.java",
+      "sha256": "341b7b0fb2420b7c94b0c6d46152e50cb5550d8125dcbd2ce1713f483eeb3917",
+      "size": 2358
+    },
+    {
+      "path": "apps/xbs/android-app/benchmark/build.gradle",
+      "sha256": "5455b833dc08d0be589252b4175528e3398b2ff4d7abec5a8e63980d6950c8e9",
+      "size": 857
+    },
+    {
+      "path": "apps/xbs/android-app/benchmark/src/main/AndroidManifest.xml",
+      "sha256": "c8fe08b06e479efc7e3d00476fffe693a3e943e2b874b3c6a1ba5156fc180751",
+      "size": 111
+    },
+    {
+      "path": "apps/xbs/android-app/benchmark/src/main/java/io/github/mikeceead/xbscompanion/benchmark/BaselineProfileGenerator.kt",
+      "sha256": "2e3345901a06ac89af382b09e41ef7cc6dfa01c79ef3d1d24fc9cdad95075bc6",
+      "size": 680
+    },
+    {
+      "path": "apps/xbs/android-app/benchmark/src/main/java/io/github/mikeceead/xbscompanion/benchmark/StartupMacrobenchmark.kt",
+      "sha256": "c6ec8ef783623691d62c8478a5f4706d317424f3c831ae954ea7458ab3aa463b",
+      "size": 1311
+    },
+    {
+      "path": "apps/xbs/android-app/build.gradle",
+      "sha256": "0c0ba2f4d312fa521af9db3188f99baf986aebb81e4a3449936d9fd3059a0377",
+      "size": 3604
+    },
+    {
+      "path": "apps/xbs/android-app/gradle-build.py",
+      "sha256": "a56427b0c78c14a466992c531c65ac333175cb5a58cb6dd9cdbedfc83775fa5a",
+      "size": 55138
+    },
+    {
+      "path": "apps/xbs/android-app/gradle.properties",
+      "sha256": "706cabb9bd12c289c151efe0e5543cc9b78dcbda9853f30e50985a97831ee935",
+      "size": 237
+    },
+    {
+      "path": "apps/xbs/android-app/gradle/phase31-release-seal.gradle",
+      "sha256": "e597d5d007f240c6c10e1f8222ab93d7e4b51bbe316e2544c3c7ad67bb878454",
+      "size": 20710
+    },
+    {
+      "path": "apps/xbs/android-app/phase31-testkit/build.gradle",
+      "sha256": "087768272658ad583cb1535a58305440396ae6431a20cc25a40a4206aa9ef977",
+      "size": 373
+    },
+    {
+      "path": "apps/xbs/android-app/phase31-testkit/src/test/java/io/github/mikeceead/xbscompanion/Phase31ReleaseSealGradleTest.java",
+      "sha256": "17b76557f40ae4ea542500b2bef18b2f2d9d78c030ee3dde914a7cf22ca613fb",
+      "size": 2859
+    },
+    {
+      "path": "apps/xbs/android-app/settings.gradle",
+      "sha256": "db5e84326b913d88c1c53e68dd023416a7b63671f6aec17b47213b4c58bed29b",
+      "size": 318
+    },
+    {
+      "path": "apps/xbs/android-app/tools/phase31_release_gate.py",
+      "sha256": "dd27747ad0ebce01d09ab397856e963c4c628f8ac7292a3fd4c142a62a87107c",
+      "size": 77175
+    },
+    {
+      "path": "apps/xbs/android-app/tools/validate_phase32d_root_module_resolver.py",
+      "sha256": "6c046d5c898d6f143921e4ca4c2ca527903f5935480739790ddec30159be5327",
+      "size": 5511
+    },
+    {
+      "path": "apps/xbs/bin/xbs-paths.sh",
+      "sha256": "04a8c8be2b6f70a42e378a3170d096ffeca215af63928500141c09d27cfbf978",
+      "size": 6384
+    },
+    {
+      "path": "apps/xbs/bin/yq",
+      "sha256": "03061b2a50c7a498de2bbb92d7cb078ce433011f085a4994117c2726be4106ea",
+      "size": 12779682
+    },
+    {
+      "path": "apps/xbs/completions/zsh/_xbs",
+      "sha256": "887fd02746c6a6fa66db2d4b145630436cc821d09ec67ae39d4e0590ba8b2c41",
+      "size": 340
+    },
+    {
+      "path": "apps/xbs/customize.sh",
+      "sha256": "3b0bfd5ade6baf696bf46966d8b83c90b43bf4cfda9dca2075c0eaf6d26931f5",
+      "size": 1540
+    },
+    {
+      "path": "apps/xbs/defaults/essentials.allowlist",
+      "sha256": "7d939ef0977f683a4c11d0a3092cff34dbf12df44815d3bbf6648cc705af226f",
+      "size": 175
+    },
+    {
+      "path": "apps/xbs/install.py",
+      "sha256": "3d6ba439a8a842f6e4b859ff0ca0bee662113e0ac5439c9346192b8dbd5bfb87",
+      "size": 472
+    },
+    {
+      "path": "apps/xbs/module.prop",
+      "sha256": "80b8c17025772fbd0cba31cab0284398e4be028c466d680e20ba60b659363921",
+      "size": 281
+    },
+    {
+      "path": "apps/xbs/module/META-INF/com/google/android/update-binary",
+      "sha256": "bcf4b1d9913f3af17755569c853e0b5a75b8005f6a18eb3f86dadcc0e968c29d",
+      "size": 612
+    },
+    {
+      "path": "apps/xbs/module/META-INF/com/google/android/updater-script",
+      "sha256": "d2b8203193a083e43ad076fde01b9c7821e0aa521e1f8077b8628fb1cdb70c60",
+      "size": 8
+    },
+    {
+      "path": "apps/xbs/module/action.sh",
+      "sha256": "b13cf01151d0d994c500558dd917fc56a25de6a4bb0d79f819bcc6858b15efb2",
+      "size": 271
+    },
+    {
+      "path": "apps/xbs/module/bin/xbs-paths.sh",
+      "sha256": "04a8c8be2b6f70a42e378a3170d096ffeca215af63928500141c09d27cfbf978",
+      "size": 6384
+    },
+    {
+      "path": "apps/xbs/module/bin/yq",
+      "sha256": "03061b2a50c7a498de2bbb92d7cb078ce433011f085a4994117c2726be4106ea",
+      "size": 12779682
+    },
+    {
+      "path": "apps/xbs/module/customize.sh",
+      "sha256": "cf9aebd9be9cb8f46a8a616c9c41a2e1e3f9f48d7df82964755532372139046b",
+      "size": 1541
+    },
+    {
+      "path": "apps/xbs/module/defaults/essentials.allowlist",
+      "sha256": "7d939ef0977f683a4c11d0a3092cff34dbf12df44815d3bbf6648cc705af226f",
+      "size": 175
+    },
+    {
+      "path": "apps/xbs/module/module.prop",
+      "sha256": "80b8c17025772fbd0cba31cab0284398e4be028c466d680e20ba60b659363921",
+      "size": 281
+    },
+    {
+      "path": "apps/xbs/module/schema.json",
+      "sha256": "9a56dea538f907704b5d475a86a8123e746b65c8c1d2d8b5091ea12aa6da175f",
+      "size": 3358
+    },
+    {
+      "path": "apps/xbs/module/service.sh",
+      "sha256": "53961d0e602a9944ce55a04576540ed431f2fd7f20bad484a559c72ca99e43aa",
+      "size": 572
+    },
+    {
+      "path": "apps/xbs/module/system/bin/XBSctl",
+      "sha256": "f7ac6bf44def499a082a57a2299b406b656316196ce59afc622ddf8024e3d09f",
+      "size": 9986
+    },
+    {
+      "path": "apps/xbs/module/system/bin/XtremeBSd",
+      "sha256": "da8cb87e10992596056bdae9dd52643b7beef71b1934ad70a999659feed4cd94",
+      "size": 30552
+    },
+    {
+      "path": "apps/xbs/module/system/bin/bash",
+      "sha256": "9efcaa3b706469225ffdc5c3851080cadb744e8c1dcbfd690f2b5749be857023",
+      "size": 1974840
+    },
+    {
+      "path": "apps/xbs/module/system/bin/bc",
+      "sha256": "ab7e390b3845fd9f99f1bf5317a16a8e2be7f8f8ec2ad0fb6014ab557a18e495",
+      "size": 92176
+    },
+    {
+      "path": "apps/xbs/module/system/bin/xbs",
+      "sha256": "7d1e0a3c12e19f8fc43f140790046e8582617d719ef178cb8dea6d7de234c95f",
+      "size": 906
+    },
+    {
+      "path": "apps/xbs/module/update.json",
+      "sha256": "3bdecd8d328980aef0940db8c799efc60ea1bf4166151f14a36470679d54a4a3",
+      "size": 251
+    },
+    {
+      "path": "apps/xbs/module/yq-update.sh",
+      "sha256": "d6efe91f1d1887ef42c42e435ffddddfc7122da7d16b3037bc48afeb252aaa76",
+      "size": 3664
+    },
+    {
+      "path": "apps/xbs/pyproject.toml",
+      "sha256": "cddef26a667fa1b861520267191f5b978a03772a68817c79ce90b026a94fc92c",
+      "size": 384
+    },
+    {
+      "path": "apps/xbs/schema.json",
+      "sha256": "9a56dea538f907704b5d475a86a8123e746b65c8c1d2d8b5091ea12aa6da175f",
+      "size": 3358
+    },
+    {
+      "path": "apps/xbs/service.sh",
+      "sha256": "53961d0e602a9944ce55a04576540ed431f2fd7f20bad484a559c72ca99e43aa",
+      "size": 572
+    },
+    {
+      "path": "apps/xbs/src/xbs_cli/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "apps/xbs/src/xbs_cli/cli.py",
+      "sha256": "6c586aadd460086d18d5c7bd0915dbf22e15ea7218b24d5465f6da5b4b4eaa23",
+      "size": 15153
+    },
+    {
+      "path": "apps/xbs/src/xbs_cli/compatibility.py",
+      "sha256": "6c0af3aededf0f59304c2b147d830a2232a621a5516a2ae724857c5c12c57dea",
+      "size": 8848
+    },
+    {
+      "path": "apps/xbs/src/xbs_cli/core.py",
+      "sha256": "52ad3de30a9aa919733f8ac48136b3714d0cc7fbe7da6e876e57845960c7b614",
+      "size": 15180
+    },
+    {
+      "path": "apps/xbs/src/xbs_cli/event_bridge.py",
+      "sha256": "c1e587d6e62e41f092f87ebbd9a609691c3116d5ec979af23418987ae8de9262",
+      "size": 16777
+    },
+    {
+      "path": "apps/xbs/system/bin/XBSctl",
+      "sha256": "f7ac6bf44def499a082a57a2299b406b656316196ce59afc622ddf8024e3d09f",
+      "size": 9986
+    },
+    {
+      "path": "apps/xbs/system/bin/XtremeBSd",
+      "sha256": "da8cb87e10992596056bdae9dd52643b7beef71b1934ad70a999659feed4cd94",
+      "size": 30552
+    },
+    {
+      "path": "apps/xbs/system/bin/bash",
+      "sha256": "9efcaa3b706469225ffdc5c3851080cadb744e8c1dcbfd690f2b5749be857023",
+      "size": 1974840
+    },
+    {
+      "path": "apps/xbs/system/bin/bc",
+      "sha256": "ab7e390b3845fd9f99f1bf5317a16a8e2be7f8f8ec2ad0fb6014ab557a18e495",
+      "size": 92176
+    },
+    {
+      "path": "apps/xbs/system/bin/xbs",
+      "sha256": "7d1e0a3c12e19f8fc43f140790046e8582617d719ef178cb8dea6d7de234c95f",
+      "size": 906
+    },
+    {
+      "path": "apps/xbs/tools/install/common.sh",
+      "sha256": "804ae15d5511e6fcfac0495aede005e84fb972adb67aee2b076a1bf6ddf5d45d",
+      "size": 2519
+    },
+    {
+      "path": "apps/xbs/update.json",
+      "sha256": "3bdecd8d328980aef0940db8c799efc60ea1bf4166151f14a36470679d54a4a3",
+      "size": 251
+    },
+    {
+      "path": "apps/xbs/yq-update.sh",
+      "sha256": "d6efe91f1d1887ef42c42e435ffddddfc7122da7d16b3037bc48afeb252aaa76",
+      "size": 3664
+    },
+    {
+      "path": "completions/zsh/README.md",
+      "sha256": "1c47269389eed6021dae30de44fcfc3bb919a41bf5dc35db4e256fd92727a811",
+      "size": 953
+    },
+    {
+      "path": "completions/zsh/_bootmanager",
+      "sha256": "ec45448343f18b3b786c6d129e678705a8b454c5ea334e5b0ae99ce988c1a1f6",
+      "size": 288
+    },
+    {
+      "path": "completions/zsh/_http-cmd",
+      "sha256": "d5e49be633081b5ca8fd12e27bb19c11f64fcf3c9ba2890b0cf44c11bda44e77",
+      "size": 365
+    },
+    {
+      "path": "completions/zsh/_ksun",
+      "sha256": "9c1c50c76e801c7b8a57c423c10dc88b161c277ecd15a61b33e488b4058fb066",
+      "size": 345
+    },
+    {
+      "path": "completions/zsh/_sortify",
+      "sha256": "46bcd35e7603c3fa6fae44955b40ac39c25f0463b0fbd879c8a4b1b187e7fca5",
+      "size": 360
+    },
+    {
+      "path": "completions/zsh/_wallglide",
+      "sha256": "0402704dc17df7e5761d222977b5f22de0b926ec14a28cd3024fa5663be1a5bb",
+      "size": 370
+    },
+    {
+      "path": "completions/zsh/_xbs",
+      "sha256": "887fd02746c6a6fa66db2d4b145630436cc821d09ec67ae39d4e0590ba8b2c41",
+      "size": 340
+    },
+    {
+      "path": "completions/zsh/direnv-auto.zsh",
+      "sha256": "e51f6fd76e7a09db94de8a457773ba2e622839bcfefd532e2c794c379b244d03",
+      "size": 815
+    },
+    {
+      "path": "completions/zsh/mike-repo-completions.zsh",
+      "sha256": "c65c0f32c0332993cbdd8374e56acb59ae749e85055ee94f541d3058d84ee024",
+      "size": 6867
+    },
+    {
+      "path": "docs/BOOTMANAGER.md",
+      "sha256": "acd0cd2795fe9d0c1641d6d3dc1c8592b22f5d50c6bf85afaab1a77be3c6b92a",
+      "size": 1680
+    },
+    {
+      "path": "docs/CLI_REFERENCE.md",
+      "sha256": "9d6bde67082f03e48b244a6b4f6e0e1e287603e7bccbac7da5d91f5bd61d11ae",
+      "size": 32915
+    },
+    {
+      "path": "docs/FRONTEND_JSON_CONTRACT.md",
+      "sha256": "8b727337f5ce5254f9791b87d45914c5dfd0565233ba546ce1a64219fb3d5039",
+      "size": 4495
+    },
+    {
+      "path": "docs/FRONTEND_RELEASE_VALIDATION.md",
+      "sha256": "f14773f286fed517dd378f4e6cb570c8b2be83f8b732c2ba83aeaf837a577db5",
+      "size": 920
+    },
+    {
+      "path": "docs/MACHINE_OUTPUT.md",
+      "sha256": "df15707dfa76b3cdcfb1b22020ad984e263459d756ac2802734dc481d229f58b",
+      "size": 1889
+    },
+    {
+      "path": "docs/RELEASING_FRONTENDS.md",
+      "sha256": "1c0b92b9a4160faf225712e25f8f2405ff43acff9cd35bb070c8695e11a01da2",
+      "size": 1498
+    },
+    {
+      "path": "docs/SCHEMA_COMMANDS.md",
+      "sha256": "38a7026ec0b1fab3985b35b843b5581d98fc8ff6f10ffa83b4a1df774179c482",
+      "size": 2356
+    },
+    {
+      "path": "docs/ksun-ux-polish-spec.md",
+      "sha256": "cc13f8f8c189a803a17d157c36c1fb61565588a7800db739c53d698b708db231",
+      "size": 5172
+    },
+    {
+      "path": "docs/mike-cli-schema.schema.json",
+      "sha256": "27a5e1a36dc666977eecdb67bdd19e0415018069d61cc5d7ddb5e9addabaebbb",
+      "size": 4675
+    },
+    {
+      "path": "docs/mike-machine-output.schema.json",
+      "sha256": "0dda4616a1d26d815409e65b482ae09992badadd2c1f80835c3c566f0ea40fed",
+      "size": 1008
+    },
+    {
+      "path": "docs/schemas/frontend-event.schema.json",
+      "sha256": "f9c687caee2ac8d12ce9db1f041333527ba11df206a828f45d95f38fbb0d4689",
+      "size": 1285
+    },
+    {
+      "path": "docs/schemas/frontend-progress.schema.json",
+      "sha256": "dde9de1bc66a9481385102eb707621590a7b43055ab9f73d94078760208bd681",
+      "size": 1531
+    },
+    {
+      "path": "docs/schemas/frontend-result.schema.json",
+      "sha256": "0846702430ce8ed47d9fb290d380e4590e6fb65fa3641c2ed1595ba96e9cece9",
+      "size": 1061
+    },
+    {
+      "path": "enter.zsh",
+      "sha256": "99e74bb076f766dc16330112732d9def7e4863784cc4a15d9231a824d90c3a30",
+      "size": 360
+    },
+    {
+      "path": "install.py",
+      "sha256": "39e71b1def1d3d0781c4f801b4a1459ede8da597bdc52fda1770bc581c4cc6f6",
+      "size": 115
+    },
+    {
+      "path": "modules/mike-suite-servers/customize.sh",
+      "sha256": "09e0c09f59a3b57def4639a02749ceca4ccec656a18f38de30e986d64fb2ffb3",
+      "size": 528
+    },
+    {
+      "path": "modules/mike-suite-servers/module.prop",
+      "sha256": "740e30673ffeb8e001c43e8ddfbc7176dbdef43503d6a16adbbeb01687699eda",
+      "size": 179
+    },
+    {
+      "path": "modules/mike-suite-servers/service.sh",
+      "sha256": "62701c31dde3359c7a8f7f4a6bc11759c6e4e3469e33f97d766770e160b10857",
+      "size": 396
+    },
+    {
+      "path": "modules/mike-suite-servers/system/bin/mike-servers",
+      "sha256": "9c14e842841eb6fbab154de12816b3a0de8b74d027f03c26c4ec78fa0cf903f0",
+      "size": 48276
+    },
+    {
+      "path": "modules/mike-suite-servers/system/bin/mike-servers-home.py",
+      "sha256": "387cba4be27b2b7edda365bf961f8c38518fe8b70e901998b947ff023c4d921b",
+      "size": 18277
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/README.md",
+      "sha256": "50d42e2e9ca3eb7bdc26c5ed71e0eda30301a81e68cb903ee3ba4482414cd880",
+      "size": 1025
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/bin/mike-servers",
+      "sha256": "16fcf6e3844eeaccd3ed14d3e0d3a507c1aa808c81517fda6ef7ba572a929622",
+      "size": 48298
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/bin/mike-servers-home.py",
+      "sha256": "d4fa1d001e55fb67fb486accfb3b511fd5d19a5bd23a473157f04b2ca3f7295a",
+      "size": 17505
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/install-systemd.sh",
+      "sha256": "0e4108596f9d35642513d39c46da1f5bedc64876fc7d4a4e05fc0742fd52b58e",
+      "size": 3302
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/system/mike-servers.service",
+      "sha256": "625ad14717c71b4b3e96acec9473f6a7622f48144e9132316533aaa2bb4fecd3",
+      "size": 271
+    },
+    {
+      "path": "modules/mike-suite-servers/systemd/system/mike-servers.service.in",
+      "sha256": "70dbaa340b41f043a6daa47062989fa21e70522ee74f2bc6a9e466c2a897ff8e",
+      "size": 276
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/assets/app.js",
+      "sha256": "36bd097117cb16de248cffbdede7db15e5d353fffce152f87d68549af813ced0",
+      "size": 26067
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/assets/base-webui.css",
+      "sha256": "ce291a73261ee95948ec7325b05149b4e62dc02170b34f78d51b53533b0127e2",
+      "size": 1485
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/assets/base-webui.js",
+      "sha256": "dec6792014a9faed30754b2ce1fc85ccbb773915aeaa937767ae5cec9051f8ec",
+      "size": 11983
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/assets/webui-bridge-legacy.js",
+      "sha256": "d45fe4d82e62b1357b4d97b31c62e19f98a02bdf9d38c429c48360ce39936104",
+      "size": 520
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/assets/webui-bridge.js",
+      "sha256": "365369c1f7fff917669199cc8e1abd1a25c024835736e946a167a4ccbe0964c1",
+      "size": 3311
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/cgi-bin/exec",
+      "sha256": "1edd0685faef9780115b0455a9fecce46245e8c8623dd00c0ae86e1a237722af",
+      "size": 1828
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/index.html",
+      "sha256": "b147661aae5aa7c3df42983d637988658879ea17780283e7bceff6e50f7467df",
+      "size": 10685
+    },
+    {
+      "path": "modules/mike-suite-servers/webroot/style.css",
+      "sha256": "5e9368ddc2723f99feefd376e17e321e50d44ebe8cab4d58ff617bedf90cd402",
+      "size": 10787
+    },
+    {
+      "path": "modules/mike-suite-servers/webui-selftest.sh",
+      "sha256": "abe5b129aba70c962bc8c78ab09c9be8d70899ff26c2df5c18e72ceb328dc3e6",
+      "size": 1520
+    },
+    {
+      "path": "packages/mike-admin-shell/README.md",
+      "sha256": "458e0fc5bc2fc2b1e06217fe5891a0c8489acf5b808ea9b8fbc28077c66a78f1",
+      "size": 436
+    },
+    {
+      "path": "packages/mike-admin-shell/base-webui.css",
+      "sha256": "ce291a73261ee95948ec7325b05149b4e62dc02170b34f78d51b53533b0127e2",
+      "size": 1485
+    },
+    {
+      "path": "packages/mike-admin-shell/base-webui.js",
+      "sha256": "dec6792014a9faed30754b2ce1fc85ccbb773915aeaa937767ae5cec9051f8ec",
+      "size": 11983
+    },
+    {
+      "path": "packages/mike-cli-kit/README.md",
+      "sha256": "2284dafbfb64292db91a53a05551ef16a701d033e540c31178417cc3279d375e",
+      "size": 56
+    },
+    {
+      "path": "packages/mike-cli-kit/pyproject.toml",
+      "sha256": "518a275c27d1b8e349f59f1440f508e72e45c4b728c450718bf2927d64b60e39",
+      "size": 372
+    },
+    {
+      "path": "packages/mike-cli-kit/src/mike_cli_kit/__init__.py",
+      "sha256": "3047d61139687bfa00fc306db907f0833e6a6a0b7c1be63fd1ce0e4f59f56b6e",
+      "size": 100265
+    },
+    {
+      "path": "packages/mike-cli-kit/src/mike_cli_kit/ksun_backend.py",
+      "sha256": "8c9d6c2a72470751be655fcd2a35570b008ec91255f8cc05f1ead0401d615eb1",
+      "size": 61095
+    },
+    {
+      "path": "packages/mike-cli-kit/src/mike_cli_kit/progress.py",
+      "sha256": "389e3068d20b8bff13d424d06248849a10cc4ffeb92379aa86a8d60978869736",
+      "size": 4970
+    },
+    {
+      "path": "packages/mike-cli-kit/src/mike_cli_kit/render_utils.py",
+      "sha256": "0377c202fff22ee2c65d312d100c6b656bf6f4ed2275bcb78088dc1ff887d048",
+      "size": 5916
+    },
+    {
+      "path": "pytest.ini",
+      "sha256": "778f38af4d096fa15926535b84974184525648d52ed96a848f61d79178a1f547",
+      "size": 168
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "c06c90a665a7ee7e8e7ff67d0a11877baeb2fafb43045b7fbf77510d93607c80",
+      "size": 81
+    },
+    {
+      "path": "tests/_cli_json.py",
+      "sha256": "4d03b5f461af0e4049e00a1753ac26ae3bf4017e2e66c5c03a0b7ec98ce65a48",
+      "size": 1269
+    },
+    {
+      "path": "tests/_schema_fast_path.py",
+      "sha256": "f7a189f2823d8f5614c1ab17d1de19c4050fc57ba16e5e70cdb73ef675bec347",
+      "size": 3368
+    },
+    {
+      "path": "tests/conftest.py",
+      "sha256": "a89f3c8cf5b80be9b50cd72cc9f1ce93119fafffacb42b087f13d80b929cda20",
+      "size": 1419
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/README.md",
+      "sha256": "6c76636d60c1ba1acdd1a29cd9976d6a4e729f6fb76e2bbd5c47c847436d500a",
+      "size": 353
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/fake_cli_app.py",
+      "sha256": "f764b33fceb2442a5c22140cbe8692c9b487a4fa34e3d73910313d28efdd7143",
+      "size": 6180
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/fake_http_server.py",
+      "sha256": "999ed85dc0dd1c28bad31625ab84c0c98588283f0bca708676c6baaf1eeec032",
+      "size": 581
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/sortify",
+      "sha256": "2be210548dfae4e8d7f2ed72702d5bf614cf327e0f17fee2d4ff950e040013c7",
+      "size": 124
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/wallglide",
+      "sha256": "50dd8f069a46e07e89fee33e50ab2f46115be2e750c0083520c2af5f75dbb3bb",
+      "size": 126
+    },
+    {
+      "path": "tests/fixtures/fake_android_bin/xbs",
+      "sha256": "066f35b906415803fee8c39609b3f7385437328ee5888c417f0151fc97ed2460",
+      "size": 120
+    },
+    {
+      "path": "tests/test_all_apps_ui_boot_regressions.py",
+      "sha256": "ace2a45cb05364719e53089d989a0a6b2b1c5198175c5148f5d07dd81613f80b",
+      "size": 4070
+    },
+    {
+      "path": "tests/test_android_app_sources.py",
+      "sha256": "c5bd332e9b236353c120f8e50cd3be2ebb0328ed0b29aad5150eae2ddae782bd",
+      "size": 7063
+    },
+    {
+      "path": "tests/test_android_module_and_server_manager_regressions.py",
+      "sha256": "e26c8dad8a7f66458374fa70be6f1465d4e5b6c3c579bc233202848d14a0cb10",
+      "size": 190
+    },
+    {
+      "path": "tests/test_bootmanager_cli.py",
+      "sha256": "c38657bc852ba0faf1a693ec5f982aff702164509aca3df7e9d6c583c053ba80",
+      "size": 2137
+    },
+    {
+      "path": "tests/test_bootmanager_docs.py",
+      "sha256": "14001235f6535a48d3d02eb3bac6003dce23388a9f215ee0aec9bc68dafbe4fc",
+      "size": 722
+    },
+    {
+      "path": "tests/test_bootmanager_human_output.py",
+      "sha256": "42368191ce9b89be4516c6e6db68d188a66b25f790165dca1cbd646ecbac4eb1",
+      "size": 2790
+    },
+    {
+      "path": "tests/test_bootmanager_installer.py",
+      "sha256": "38f7c71727391d9edf0ee679f638c77e24eb9670bf52c5bcc103857a76081b09",
+      "size": 4207
+    },
+    {
+      "path": "tests/test_bootmanager_packaging.py",
+      "sha256": "e0a6aeb6b54c7b623c307acb008c75fd2acad20f6ac668747c45ef70c81c53b4",
+      "size": 2501
+    },
+    {
+      "path": "tests/test_bootmanager_runtime.py",
+      "sha256": "00b23c90267c71fed1d1f5e4597c085d4436b9b32642381491fddd3b2e7f4259",
+      "size": 3035
+    },
+    {
+      "path": "tests/test_cli_human_render_regressions.py",
+      "sha256": "7cf59b5c1e4e714a98585e71d5714b421279aa456b208ca9ea47ed381c1d3a1c",
+      "size": 9464
+    },
+    {
+      "path": "tests/test_cli_schema_contract.py",
+      "sha256": "48f26116782cf55f1453bdf6e5fb22c1bcfd28354d28b8f74bc3432bbd760a9a",
+      "size": 1946
+    },
+    {
+      "path": "tests/test_cli_stdout_snapshots_final.py",
+      "sha256": "7b8563cc0bc08e9b1bc902558135e60c799f1c1dd50480f37b6f38ac8cfe3db0",
+      "size": 13990
+    },
+    {
+      "path": "tests/test_config_edit_commands.py",
+      "sha256": "16634f05228437ca804a42bbf3ae19e97bbabd078385e1ea8c8d84acd489b283",
+      "size": 4829
+    },
+    {
+      "path": "tests/test_fake_android_bin_and_server_manager_integration.py",
+      "sha256": "78a48623bf247d6af27f227146a265b7579098f4587fa5434213aedb4639f0f6",
+      "size": 12875
+    },
+    {
+      "path": "tests/test_flowspace_cli_conformance.py",
+      "sha256": "fdc483105c2d2b2d811cfd27b53bb2e183dfaccce154aff0b3faf67b14f0fde4",
+      "size": 10324
+    },
+    {
+      "path": "tests/test_flowspace_desktop_sources.py",
+      "sha256": "c4fee242901ccdaf51eae1dba94b265fbfcf19a554df07c843a4f1605085f44b",
+      "size": 1798
+    },
+    {
+      "path": "tests/test_frontend_cli_roundtrip.py",
+      "sha256": "79e8cdb279441891f3904ad1f7596505be128eaccfb03cf8618bf943224b8ec9",
+      "size": 5109
+    },
+    {
+      "path": "tests/test_frontend_progress_contract.py",
+      "sha256": "618deb4f09e1e8e5fd12c412fdb392c212f4e0567428ce4ea88d6cf2425c2e81",
+      "size": 3093
+    },
+    {
+      "path": "tests/test_frontend_release_packaging.py",
+      "sha256": "62331dc0158254d6d8561ee4b1234eccfa10443307529f986e1b593aaacd5022",
+      "size": 1893
+    },
+    {
+      "path": "tests/test_generated_cli_artifacts.py",
+      "sha256": "bb92ad3e7393dadd3518b37aaeb45adf5792161779c7acd6d3002d10f20aa0eb",
+      "size": 3014
+    },
+    {
+      "path": "tests/test_http_cmd_cli.py",
+      "sha256": "2ac45b15af359303255fac6ba5b79b4602e677bfb25f68c5b07c69228c691422",
+      "size": 1586
+    },
+    {
+      "path": "tests/test_http_cmd_end_to_end_cli.py",
+      "sha256": "25504d5c4e3b51c3760076e76a9fa46b30b8770a72ca048b0940f45509da1da7",
+      "size": 2322
+    },
+    {
+      "path": "tests/test_http_cmd_human_output.py",
+      "sha256": "b3e777261a9b35e915d6bda572e5bc65ae1fbb965988166ffe6a04dea57fbd15",
+      "size": 2357
+    },
+    {
+      "path": "tests/test_human_presenters_pass3.py",
+      "sha256": "70a6fbf75d6b2a15926df04ed4338a1341103baa2ef9a0e2fbc0c90dde792488",
+      "size": 2589
+    },
+    {
+      "path": "tests/test_install_metadata_yaml.py",
+      "sha256": "8b4daeba81eb3e61fc26c5986ef9c3ca864510878f4071328e129c81897adb73",
+      "size": 4286
+    },
+    {
+      "path": "tests/test_installer_verbose_and_fix_plan_regressions.py",
+      "sha256": "be93fc01b931ba38f4e69f9473efe13b06a9b3755f6b2b75f2dddf9ccc64c487",
+      "size": 3559
+    },
+    {
+      "path": "tests/test_ksun_cli.py",
+      "sha256": "eab0fc7443c370204124e16343abd7566cf7fd8040bef2d2246c59405c3ee79c",
+      "size": 43679
+    },
+    {
+      "path": "tests/test_machine_output_regressions.py",
+      "sha256": "d9f9d70f6a72895a6aac3397a4a160868d6a3f8c3a72df7390dbbff483b41ce6",
+      "size": 15697
+    },
+    {
+      "path": "tests/test_mike_cli_kit.py",
+      "sha256": "46e60f39926207bfaa4a752c42c5ead813a3162b50136c3bd11c82de17f28a66",
+      "size": 5868
+    },
+    {
+      "path": "tests/test_ov01_shared_contracts.py",
+      "sha256": "2359f9e9cf8a5260fe4aa81806ada2b85e722166e54433330844c3a23300f31d",
+      "size": 7593
+    },
+    {
+      "path": "tests/test_ov0203_installer_contracts.py",
+      "sha256": "63ee6349d2651fede064ea3c4f523d85ad7aae83e5455471111ab683ad55206f",
+      "size": 15354
+    },
+    {
+      "path": "tests/test_ov0203_validation_contracts.py",
+      "sha256": "d12d9ac5af8da8f5cb0b2cf13a584032685a235e751e2fa31a41e6e446caec5c",
+      "size": 6948
+    },
+    {
+      "path": "tests/test_ov04_http_cmd_contracts.py",
+      "sha256": "2375d444ff3c3b085a9b95d2c103011b4501511cce8bbc6d9069d7ddc2600d83",
+      "size": 3562
+    },
+    {
+      "path": "tests/test_ov0506_ksun_integrity.py",
+      "sha256": "aaaa5850116ba008726f70c90f35a3de3dd92479da6b4bf32b91f37ec2a7476d",
+      "size": 26204
+    },
+    {
+      "path": "tests/test_ov0910_wallglide_transactions.py",
+      "sha256": "6d315b92aed08ce6a7a68d169add0417b12c083460d2405858e9e02f5031fbe0",
+      "size": 24144
+    },
+    {
+      "path": "tests/test_ov1112_server_manager_hardening.py",
+      "sha256": "eaf1c27c1ee6bf2e4a499985afa667079d38b112026532361656979ff32733d4",
+      "size": 6335
+    },
+    {
+      "path": "tests/test_ov1314_xbs_diagnostics_transactions.py",
+      "sha256": "df24c4718373a302de59843145ebdc9245b5677ec84e21c3448468eb8e24f56e",
+      "size": 4080
+    },
+    {
+      "path": "tests/test_ov1516_xbs_event_process_hardening.py",
+      "sha256": "0ed26fb1774cb1497f53ebf9c5004d771e4b74545a4a0355ee2ebf3c07d713a6",
+      "size": 3024
+    },
+    {
+      "path": "tests/test_ov1718_xbs_notification_release_readiness.py",
+      "sha256": "ec24f98b0526cd411c13b740261bcd9b5883959e603006ad1a45cef949ca7a0a",
+      "size": 2541
+    },
+    {
+      "path": "tests/test_ov1920_xbs_history_activity_hardening.py",
+      "sha256": "578ec45522872a20ae71d63d515c95fb879240a5a93d81c26d66968452214136",
+      "size": 3522
+    },
+    {
+      "path": "tests/test_ov2122_xbs_command_settings_hardening.py",
+      "sha256": "ed293baa19e2d495ec97912131cffe6f843bc5794fa0218d63a914d424d7bc47",
+      "size": 2727
+    },
+    {
+      "path": "tests/test_ov2324_xbs_schema_debug_health_hardening.py",
+      "sha256": "9289549dd58a9ec1876c6d098d2c24a27981b9c675d7bcbc7da2af821767f668",
+      "size": 4673
+    },
+    {
+      "path": "tests/test_ov2526_xbs_guided_event_bridge_hardening.py",
+      "sha256": "4242ed4bd7a1220fff33e8dcbf90d0f4027b20925a2a1b60f56908fae4bdd68a",
+      "size": 7599
+    },
+    {
+      "path": "tests/test_python_installer_migration.py",
+      "sha256": "c60b9a8b0e82d425a1dd5bfe777fe2437b3356976330f54c88b2d144a5d7da62",
+      "size": 10679
+    },
+    {
+      "path": "tests/test_self_hosted_webui_regressions.py",
+      "sha256": "3eab758e2c8112775ee1794226b6ffe3a4798eb679412111e97c38d1cd197ef9",
+      "size": 903
+    },
+    {
+      "path": "tests/test_sortify_split_cli.py",
+      "sha256": "7c6c7adfbab06e80ae7128845402d9575da3b6605abeda62c91bbca45d3dad64",
+      "size": 2339
+    },
+    {
+      "path": "tests/test_step11_step12.py",
+      "sha256": "c71bc55e3acbdc8ff0444d25b9aa72c2fccbb3ffb67709c0e0de7fb1bbf62314",
+      "size": 243
+    },
+    {
+      "path": "tests/test_step3_shared_cli_output.py",
+      "sha256": "1ad0a2670eec7f9cf540a02b7756995fb7e97f8c3bfe4bdde7034524d8653800",
+      "size": 1113
+    },
+    {
+      "path": "tests/test_step4_removed_legacy_surface.py",
+      "sha256": "ff275ffbf82dc503022147a204f911b8383fab8613fd78f1cd61ac8b86c657a0",
+      "size": 2194
+    },
+    {
+      "path": "tests/test_step5_schema_config_catalogs.py",
+      "sha256": "9f5f0750ed0fc8b316a69b582ba0c811a14b405cc290666fbc9c100edaef3302",
+      "size": 1185
+    },
+    {
+      "path": "tests/test_step5_step6_and_interactive.py",
+      "sha256": "8c50f3a87aacb4bb5b78ebcfec7fbe3814c5e7162837e363598f762e311d6fd7",
+      "size": 3800
+    },
+    {
+      "path": "tests/test_step6_cli_schema_fast_paths.py",
+      "sha256": "8a9f9069d9c702351d16aa0d0e21ee2500f45019775fdca19745bb6d267a764b",
+      "size": 1704
+    },
+    {
+      "path": "tests/test_step6_schema_config_metadata.py",
+      "sha256": "0b035ac58dcaff9f1f4fd5133c596eeff1861f0d970933e6a532cae5cd8a4c81",
+      "size": 1666
+    },
+    {
+      "path": "tests/test_step6_xbs_schema_fast_path.py",
+      "sha256": "74c7a2d47f05df9e5fa5f488ae1fca526bffb633334285a8fefbea77b451747d",
+      "size": 665
+    },
+    {
+      "path": "tests/test_step7_step8.py",
+      "sha256": "72c70af403d1cd709729490b5c2756b70ed58772fdd7d421c3c2eec67fe7b7ed",
+      "size": 473
+    },
+    {
+      "path": "tests/test_step8_wallglide_daily_resolution.py",
+      "sha256": "4d23114c0842513745a2e5089f74629d106aa70173feedaf326d83f046b38d11",
+      "size": 13993
+    },
+    {
+      "path": "tests/test_step9_step10.py",
+      "sha256": "b1d9cd4db6e19987f82b6bbb00aacf245abba3d272dcb957253ca07fcab02ba8",
+      "size": 437
+    },
+    {
+      "path": "tests/test_wallglide_domain_runtime_regressions.py",
+      "sha256": "5d89e531d27dc2780d0219bc6665b112695a359441efafb14a617b224177fa8f",
+      "size": 677
+    },
+    {
+      "path": "tests/test_wallglide_ui_boot_regressions.py",
+      "sha256": "03b4f2844be3f799a0e197d719bdadd1f97c6c78dbb5f0bedefcbce2b1e0e9f5",
+      "size": 1147
+    },
+    {
+      "path": "tests/test_webui_package_data_regressions.py",
+      "sha256": "ea54879a1414392249742bfe1d30abd6f33a172b66dd24da1135cf8a06189e4f",
+      "size": 1556
+    },
+    {
+      "path": "tests/test_webui_runtime_split.py",
+      "sha256": "b47c55e6916ede9ddcb635cd9ce35ef0249aece7789d47baa5f6e17f3c725109",
+      "size": 4239
+    },
+    {
+      "path": "tests/test_xbs_android_frontend_runtime.py",
+      "sha256": "845a70d8f70937b38ed3dc2918d5e66a96d8aef514d9d869eb730451769f8e9e",
+      "size": 5836
+    },
+    {
+      "path": "tests/test_xbs_android_phase00_01_foundation.py",
+      "sha256": "a5f19b61a3cfc6f37898712b2556520d988fc54210a2a4011e0da6e9b42db9ac",
+      "size": 5158
+    },
+    {
+      "path": "tests/test_xbs_android_phase02_locale_sdk_cleanup.py",
+      "sha256": "98b99b65df77e501eeb2738a2a817e470e8cb2587ad85c921f8d9e9dc33cf9ed",
+      "size": 2417
+    },
+    {
+      "path": "tests/test_xbs_android_phase03_storage_backup_rules.py",
+      "sha256": "c3d1b16e5524d6abe1d78dd804fec6b5b919e6a6f38d23bc73079581af3bdae2",
+      "size": 2346
+    },
+    {
+      "path": "tests/test_xbs_android_phase04_ui_widget_i18n_cleanup.py",
+      "sha256": "c301f3317e3b41a23e32fc68c19b6c3ecb992bd809d38d73fe67580052251eed",
+      "size": 3939
+    },
+    {
+      "path": "tests/test_xbs_android_phase05_warning_polish.py",
+      "sha256": "06d9c34d9dc86cc9ff19de7f14635dadfd15af9737f204a56838b26e46569824",
+      "size": 4036
+    },
+    {
+      "path": "tests/test_xbs_android_phase06_final_resource_warning_seal.py",
+      "sha256": "5ab31d42f7c7f9529721c9287e9bd4fdd8573e347600ec84a069a8cd84510135",
+      "size": 1522
+    },
+    {
+      "path": "tests/test_xbs_android_phase07_command_policy_timeout.py",
+      "sha256": "d0c4f8be5f0388019b5ae11b23c399a2de802f4a1998143656b22192d4e0363a",
+      "size": 2781
+    },
+    {
+      "path": "tests/test_xbs_android_phase08_foreground_command_service.py",
+      "sha256": "6505f6547ecc62f158e3d21e886af4cf8bae1d235738aca0f7bdfadbea95f1f8",
+      "size": 2471
+    },
+    {
+      "path": "tests/test_xbs_android_phase09_active_command_ui.py",
+      "sha256": "8b8fe0ff8c5ba23b6b2f6c8ea3bc70cd05698ba167684ea0e7862b89f90625b0",
+      "size": 2107
+    },
+    {
+      "path": "tests/test_xbs_android_phase10_run_history_filtering.py",
+      "sha256": "36ad45ea28d7d6ecfd010a004980fcb745b1dece8114c1db7ce1e6b9313b58c1",
+      "size": 1477
+    },
+    {
+      "path": "tests/test_xbs_android_phase11_safe_retry_guards.py",
+      "sha256": "3321b1d751d297a306cb32c3a6d030dccac6a87794cf0bb60ffcc330fe2aba8a",
+      "size": 1520
+    },
+    {
+      "path": "tests/test_xbs_android_phase12_support_bundle_export.py",
+      "sha256": "e57cea77c709af72c7da64dcf43d5e81192de3e64a68fe082f0c43edf787dfef",
+      "size": 1797
+    },
+    {
+      "path": "tests/test_xbs_android_phase13_root_diagnostics_workbench.py",
+      "sha256": "ea3b46b1b4b5d440eea6a48c71b68751d7f6869c9250f954399f6677747c034c",
+      "size": 3142
+    },
+    {
+      "path": "tests/test_xbs_android_phase14_config_transaction_journal.py",
+      "sha256": "f2a28a731cc900f514f3934d7aa60b88fc75c2b5b93709d14d32f7116afd60c5",
+      "size": 4981
+    },
+    {
+      "path": "tests/test_xbs_android_phase15_event_editor_validation.py",
+      "sha256": "420fc46d41a550acbd341a71855dda3a27ee5c5e57e4d200ec41eb638eb87d6e",
+      "size": 3741
+    },
+    {
+      "path": "tests/test_xbs_android_phase16_process_monitor_correctness.py",
+      "sha256": "28496c275100cc5d1c97882a7447512bcbd4605e6daccbc3213620a25a47c9d7",
+      "size": 3127
+    },
+    {
+      "path": "tests/test_xbs_android_phase17_notification_ux_finalization.py",
+      "sha256": "097bdd80f9f4008f180d4fb324c56a9b027db5a73fceb6b89e20500e7528b373",
+      "size": 4284
+    },
+    {
+      "path": "tests/test_xbs_android_phase18_release_readiness_seal.py",
+      "sha256": "d471e5659083aaea6456f09b1b639218cbd26d5e4fa4efc02fca3bea9d12573c",
+      "size": 4595
+    },
+    {
+      "path": "tests/test_xbs_android_phase19_room_history_migration.py",
+      "sha256": "d39fe1af29f723e1b540b53eedb19421a4a73ea4b49ef481b045f3c12652fe4f",
+      "size": 4771
+    },
+    {
+      "path": "tests/test_xbs_android_phase20_activity_workbench.py",
+      "sha256": "5022615e4c00aa529d5bcf00f6afc050cab810722f5143b41bee7d7e8ca1ad09",
+      "size": 4424
+    },
+    {
+      "path": "tests/test_xbs_android_phase21_command_center_quick_actions.py",
+      "sha256": "cb21475b240ba8553875f3186379f05220b2101d4701ed5bad485abd64939f23",
+      "size": 3004
+    },
+    {
+      "path": "tests/test_xbs_android_phase22_more_settings_information_architecture.py",
+      "sha256": "193f763f97b6bdf947319da89cb1e673e39029cfaa6c6e3e01e46522f30fe32b",
+      "size": 3581
+    },
+    {
+      "path": "tests/test_xbs_android_phase24_debug_workbench_health_model.py",
+      "sha256": "d3c7c6a948a55993140158ad5339c5939da622dc65137adf48c1d90f3165ea94",
+      "size": 6400
+    },
+    {
+      "path": "tests/test_xbs_android_phase25_guided_fixes_redacted_support.py",
+      "sha256": "d70ced8ba02432270ea7072b156656455918cbf91d8cd8fc8560fa277e1219a4",
+      "size": 3437
+    },
+    {
+      "path": "tests/test_xbs_android_phase26_authenticated_event_bridge.py",
+      "sha256": "3fed717766409337148e35dc9c8ef61f8c36eb0b2b37fe1667eee4eb50da1348",
+      "size": 5355
+    },
+    {
+      "path": "tests/test_xbs_android_phase27_runtime_notification_2.py",
+      "sha256": "67db0b104bd1db89d981c88ab2a102ecb088dc3d733bad04d4a0a31b5347bd7e",
+      "size": 3902
+    },
+    {
+      "path": "tests/test_xbs_android_phase28_tasker_external_entry_hardening.py",
+      "sha256": "2ea8c13630e80c7125163b5ac81d3c30c6b876c9c38f003106ce29fcc6b9091b",
+      "size": 5915
+    },
+    {
+      "path": "tests/test_xbs_android_phase29_30_security_accessibility_adaptive_performance.py",
+      "sha256": "ac55a6de1907fcf0ffae45485ae0975dbf6a8012270ac2b3e10644d7a8548789",
+      "size": 4451
+    },
+    {
+      "path": "tests/test_xbs_android_phase31_final_regression_release_seal.py",
+      "sha256": "5e8581feab588bcef5af2b848a299738f9fb712c674e6720d3598126cba4ac30",
+      "size": 17637
+    },
+    {
+      "path": "tests/test_xbs_android_phase32b_event_bridge_runtime_parser.py",
+      "sha256": "db689ebfe6d1c374a420a117bfcba9d2ae43314821079402738ce74b192460ed",
+      "size": 1637
+    },
+    {
+      "path": "tests/test_xbs_android_phase32c_gradle_graph_assertion.py",
+      "sha256": "d3e52b6d166ed2e2cbe71e34fdc175008517b467bab206a7d469aba167298345",
+      "size": 1379
+    },
+    {
+      "path": "tests/test_xbs_android_phase32d_root_module_resolver.py",
+      "sha256": "c2b67756ff16c77d02d6c3d803a12c27132f726ac27cd42517dd41ee4c831006",
+      "size": 6448
+    },
+    {
+      "path": "tests/test_xbs_android_template_routing.py",
+      "sha256": "1a90048627779263f1398305333f5a57caa66293b88cf16e5547cd4e06eb667a",
+      "size": 1102
+    },
+    {
+      "path": "tests/test_xbs_native_frontend_only.py",
+      "sha256": "e9978041ffc6793d97be6c24629764ded6c18c4fd7c51e8c0c67b5d8cc3fa0bb",
+      "size": 984
+    },
+    {
+      "path": "tests/test_xbs_phase23_schema_capability_contract.py",
+      "sha256": "0b1db3cf65550fba846d0a389a08276e4515c2d4c36aab9bd935a7ad5257c038",
+      "size": 5015
+    },
+    {
+      "path": "tests/test_xbs_phase26_event_bridge_runtime.py",
+      "sha256": "b97b1272e13fced417a5fe00c6aa6a66c5477d6b8d43479a9ea6224ce2bdaa5a",
+      "size": 8108
+    },
+    {
+      "path": "tools/generate_cli_artifacts.py",
+      "sha256": "aacb5e69da73039f2e4fbf301e6bfd94f6dbb50fb64cd6e884c87122cb25d9b3",
+      "size": 26246
+    },
+    {
+      "path": "tools/install/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "tools/install/app_cli.py",
+      "sha256": "cba4a48117745689f724e136b523e71691d07b0a4133af9ca400b9545402b733",
+      "size": 4712
+    },
+    {
+      "path": "tools/install/app_installers.py",
+      "sha256": "da3e93c15cde6449083e55c909c688e1cc128fc939fe3ff391f571233deb82fd",
+      "size": 16126
+    },
+    {
+      "path": "tools/install/apps.yaml",
+      "sha256": "74310ca23f6a7f042a5f848045693a6b97367b68ac29185c0eb1a91fe026b6b7",
+      "size": 2798
+    },
+    {
+      "path": "tools/install/cli.py",
+      "sha256": "15c5ae3ca1a224f773994f12c0fc6bc4143d8d05b7110d32a2398ff01d208dca",
+      "size": 3945
+    },
+    {
+      "path": "tools/install/commands/apps.py",
+      "sha256": "a38a28a86652cd969e7a283d7c3d01869f5ef9248ea5c50ebab1b6ff83cd15f7",
+      "size": 8076
+    },
+    {
+      "path": "tools/install/commands/servers.py",
+      "sha256": "74af88d1c6c78a5821b3d5aaf50717452ab81a67c60b3c8be7961f9a21aab100",
+      "size": 1847
+    },
+    {
+      "path": "tools/install/common.py",
+      "sha256": "81a7891be2da16cc11d4dfbd84a36209442e013275f77877b48ab6143148b4b5",
+      "size": 39114
+    },
+    {
+      "path": "tools/install/installers/servers.py",
+      "sha256": "e757e1f13e3da7c3dcf15e77c7b51a238aab8fdb1144ca8b6c50b3593d1217b3",
+      "size": 4039
+    },
+    {
+      "path": "tools/install/metadata.py",
+      "sha256": "2871e007c6fe40316a1b1754a6137c164c25b6627ceba7c0819180eecfd0caff",
+      "size": 5470
+    },
+    {
+      "path": "tools/release/build_android_releases.py",
+      "sha256": "48e37004bcbbf093ad566da9c2fe1556556d9eb7f636e7f50cd08502dde9ffbb",
+      "size": 6036
+    },
+    {
+      "path": "tools/release/build_flowspace_deb.py",
+      "sha256": "7c3018688018ac20c61225199f32e9fbae98d57425e9b7b91ba7bf307c66066b",
+      "size": 206
+    },
+    {
+      "path": "tools/sync_admin_shell.py",
+      "sha256": "28696505baa8b6901b9ad8857b255ad82267cb2291be533866c76b21640b4934",
+      "size": 1794
+    },
+    {
+      "path": "tools/sync_sortify_runtime.py",
+      "sha256": "c0197d166273e14061834dbabbcececab994ecc79bf6c9ced527c65d1ce36596",
+      "size": 452
+    },
+    {
+      "path": "tools/validation/requirements-suite.txt",
+      "sha256": "ca67b32a88b5f028725ad41d732918dd07ff345cc18fe2af78b118ccc6be9160",
+      "size": 1007
+    }
+  ],
+  "format": 2,
+  "repository_tree_sha256": "4c95a1b44846edd136a4770f832f563efed25f8de09b7232c622f1bffcba7394"
+}

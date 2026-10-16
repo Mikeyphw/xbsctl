@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Required for root process/app-picking rules that can target arbitrary installed packages. -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <queries>
+        <package android:name="net.dinglisch.android.taskerm" />
+        <package android:name="net.dinglisch.android.tasker" />
+    </queries>
+
+    <application
+        android:name=".XbsApplication"
+        android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
+        tools:ignore="UnusedAttribute"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/xbs_network_security_config"
+        android:dataExtractionRules="@xml/xbs_data_extraction_rules"
+        android:fullBackupContent="@xml/xbs_full_backup_content"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.XbsCompanion">
+
+        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+        <activity android:name=".CliCommandActivity" android:exported="false" />
+        <activity android:name=".MoreSettingsActivity" android:exported="false" />
+        <activity android:name=".XbsConfigActivity" android:exported="false" />
+        <activity android:name=".XbsEventEditorActivity" android:exported="false" />
+        <activity android:name=".XbsEssentialsActivity" android:exported="false" />
+        <activity android:name=".AppPickerActivity" android:exported="false" />
+        <activity android:name=".ProcessMonitorActivity" android:exported="false" />
+        <activity android:name=".RootDiagnosticsActivity" android:exported="false" />
+        <activity android:name=".DebugWorkbenchActivity" android:exported="false" />
+        <activity android:name=".GuidedFixActivity" android:exported="false" />
+        <activity android:name=".SecuritySealActivity" android:exported="false" />
+        <activity android:name=".ReleaseReadinessActivity" android:exported="false" />
+        <activity android:name=".FinalReleaseSealActivity" android:exported="false" />
+        <activity android:name=".ActivityWorkbenchActivity" android:exported="false" />
+        <activity
+            android:name=".EventControlActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.XbsCompanion" />
+
+        <activity
+            android:name=".TaskerPluginActivity"
+            android:exported="true"
+            android:label="@string/tasker_action_name"
+            android:theme="@style/Theme.XbsCompanion">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".TaskerEventEditActivity"
+            android:exported="true"
+            android:label="@string/tasker_event_name"
+            android:theme="@style/Theme.XbsCompanion">
+            <intent-filter>
+                <action android:name="net.dinglisch.android.tasker.ACTION_EDIT_EVENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".TaskerStateEditActivity"
+            android:exported="true"
+            android:label="@string/tasker_state_name"
+            android:theme="@style/Theme.XbsCompanion">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Exported by Tasker plug-in contract; receiver validates a bounded HMAC-signed configuration, installed Tasker signing certificate, and sender identity where Android exposes it. -->
+        <receiver
+            android:name=".TaskerPluginReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/tasker_action_name"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Exported by Tasker condition contract; receiver validates a bounded HMAC-signed condition and sender identity before evaluating cached state. -->
+        <receiver
+            android:name=".TaskerConditionReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/tasker_condition_name"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.QUERY_CONDITION" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".NotificationActionReceiver" android:exported="false" />
+
+        <receiver android:name=".BootReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".EventMonitorService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Monitors the local XBS root module event journal and keeps Tasker states and the persistent runtime notification current." />
+        </service>
+
+        <service
+            android:name=".RootCommandService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs user-triggered XBS root commands with bounded timeouts, cancellation, and foreground execution visibility." />
+        </service>
+    </application>
+</manifest>

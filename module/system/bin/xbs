@@ -1,0 +1,35 @@
+#!/system/bin/sh
+MODULE_ID="XtremeBS"
+MODDIR=""
+
+is_candidate() {
+  candidate="$1"
+  [ -n "$candidate" ] || return 1
+  [ -d "$candidate" ] || return 1
+  [ -f "$candidate/module.prop" ] || return 1
+  [ -f "$candidate/runtime/arm64-v8a/xbs" ] || return 1
+  return 0
+}
+
+for candidate in   "${XBS_MODULE_DIR:-}"   "/data/adb/modules/$MODULE_ID"   "/data/adb/modules_update/$MODULE_ID"   "/data/adb/ksu/modules/$MODULE_ID"   "/data/adb/ksu/modules_update/$MODULE_ID"   "${0%/*}/../.."; do
+  if is_candidate "$candidate"; then
+    MODDIR="$candidate"
+    break
+  fi
+done
+
+if [ -z "$MODDIR" ]; then
+  echo "xbs: Go runtime module directory not found" >&2
+  echo "hint: build/install the XGO07 module or set XBS_MODULE_DIR to a staged module root." >&2
+  exit 127
+fi
+
+RUNTIME_BIN="$MODDIR/runtime/arm64-v8a/xbs"
+if [ ! -f "$RUNTIME_BIN" ] || [ -L "$RUNTIME_BIN" ] || [ ! -x "$RUNTIME_BIN" ]; then
+  echo "xbs: bundled Go XBS runtime is missing or unsafe: $RUNTIME_BIN" >&2
+  echo "hint: verify it exists, is not a symlink, and has executable mode; reboot after module install/update." >&2
+  exit 127
+fi
+
+export XBS_MODULE_DIR="$MODDIR"
+exec "$RUNTIME_BIN" "$@"

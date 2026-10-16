@@ -1,0 +1,19 @@
+{
+  "observed_exit_code": 0,
+  "stdout": {
+    "action": "status",
+    "app": "xbs",
+    "data": {
+      "status": {
+        "ok": false,
+        "raw": null,
+        "source": "status_file"
+      }
+    },
+    "error": null,
+    "exit_code": 0,
+    "message": "",
+    "ok": true,
+    "schema_version": "2.0.0"
+  }
+}

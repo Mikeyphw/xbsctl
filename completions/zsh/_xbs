@@ -1,0 +1,13 @@
+#compdef xbs
+
+_xbs_completion() {
+  local -a candidates word_args
+  local word
+  for word in "${words[@]}"; do
+    word_args+=("--word=$word")
+  done
+  candidates=("${(@f)$(xbs completion complete-zsh --index "$CURRENT" "${word_args[@]}" 2>/dev/null)}" )
+  (( ${#candidates[@]} )) && compadd -Q -a candidates
+}
+
+compdef _xbs_completion xbs

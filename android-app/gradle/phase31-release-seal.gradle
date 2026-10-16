@@ -1,0 +1,420 @@
+import groovy.json.JsonOutput
+import org.gradle.api.tasks.GradleBuild
+
+if (project != rootProject) {
+    throw new GradleException('gradle/phase31-release-seal.gradle must be applied by the root project')
+}
+
+ext.phase31GateTool = rootProject.file('tools/phase31_release_gate.py')
+ext.phase31SessionDir = rootProject.file('.gradle/phase31-release/current')
+ext.phase31SessionFile = new File(phase31SessionDir, 'session.json')
+ext.phase31SessionSecret = new File(phase31SessionDir, 'session.secret')
+ext.phase31CandidateGraphInput = new File(phase31SessionDir, 'candidate-gradle-graph.json')
+ext.phase31CandidateReceipt = new File(phase31SessionDir, 'candidate-receipt.json')
+ext.phase31FinalGraphInput = new File(phase31SessionDir, 'final-gradle-graph.json')
+ext.phase31FinalReceipt = new File(phase31SessionDir, 'final-receipt.json')
+ext.phase31SourceAudit = new File(phase31SessionDir, 'source-audit.json')
+ext.phase31ArtifactReplayEvidence = new File(phase31SessionDir, 'artifact-replay.json')
+ext.phase31GitEvidence = new File(phase31SessionDir, 'git-finalization.json')
+ext.phase31HostEvidence = new File(phase31SessionDir, 'host-evidence.json')
+ext.phase31ApkEvidence = new File(phase31SessionDir, 'apk-evidence.json')
+ext.phase31PytestXml = new File(phase31SessionDir, 'pytest-xbs.xml')
+ext.phase31EvidenceDir = rootProject.file('build/phase31')
+ext.phase31EvidenceAssetDir = new File(phase31SessionDir, 'generated-assets')
+ext.phase31EvidenceAsset = new File(phase31EvidenceAssetDir, 'phase31_release_evidence.properties')
+ext.phase31FinalApk = rootProject.file('app/build/outputs/apk/release/app-release.apk')
+
+def phase31Python = providers.environmentVariable('PYTHON').orElse('python3')
+def phase31Overlay = providers.gradleProperty('phase31Overlay')
+def phase31Baseline = providers.gradleProperty('phase31Baseline')
+def phase31Apksigner = providers.gradleProperty('phase31Apksigner').orElse('apksigner')
+def phase31Profgen = providers.gradleProperty('phase31Profgen').orElse(
+    providers.environmentVariable('PHASE31_PROFGEN').orElse('profgen'))
+def phase31Cert = providers.gradleProperty('phase31ReleaseCertSha256').orElse(
+    providers.environmentVariable('PHASE31_RELEASE_CERT_SHA256').orElse(''))
+def defaultRepoRoot = rootProject.projectDir.parentFile.parentFile.parentFile
+def phase31RepoRoot = providers.gradleProperty('phase31RepoRoot').map { rootProject.file(it) }.orElse(defaultRepoRoot)
+
+def phase31NestedProperties = {
+    def properties = new LinkedHashMap<String, String>()
+    properties.putAll(gradle.startParameter.projectProperties)
+    properties.put('phase31SessionFile', phase31SessionFile.absolutePath)
+    properties.put('phase31SessionSecret', phase31SessionSecret.absolutePath)
+    properties.put('phase31EvidenceAssetDir', phase31EvidenceAssetDir.absolutePath)
+    properties.put('phase31RepoRoot', phase31RepoRoot.get().absolutePath)
+    properties
+}
+
+def phase31TaskRows = {
+    gradle.taskGraph.allTasks.collect { task ->
+        [
+            path: task.path,
+            failure: task.state.failure == null ? '' : task.state.failure.toString(),
+            skipped: task.state.skipped,
+            no_source: task.state.noSource,
+            did_work: task.state.didWork,
+            up_to_date: task.state.upToDate,
+            outputs: task.outputs.files.files.collect { it.absolutePath }.sort()
+        ]
+    }
+}
+
+ext.phase31CleanGatePaths = [':app:clean', ':benchmark:clean', ':phase31-testkit:clean'] as Set
+
+tasks.named('clean') {
+    dependsOn phase31CleanGatePaths
+}
+
+tasks.register('phase31VerifyInputs') {
+    group = 'verification'
+    dependsOn 'phase31AssertGraph'
+    doLast {
+        if (!phase31GateTool.isFile()) throw new GradleException("Missing ${phase31GateTool}")
+        if (!phase31Overlay.isPresent()) throw new GradleException('Set -Pphase31Overlay=/absolute/path/to/overlay.zip')
+        if (!phase31Baseline.isPresent()) throw new GradleException('Set -Pphase31Baseline=/absolute/path/to/baseline.tar.gz-or-directory')
+        if (!file(phase31Overlay.get()).isFile()) throw new GradleException("Overlay not found: ${phase31Overlay.get()}")
+        if (!file(phase31Baseline.get()).exists()) throw new GradleException("Baseline not found: ${phase31Baseline.get()}")
+        if (!phase31Cert.get().replaceAll('[^A-Fa-f0-9]', '').matches('[A-Fa-f0-9]{64}')) {
+            throw new GradleException('Set PHASE31_RELEASE_CERT_SHA256 or -Pphase31ReleaseCertSha256 to exactly 64 hex characters')
+        }
+        def profgenValue = phase31Profgen.get()
+        def profgenFile = file(profgenValue)
+        if (!profgenFile.isFile() && !providers.exec {
+            commandLine 'sh', '-c', 'command -v "$1" >/dev/null 2>&1', 'phase31-profgen-check', profgenValue
+            ignoreExitValue = true
+        }.result.get().exitValue.equals(0)) {
+            throw new GradleException("profgen not found: ${profgenValue}; set -Pphase31Profgen=/absolute/path/to/profgen")
+        }
+    }
+}
+
+tasks.register('phase31StartSession', Exec) {
+    group = 'verification'
+    dependsOn 'phase31VerifyInputs'
+    outputs.file phase31SessionFile
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'start-session',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--output', phase31SessionFile
+    }
+}
+
+tasks.register('phase31PythonContracts', Exec) {
+    group = 'verification'
+    description = 'Runs every repository tests/test_xbs*.py contract and emits session-scoped JUnit XML.'
+    workingDir phase31RepoRoot.get()
+    outputs.file phase31PytestXml
+    doFirst {
+        def tests = fileTree(new File(phase31RepoRoot.get(), 'tests')) {
+            include 'test_xbs*.py'
+        }.files.sort { it.absolutePath }
+        if (tests.isEmpty()) throw new GradleException('No tests/test_xbs*.py contracts were found')
+        phase31PytestXml.parentFile.mkdirs()
+        commandLine([phase31Python.get(), '-m', 'pytest', '-q', '--disable-warnings', '--maxfail=1',
+            '--junitxml', phase31PytestXml.absolutePath] + tests.collect { it.absolutePath })
+    }
+}
+
+ext.phase31CandidateGatePaths = [
+    ':app:testReleaseUnitTest', ':app:lintRelease', ':app:assembleRelease', ':app:connectedReleaseAndroidTest',
+    ':benchmark:connectedCheck', ':app:generateReleaseBaselineProfile', ':phase31-testkit:test', ':phase31PythonContracts'
+]
+
+def phase31GraphSnapshot = [
+    'clean': phase31CleanGatePaths,
+    'phase31CandidateReceipt': phase31CandidateGatePaths as Set,
+    'phase31CollectHostEvidence': [':phase31SourcePromiseSeal', ':phase31ArtifactReplay', ':phase31GitFinalization'] as Set,
+    'phase31FinalReceipt': [':app:assembleRelease'] as Set,
+    'phase31FinalBuild': [':phase31CollectHostEvidence'] as Set,
+    'phase31VerifySignedApk': [':phase31FinalBuild'] as Set,
+    'phase31FinalReport': [':phase31VerifySignedApk'] as Set,
+    'phase31FinalReleaseSeal': [':phase31FinalReport'] as Set,
+    'candidateGateOrder': phase31CandidateGatePaths.collectEntries { [(it): [] as Set] },
+    'assembleReleaseOrder': [] as Set
+]
+
+ext.phase31GraphSnapshot = phase31GraphSnapshot
+
+// Register cross-project ordering only after every subproject has created its tasks.
+// This guarantees a truly clean candidate and profile generation before release assembly.
+// Gradle 9.x cannot safely resolve TaskDependency objects during TestKit lifecycle
+// transitions, so this script records declarations when it makes them instead of
+// re-entering dependency resolution from projectsEvaluated or doLast.
+gradle.projectsEvaluated {
+    def cleanTask = tasks.named('clean')
+    [
+        [':app:testReleaseUnitTest', project(':app').tasks.named('testReleaseUnitTest')],
+        [':app:lintRelease', project(':app').tasks.named('lintRelease')],
+        [':app:assembleRelease', project(':app').tasks.named('assembleRelease')],
+        [':app:connectedReleaseAndroidTest', project(':app').tasks.named('connectedReleaseAndroidTest')],
+        [':benchmark:connectedCheck', project(':benchmark').tasks.named('connectedCheck')],
+        [':app:generateReleaseBaselineProfile', project(':app').tasks.named('generateReleaseBaselineProfile')],
+        [':phase31-testkit:test', project(':phase31-testkit').tasks.named('test')],
+        [':phase31PythonContracts', tasks.named('phase31PythonContracts')]
+    ].each { row ->
+        def taskPath = row[0]
+        def provider = row[1]
+        provider.configure { mustRunAfter cleanTask }
+        (phase31GraphSnapshot['candidateGateOrder'][taskPath] as Set).add(':clean')
+    }
+    project(':app').tasks.named('assembleRelease') {
+        mustRunAfter project(':app').tasks.named('generateReleaseBaselineProfile')
+    }
+    (phase31GraphSnapshot['assembleReleaseOrder'] as Set).add(':app:generateReleaseBaselineProfile')
+}
+
+// Executes only inside the clean nested candidate build. Every dependency has
+// completed before the signed receipt is generated.
+tasks.register('phase31CandidateReceipt', Exec) {
+    group = 'verification'
+    description = 'Runs the real candidate gates and HMAC-signs their exact task outputs.'
+    dependsOn ':app:testReleaseUnitTest', ':app:lintRelease', ':app:assembleRelease',
+        ':app:connectedReleaseAndroidTest', ':benchmark:connectedCheck',
+        ':app:generateReleaseBaselineProfile', ':phase31-testkit:test', ':phase31PythonContracts'
+    outputs.file phase31CandidateReceipt
+    doFirst {
+        if (!gradle.startParameter.taskNames.contains('clean') ||
+            !gradle.startParameter.taskNames.contains('phase31CandidateReceipt')) {
+            throw new GradleException('phase31CandidateReceipt must be invoked as clean phase31CandidateReceipt')
+        }
+        def sessionPath = providers.gradleProperty('phase31SessionFile').getOrElse(phase31SessionFile.absolutePath)
+        def secretPath = providers.gradleProperty('phase31SessionSecret').getOrElse(phase31SessionSecret.absolutePath)
+        if (!file(sessionPath).isFile() || !file(secretPath).isFile()) {
+            throw new GradleException('Phase 31 session/secret is missing from the nested candidate build')
+        }
+        phase31CandidateGraphInput.parentFile.mkdirs()
+        phase31CandidateGraphInput.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+            format: 2,
+            gradle_version: gradle.gradleVersion,
+            requested_tasks: gradle.startParameter.taskNames,
+            tasks: phase31TaskRows()
+        ])) + '\n'
+        commandLine phase31Python.get(), phase31GateTool, 'record-candidate',
+            '--repo-root', rootProject.projectDir,
+            '--session', sessionPath,
+            '--secret', secretPath,
+            '--graph-input', phase31CandidateGraphInput,
+            '--output', phase31CandidateReceipt
+    }
+}
+
+tasks.register('phase31CandidateBuild', GradleBuild) {
+    group = 'verification'
+    description = 'First pass: clean build plus every real JVM, Python, lint, device, migration, accessibility, benchmark, profile, and TestKit gate.'
+    dependsOn 'phase31StartSession'
+    dir = rootProject.projectDir
+    startParameter.projectProperties = phase31NestedProperties()
+    tasks = ['clean', 'phase31CandidateReceipt']
+}
+
+tasks.register('phase31SourcePromiseSeal', Exec) {
+    group = 'verification'
+    dependsOn 'phase31CandidateBuild'
+    outputs.file phase31SourceAudit
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'source-audit',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--output', phase31SourceAudit
+    }
+}
+
+tasks.register('phase31ArtifactReplay', Exec) {
+    group = 'verification'
+    dependsOn 'phase31CandidateBuild'
+    outputs.file phase31ArtifactReplayEvidence
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'artifact-replay',
+            '--repo-root', rootProject.projectDir,
+            '--overlay', phase31Overlay.get(),
+            '--baseline', phase31Baseline.get(),
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--output', phase31ArtifactReplayEvidence
+    }
+}
+
+tasks.register('phase31GitFinalization', Exec) {
+    group = 'verification'
+    dependsOn 'phase31CandidateBuild'
+    outputs.file phase31GitEvidence
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'git-finalization',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--output', phase31GitEvidence
+    }
+}
+
+tasks.register('phase31CollectHostEvidence', Exec) {
+    group = 'verification'
+    dependsOn 'phase31SourcePromiseSeal', 'phase31ArtifactReplay', 'phase31GitFinalization'
+    outputs.files phase31HostEvidence, phase31EvidenceAsset
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'collect-evidence',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--candidate-receipt', phase31CandidateReceipt,
+            '--output', phase31HostEvidence,
+            '--asset', phase31EvidenceAsset
+    }
+}
+
+// Executes only inside the second nested build. --rerun-tasks is set by the
+// outer GradleBuild so the final APK cannot be an up-to-date candidate APK.
+tasks.register('phase31FinalReceipt', Exec) {
+    group = 'verification'
+    description = 'Reassembles the final APK with host evidence and signs the exact final task/output receipt.'
+    dependsOn ':app:assembleRelease'
+    outputs.file phase31FinalReceipt
+    doFirst {
+        if (!gradle.startParameter.taskNames.contains('phase31FinalReceipt') || !gradle.startParameter.rerunTasks) {
+            throw new GradleException('phase31FinalReceipt requires a --rerun-tasks nested final build')
+        }
+        def sessionPath = providers.gradleProperty('phase31SessionFile').getOrElse(phase31SessionFile.absolutePath)
+        def secretPath = providers.gradleProperty('phase31SessionSecret').getOrElse(phase31SessionSecret.absolutePath)
+        phase31FinalGraphInput.parentFile.mkdirs()
+        phase31FinalGraphInput.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+            format: 2,
+            gradle_version: gradle.gradleVersion,
+            requested_tasks: gradle.startParameter.taskNames,
+            rerun_tasks: gradle.startParameter.rerunTasks,
+            tasks: phase31TaskRows()
+        ])) + '\n'
+        commandLine phase31Python.get(), phase31GateTool, 'record-final',
+            '--repo-root', rootProject.projectDir,
+            '--session', sessionPath,
+            '--secret', secretPath,
+            '--graph-input', phase31FinalGraphInput,
+            '--host-evidence', phase31HostEvidence,
+            '--evidence-asset', phase31EvidenceAsset,
+            '--apk', phase31FinalApk,
+            '--output', phase31FinalReceipt
+    }
+}
+
+tasks.register('phase31FinalBuild', GradleBuild) {
+    group = 'verification'
+    description = 'Second pass: reruns release assembly, packages canonical host evidence, and emits a signed final-build receipt.'
+    dependsOn 'phase31CollectHostEvidence'
+    dir = rootProject.projectDir
+    startParameter.projectProperties = phase31NestedProperties()
+    startParameter.rerunTasks = true
+    tasks = ['phase31FinalReceipt']
+}
+
+tasks.register('phase31VerifySignedApk', Exec) {
+    group = 'verification'
+    dependsOn 'phase31FinalBuild'
+    outputs.file phase31ApkEvidence
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'verify-apk',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--host-evidence', phase31HostEvidence,
+            '--final-receipt', phase31FinalReceipt,
+            '--apk', phase31FinalApk,
+            '--apksigner', phase31Apksigner.get(),
+            '--profgen', phase31Profgen.get(),
+            '--expected-cert', phase31Cert.get(),
+            '--evidence-asset', phase31EvidenceAsset,
+            '--output', phase31ApkEvidence
+    }
+}
+
+tasks.register('phase31FinalReport', Exec) {
+    group = 'verification'
+    dependsOn 'phase31VerifySignedApk'
+    outputs.files new File(phase31EvidenceDir, 'final-release-seal.json'), new File(phase31EvidenceDir, 'final-release-seal.md')
+    doFirst {
+        commandLine phase31Python.get(), phase31GateTool, 'finalize',
+            '--repo-root', rootProject.projectDir,
+            '--session', phase31SessionFile,
+            '--secret', phase31SessionSecret,
+            '--host-evidence', phase31HostEvidence,
+            '--apk-evidence', phase31ApkEvidence,
+            '--output', new File(phase31EvidenceDir, 'final-release-seal.json'),
+            '--markdown', new File(phase31EvidenceDir, 'final-release-seal.md')
+    }
+}
+
+tasks.register('phase31DestroySessionSecret') {
+    group = 'verification'
+    doLast {
+        if (phase31SessionSecret.exists() && !phase31SessionSecret.delete()) {
+            throw new GradleException("Unable to delete Phase 31 session secret: ${phase31SessionSecret}")
+        }
+    }
+}
+
+tasks.register('phase31FinalReleaseSeal') {
+    group = 'verification'
+    description = 'Runs the fail-closed, session-bound two-pass 14-gate Phase 31 release seal.'
+    dependsOn 'phase31FinalReport'
+    finalizedBy 'phase31DestroySessionSecret'
+}
+
+// Executable dependency assertion used directly and by Gradle TestKit.
+tasks.register('phase31AssertGraph') {
+    group = 'verification'
+    doLast {
+        def snapshot = phase31GraphSnapshot
+        if (!(snapshot instanceof Map) || snapshot.isEmpty()) {
+            throw new GradleException('Phase 31 graph snapshot was not captured during project evaluation')
+        }
+        def direct = { String taskName ->
+            def value = snapshot[taskName]
+            if (!(value instanceof Set)) {
+                throw new GradleException("Missing Phase 31 graph snapshot for ${taskName}")
+            }
+            value
+        }
+        def assertContains = { String taskName, Set<String> expected ->
+            def actual = direct(taskName)
+            if (!actual.containsAll(expected)) {
+                throw new GradleException("${taskName} dependency graph mismatch: expected ${expected}, actual ${actual}")
+            }
+        }
+        assertContains('clean', [':app:clean', ':benchmark:clean', ':phase31-testkit:clean'] as Set<String>)
+        def candidate = tasks.getByName('phase31CandidateBuild')
+        if (!(candidate instanceof GradleBuild) || candidate.tasks != ['clean', 'phase31CandidateReceipt']) {
+            throw new GradleException("phase31CandidateBuild must execute clean then phase31CandidateReceipt; actual=${candidate.tasks}")
+        }
+        assertContains('phase31CandidateReceipt', phase31CandidateGatePaths as Set<String>)
+        def gateOrder = snapshot['candidateGateOrder']
+        phase31CandidateGatePaths.each { path ->
+            def ordering = gateOrder[path] as Set
+            if (!ordering.contains(':clean')) {
+                throw new GradleException("${path} must run after :clean; actual=${ordering}")
+            }
+        }
+        def ordering = snapshot['assembleReleaseOrder'] as Set
+        if (!ordering.contains(':app:generateReleaseBaselineProfile')) {
+            throw new GradleException("assembleRelease must run after generateReleaseBaselineProfile; actual=${ordering}")
+        }
+        assertContains('phase31CollectHostEvidence', [
+            ':phase31SourcePromiseSeal', ':phase31ArtifactReplay', ':phase31GitFinalization'
+        ] as Set<String>)
+        assertContains('phase31FinalReceipt', [':app:assembleRelease'] as Set<String>)
+        assertContains('phase31FinalBuild', [':phase31CollectHostEvidence'] as Set<String>)
+        assertContains('phase31VerifySignedApk', [':phase31FinalBuild'] as Set<String>)
+        assertContains('phase31FinalReport', [':phase31VerifySignedApk'] as Set<String>)
+        assertContains('phase31FinalReleaseSeal', [':phase31FinalReport'] as Set<String>)
+        def finalBuild = tasks.getByName('phase31FinalBuild')
+        if (!(finalBuild instanceof GradleBuild) || finalBuild.tasks != ['phase31FinalReceipt'] || !finalBuild.startParameter.rerunTasks) {
+            throw new GradleException('phase31FinalBuild must rerun the final receipt/assembly pass')
+        }
+        println 'PHASE31_GRAPH_OK clean-candidate->signed-receipt->host-evidence->rerun-final-receipt->apk-profgen->final-report'
+    }
+}
+
+tasks.register('phase31GraphContract') {
+    group = 'verification'
+    dependsOn 'phase31AssertGraph'
+}

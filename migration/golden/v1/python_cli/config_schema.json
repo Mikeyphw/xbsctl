@@ -1,0 +1,143 @@
+{
+  "observed_exit_code": 0,
+  "stdout": {
+    "action": "schema.config",
+    "app": "xbs",
+    "data": {
+      "entries": [
+        {
+          "default": 2,
+          "description": "Version marker for the XBS config structure.",
+          "editable": false,
+          "examples": [
+            2
+          ],
+          "key": "header.version",
+          "title": "Config version",
+          "type": "integer"
+        },
+        {
+          "default": 3,
+          "description": "Delay before the XBS action set runs after an event is triggered.",
+          "editable": true,
+          "examples": [
+            0,
+            3,
+            10
+          ],
+          "key": "header.delay",
+          "title": "Boot delay seconds",
+          "type": "integer"
+        },
+        {
+          "default": "/data/local/tmp/XtremeBS.log",
+          "description": "",
+          "editable": true,
+          "key": "header.log_file",
+          "title": "header.log_file",
+          "type": "string"
+        },
+        {
+          "default": 3,
+          "description": "Numeric verbosity level used by the XBS runtime.",
+          "editable": true,
+          "examples": [
+            1,
+            3,
+            5
+          ],
+          "key": "header.log_level",
+          "title": "Log verbosity",
+          "type": "integer"
+        },
+        {
+          "default": false,
+          "description": "",
+          "editable": true,
+          "key": "header.log_json",
+          "title": "header.log_json",
+          "type": "boolean"
+        },
+        {
+          "default": false,
+          "description": "",
+          "editable": true,
+          "key": "header.dry_run",
+          "title": "header.dry_run",
+          "type": "boolean"
+        },
+        {
+          "default": "/data/local/tmp/XtremeBS/reload.lock",
+          "description": "",
+          "editable": true,
+          "key": "header.lock_file",
+          "title": "header.lock_file",
+          "type": "string"
+        },
+        {
+          "default": "/data/local/tmp/xbs",
+          "description": "",
+          "editable": true,
+          "key": "header.ctl_file",
+          "title": "header.ctl_file",
+          "type": "string"
+        },
+        {
+          "default": "/sdcard/.config/xbs/lists/essentials.allowlist",
+          "description": "",
+          "editable": true,
+          "key": "header.essentials_allowlist",
+          "title": "header.essentials_allowlist",
+          "type": "string"
+        },
+        {
+          "default": true,
+          "description": "Enable or disable user-facing notifications for XBS actions.",
+          "editable": true,
+          "examples": [
+            true,
+            false
+          ],
+          "key": "header.notify",
+          "title": "Notifications enabled",
+          "type": "boolean"
+        },
+        {
+          "default": "",
+          "description": "Default package allowlist inherited by event-specific sections.",
+          "editable": true,
+          "examples": [
+            "com.termux\norg.mozilla.firefox"
+          ],
+          "key": "events.template.allowlist",
+          "title": "Default allowlist",
+          "type": "string"
+        },
+        {
+          "default": "",
+          "description": "",
+          "editable": true,
+          "key": "events.template.denylist",
+          "title": "events.template.denylist",
+          "type": "string"
+        },
+        {
+          "default": "",
+          "description": "",
+          "editable": true,
+          "key": "events.template.proc_file",
+          "title": "events.template.proc_file",
+          "type": "string"
+        }
+      ],
+      "schema_version": "1.0.0"
+    },
+    "error": {
+      "message": "Config schema catalog"
+    },
+    "exit_code": 0,
+    "message": "Config schema catalog",
+    "ok": true,
+    "schema_version": "2.0.0"
+  }
+}

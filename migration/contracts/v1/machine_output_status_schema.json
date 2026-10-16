@@ -1,0 +1,83 @@
+{
+  "action": "schema.output",
+  "app": "xbs",
+  "data": {
+    "command": [
+      "status"
+    ],
+    "notes": [
+      "data is command-specific",
+      "error is null on success",
+      "default CLI output stays human-readable unless --json is set",
+      "--progress-json writes JSON Lines progress events to stderr",
+      "SIGINT and SIGTERM cancel progress-aware operations with exit code 130"
+    ],
+    "schema": {
+      "$id": "mike-machine-output.schema.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "app": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
+        "error": {
+          "additionalProperties": true,
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message"
+          ],
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "exit_code": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "2.0.0"
+        }
+      },
+      "required": [
+        "schema_version",
+        "ok",
+        "app",
+        "action",
+        "message",
+        "exit_code",
+        "data",
+        "error"
+      ],
+      "title": "Mike CLI Machine Output",
+      "type": "object"
+    },
+    "schema_version": "1.0.0"
+  },
+  "error": {
+    "message": "Machine output schema"
+  },
+  "exit_code": 0,
+  "message": "Machine output schema",
+  "ok": true,
+  "schema_version": "2.0.0"
+}

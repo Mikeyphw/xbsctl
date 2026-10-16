@@ -1,0 +1,12 @@
+plugins { id 'java' }
+
+dependencies {
+    testImplementation gradleTestKit()
+    testImplementation 'junit:junit:4.13.2'
+}
+
+test {
+    useJUnit()
+    systemProperty 'phase31.scriptUnderTest', rootProject.file('gradle/phase31-release-seal.gradle').absolutePath
+    systemProperty 'phase31.gateToolUnderTest', rootProject.file('tools/phase31_release_gate.py').absolutePath
+}

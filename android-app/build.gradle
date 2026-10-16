@@ -1,0 +1,46 @@
+plugins {
+    id 'base'
+    id 'com.android.application' version '9.3.1' apply false
+    id 'com.android.test' version '9.3.1' apply false
+    id 'androidx.baselineprofile' version '1.4.1' apply false
+}
+
+
+tasks.register('verifyStableToolchainBaseline') {
+    group = 'verification'
+    description = 'Verify the fleet-standard stable Android toolchain for XBS Companion.'
+    doLast {
+        def rootBuild = rootProject.file('build.gradle').text
+        def appBuild = rootProject.file('app/build.gradle').text
+        def benchmarkBuild = rootProject.file('benchmark/build.gradle').text
+        def props = rootProject.file('gradle.properties').text
+        def builder = rootProject.file('gradle-build.py').text
+        def devtool = rootProject.file('../../../.devtool.toml').text
+        def prerelease = ~/(?i)(?:alpha|beta|rc|snapshot|preview|canary)/
+        if (rootBuild.count("version '9.3.1' apply false") < 2) throw new GradleException('XBS requires AGP 9.3.1 for app and test plugins')
+        if (!rootBuild.contains("androidx.baselineprofile' version '1.4.1'")) throw new GradleException('XBS requires stable Baseline Profile plugin 1.4.1')
+        if (!benchmarkBuild.contains("benchmark-macro-junit4:1.4.1")) throw new GradleException('XBS requires stable Macrobenchmark 1.4.1')
+        if (!props.readLines().any { it.trim() == 'android.newDsl=false' }) throw new GradleException('Baseline Profile 1.4.1 on AGP 9 requires android.newDsl=false')
+        [appBuild, benchmarkBuild].each { text ->
+            if (!text.contains('compileSdk 36') || !text.contains('targetSdk 36')) throw new GradleException('XBS app/benchmark require compileSdk/targetSdk 36')
+            if (!text.contains("buildToolsVersion '36.0.0'")) throw new GradleException('XBS app/benchmark require Build Tools 36.0.0')
+            if (text.count('JavaVersion.VERSION_21') < 2) throw new GradleException('XBS app/benchmark require Java source/bytecode 21')
+        }
+        if (!appBuild.contains("androidx.lifecycle:lifecycle-runtime-android:2.8.7") || !appBuild.contains("androidx.lifecycle:lifecycle-viewmodel-android:2.8.7")) throw new GradleException('XBS Android app must use Android-specific Lifecycle artifacts so lint never resolves desktop KMP variants')
+        if (appBuild.contains("androidx.lifecycle:lifecycle-runtime:2.8.7") || appBuild.contains("androidx.lifecycle:lifecycle-viewmodel:2.8.7")) throw new GradleException('Generic Lifecycle KMP coordinates are forbidden in the Java-only XBS Android app')
+        if (!builder.contains('DEFAULT_GRADLE_VERSION = "9.7.1"')) throw new GradleException('XBS builder requires Gradle 9.7.1')
+        if (!builder.contains('DEFAULT_JAVA_MAJOR = 21')) throw new GradleException('XBS builder requires JDK 21')
+        def marker = '[targets.xbs_android.gradle]'
+        def start = devtool.indexOf(marker)
+        def next = devtool.indexOf('\n[', start + marker.length())
+        def target = next >= 0 ? devtool.substring(start, next) : devtool.substring(start)
+        if (!target.contains('version = "9.7.1"')) throw new GradleException('Devtool XBS target requires Gradle 9.7.1')
+        [rootBuild, appBuild, benchmarkBuild].each { text ->
+            text.readLines().findAll { it =~ /(?:version|implementation|testImplementation|androidTestImplementation|annotationProcessor)\s+['\"][^'\"]+['\"]/ }.each { line ->
+                if (line =~ prerelease) throw new GradleException("Prerelease Android dependency/tool is forbidden: ${line.trim()}")
+            }
+        }
+    }
+}
+
+apply from: rootProject.file('gradle/phase31-release-seal.gradle')

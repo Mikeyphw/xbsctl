@@ -1,0 +1,26 @@
+#!/system/bin/sh
+MODULE_ID="XtremeBS"
+RUNTIME_NAME="XBSctl"
+XBS_MODULE_DIR="${XBS_MODULE_DIR:-}"
+SELF="$0"
+SELF_DIR="${SELF%/*}"
+for candidate in \
+  "$XBS_MODULE_DIR" \
+  "$SELF_DIR/../.." \
+  "/data/adb/modules/$MODULE_ID" \
+  "/data/adb/modules_update/$MODULE_ID" \
+  "/data/adb/ksu/modules/$MODULE_ID" \
+  "/data/adb/ksu/modules_update/$MODULE_ID"; do
+  [ -n "$candidate" ] || continue
+  if [ -f "$candidate/module.prop" ] || [ -f "$candidate/bin/xbs-paths.sh" ]; then
+    XBS_MODULE_DIR="$candidate"
+    break
+  fi
+done
+RUNTIME="$XBS_MODULE_DIR/runtime/arm64-v8a/$RUNTIME_NAME"
+if [ ! -f "$RUNTIME" ] || [ -L "$RUNTIME" ] || [ ! -x "$RUNTIME" ]; then
+  echo "bundled native $RUNTIME_NAME executable is missing or unsafe: $RUNTIME" >&2
+  echo "hint: verify it exists, is not a symlink, and has executable mode; reboot after module install/update." >&2
+  exit 127
+fi
+exec "$RUNTIME" "$@"

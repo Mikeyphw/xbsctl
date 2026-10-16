@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">XBS Companion</string>
+    <string name="tasker_action_name">XBS Companion Action</string>
+    <string name="tasker_event_name">XBS Companion Event</string>
+    <string name="tasker_state_name">XBS Companion State</string>
+    <string name="tasker_condition_name">XBS Companion Condition</string>
+    <string name="notification_channel_name">XBS command results</string>
+    <string name="notification_channel_description">Results of manual and Tasker XBS actions</string>
+    <string name="notification_runtime_channel_name">XBS runtime status</string>
+    <string name="notification_runtime_channel_description">Foreground service status for the XBS runtime and active events</string>
+    <string name="notification_alerts_channel_name">XBS important events</string>
+    <string name="notification_alerts_channel_description">Safe mode, runtime failures and validation errors</string>
+    <string name="xbs_loading_apps">Loading installed applications…</string>
+    <string name="xbs_loading_apps_refresh">Refreshing installed applications…</string>
+    <string name="xbs_nav_button_label">%1$s\n%2$s</string>
+    <string name="xbs_status_line">%1$s  ·  %2$s</string>
+    <string name="xbs_app_picker_summary">%1$s · %2$s · %3$s%4$s</string>
+    <string name="xbs_app_picker_summary_detail"> · %1$s · %2$s</string>
+    <string name="xbs_process_summary">%1$s · %2$s · %3$s shown RAM · sampled %4$s</string>
+    <string name="xbs_read_only_path">%1$s: %2$s</string>
+    <string name="xbs_read_only_path_empty">Inherited / assigned when saved</string>
+    <string name="xbs_saving">Saving…</string>
+    <string name="xbs_validate_save_template">Validate and save template</string>
+    <string name="xbs_validate_save_event">Validate and save event</string>
+    <string name="xbs_sort_cpu">Sort: CPU</string>
+    <string name="xbs_sort_ram">Sort: RAM</string>
+    <string name="xbs_sort_name">Sort: Name</string>
+    <plurals name="xbs_cached_apps">
+        <item quantity="one">%d cached app</item>
+        <item quantity="other">%d cached apps</item>
+    </plurals>
+    <plurals name="xbs_selected_apps">
+        <item quantity="one">%d selected app</item>
+        <item quantity="other">%d selected apps</item>
+    </plurals>
+    <plurals name="xbs_shown_apps">
+        <item quantity="one">%d shown app</item>
+        <item quantity="other">%d shown apps</item>
+    </plurals>
+    <plurals name="xbs_user_apps">
+        <item quantity="one">%d user app</item>
+        <item quantity="other">%d user apps</item>
+    </plurals>
+    <plurals name="xbs_system_apps">
+        <item quantity="one">%d system app</item>
+        <item quantity="other">%d system apps</item>
+    </plurals>
+    <plurals name="xbs_shown_processes">
+        <item quantity="one">%d shown process</item>
+        <item quantity="other">%d shown processes</item>
+    </plurals>
+    <plurals name="xbs_total_processes">
+        <item quantity="one">%d process</item>
+        <item quantity="other">%d processes</item>
+    </plurals>
+
+</resources>

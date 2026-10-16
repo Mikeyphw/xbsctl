@@ -1,0 +1,180 @@
+XBS native frontend migration
+- removed the legacy browser WebUI and CGI backend
+- removed WebUI CLI commands and packaged static assets
+- native Android frontend is the supported GUI
+
+2026-07-30 Phase 00+01 Android foundation
+- Froze the root-only native Android frontend contract.
+- Removed obsolete Termux wording from permission-denied guidance.
+- Enabled AndroidX/AppCompat and Material 3 with opt-in dynamic colors.
+- Added shared edge-to-edge activity handling and future lifecycle/RecyclerView/Room dependencies.
+
+2026-07-30 Phase 00+01 r3 Android lint hotfix
+- Replaced Tasker onBackPressed overrides with AndroidX OnBackPressedDispatcher callbacks.
+- Preserved save-on-back behavior for Tasker action, event, and state editors.
+
+
+2026-07-30 phase00_01_foundation_snapshot_20260730_103616_r4: AGP 9.3 lint-policy hotfix for API-27 navigation-bar resources, explicit receiver flags, and documented package-visibility permission.
+
+2026-07-30 phase00_01_foundation_snapshot_20260730_103616_r5: ignored Devtool local artifact-history/build-output paths so automatic overlay commits do not try to stage a missing .devtool/artifacts.json file.
+
+2026-07-30 Phase 02 locale and min-SDK cleanup
+- Replaced internal case normalization with Locale.ROOT in machine-result, result-formatter, event, and command-history paths.
+- Removed API 25 fallback branches from foreground-service launch and notification-channel construction because XBS minSdk is 26.
+- Preserved Android 13 notification-permission and Android 12 foreground-service behavior guards.
+
+2026-07-30 Phase 03 storage paths and backup rules
+- Replaced Android frontend hardcoded /sdcard XBS paths with Environment-derived external-storage paths.
+- Centralized config, list, and backup directories in XbsConfigApi so UI defaults and shell writes use the same canonical paths.
+- Added Android 12+ data-extraction rules while keeping allowBackup=false for root/config safety.
+
+2026-07-30 Phase 04 UI widget and string-resource cleanup
+- Migrated programmatic toggle controls from platform Switch to AppCompat SwitchCompat.
+- Moved the lint-reported dynamic setText summaries/status labels to Android string resources with placeholders.
+- Added pre-Android-12 full-backup rules alongside data-extraction rules while preserving allowBackup=false.
+
+- Phase 05: warning polish removed remaining resource/plural/icon/receiver cleanup warnings while preserving Tasker integration.
+
+2026-07-30 Phase 06 final resource warning seal
+- Removed the unused legacy launcher drawable left after adaptive-icon migration.
+- Added a narrow lint policy for stale local mipmap-anydpi-v26 directories that Git cannot track or commit once empty.
+- Sealed the post-foundation warning cleanup path with focused resource/link/lint validation.
+
+2026-07-30 Phase 07 command policy and timeout foundation
+- Added typed command provenance, mutation classification, and bounded timeout policy for root-backed XBS actions.
+- Replaced the unbounded cached root executor with a small fixed executor and timeout-aware process completion.
+- Captured stdout/stderr separately for foreground command runs and made notification cancellation produce an explicit cancelled terminal state.
+
+2026-07-30 Phase 08 foreground command service and cancellation
+- Added RootCommandService as the foreground owner for active root command execution.
+- Route new root runs through a foreground service while preserving bounded worker concurrency, timeout handling, stdout/stderr capture, and Tasker completion variables.
+- Added explicit cancelling state and context-aware notification cancellation before terminal exit 130 results are persisted.
+
+2026-07-30 Phase 09 active command UI and run details
+- Added active command sections to Overview and Activity so foreground root work is visible in app, not only in notifications.
+- Added run detail formatting with separate stdout, stderr and error blocks.
+- Added in-app cancel affordances for running/cancelling commands through RootCommandService.
+
+
+Phase 10 - Run history filtering and retry
+- Added command history filters, retention cap, clear-finished action, and retry from stored commands.
+- Baseline: Phase 09 commit 2d63948.
+
+
+Phase 11 - Safe retry guards
+- Added retry policy, destructive replay confirmation, active-run retry blocking, and sanitized retry action IDs.
+- Baseline: Phase 10 commit 8c41e61.
+
+Phase 12 - Support bundle export
+- Added bounded text support bundle generation for app/device/root/runtime/recent-run/event diagnostics.
+- Added Settings actions to copy or share the bundle without new storage permissions.
+- Baseline: Phase 11 commit 7c62d5e.
+
+Phase 13 - Root Diagnostics Workbench
+- Added a dedicated root/provider, XBS binary, storage, notification, and foreground-service diagnostics screen.
+- Added narrow guided fixes and cached structured diagnostics in support bundle format 18.
+- Baseline: Phase 12 commit bd66d73.
+
+Phase 14 - Configuration transaction journal and rollback (r2 rebuild)
+- Replaced independent config/list promotion with a serialized journaled transaction and verified whole-set automatic rollback.
+- Added root-side lock ownership/stale-lock recovery, old/new SHA-256 journal digests, real XBS validation, and post-promotion file verification.
+- Added latest-pointer and post-commit-change guards so stale rollback cannot overwrite a newer or externally modified state.
+- Kept interrupted/failed recovery retryable and re-applied the committed set when manual rollback fails.
+- Added canonical essentials-path guidance, cached transaction evidence in support bundle format 18, and the Phase 13 minSdk-26 foreground-service lint fix.
+- Baseline: Phase 13 contract hotfix r2 commit 6c63002.
+
+Phase 15 - Event editor validation polish
+- Added reusable pure-Java validation for event identity, package lists, allow/deny conflicts, process-rule shape/safety/nice values, and CPU-core actions.
+- Added live inline field errors, footer validation status, blocking-save enforcement, and grouped warning review.
+- Captured immutable editor state before background work and cloned config JSON before the Phase 14 transaction save.
+- Added seven Java validation regressions and repository source contracts without new Android resources.
+- Baseline: landed Phase 14 r2 configuration transaction journal and rollback.
+
+Phase 16 - Process monitor correctness pass
+- Excluded guest and guest-nice double counting from aggregate CPU totals and scaled deltas with the sampled kernel CPU count.
+- Added real NUL-separated cmdline capture, robust stat parsing, stable PID/start-tick identity, PPID, executable, SELinux context, and observation timestamps.
+- Added partial/restricted /proc diagnostics to the monitor, Overview cache card, and support bundle format 18.
+- Added parser, PID-reuse, inaccessible-file, multi-core, kernel-variation, and source-contract regressions without Android resource changes.
+- Baseline: combined Phase 14 r2 + Phase 15 commit 2a0c14b.
+
+Phase 17 - Notification UX finalization
+- Replaced duplicate active per-run notifications with one consolidated foreground command notification.
+- Split active-command progress and terminal command-result channels, with failures-only completion alerts as the default policy.
+- Added exact run-detail deep links, single-run cancellation, stable namespaced notification IDs, stale-action guards, and double-tap de-duplication.
+- Added channel-specific settings/repair entry points and notification evidence in support bundle format 18.
+- Baseline: Phase 16 commit 1a070b3.
+
+Phase 18 - Release and readiness seal
+- Added a deterministic blocker/warning/pass gate over cached diagnostics, runtime, process, notification, transaction, and command-service evidence.
+- Added a dedicated readiness screen with guided navigation and complete support bundle format 18 evidence.
+- Advanced release metadata to version 4.2.0 / versionCode 15 and added a signing-backed Gradle release gate.
+- Added Java and repository regressions without Android resource additions.
+- Baseline: Phase 17 commit 361696f.
+
+Phase 19 - Room history migration
+- Replaced the SharedPreferences run-history array with a versioned Room database behind the existing RunStore facade.
+- Added idempotent legacy migration, bounded retention, persistent configuration-transaction summaries, and no destructive migration fallback.
+- Added local-history readiness evidence to Settings, the release gate, and support bundle format 18.
+- Baseline: Phase 18 commit b776fe3.
+
+Phase 20 - Activity workbench
+- Added a dedicated searchable command/event evidence workbench with status, source, time, problem, and pinned filters.
+- Added durable Room pins through a non-destructive schema 1→2 migration and configurable 30/60/120/240 record retention.
+- Added selection, bounded export, per-record deletion, pin-safe bulk pruning, and exact notification deep links.
+- Advanced support bundle and release-readiness schema requirements to format v8.
+- Baseline: Phase 19 Room history migration overlay.
+
+Phase 21 - Command Center and Quick Actions
+- Rebuilt the complete XBS/XBSctl catalog as searchable typed action groups with risk, expected-effect, timeout, and compatibility metadata.
+- Added immutable generated command previews and routed catalog execution through an exact allowlist-backed `XbsCommandSpec` path.
+- Kept Android-inappropriate editor, direct config-write, completion-install, and manpage-install commands visible but disabled with safer workflow guidance.
+- Added a compact typed Quick Actions sheet for validation, reload, pause/resume, safe mode, diagnostics, Command Center, and common event controls.
+- Added explicit destructive confirmation, bounded field validation, forged-catalog rejection, and focused Java/repository contracts.
+- Baseline: Phase 20 Activity Workbench commit beedf20.
+
+Phase 22 - More and Settings information architecture
+- Replaced the long Settings page with a searchable hub and eight non-overlapping destinations.
+- Added immediate state summaries, proper selection dialogs, permission/channel status, cache controls, contextual explanations, and dynamic-color preview.
+- Kept runtime, notification, appearance, Tasker, data, configuration, diagnostics, and about tools in exactly one destination each.
+- Advanced release gate C to version 4.2.0 / versionCode 15 and support bundle format 18.
+- Baseline: Phase 21 Command Center and Quick Actions result over commit beedf20.
+
+Phase 23 - Schema compatibility and capability negotiation
+- Added `xbs --json capabilities` as the canonical module/CLI compatibility contract.
+- Published module, CLI, Android-contract, config-version, event-field, command, and SHA-256 schema evidence.
+- Added cached Android compatibility probing with explicit static fallback rather than silent capability assumptions.
+- Routed Command Center, Quick Actions, event editing, diagnostics, release readiness, and support export through the shared capability registry.
+- Advanced support bundle format to v10 while preserving unknown newer fields and older string command fixtures.
+- Baseline: Phase 22 More and Settings information architecture result.
+
+Phase 24 - Debug Workbench health model
+- Added a read-only structured health model over cached root, capability, storage, history, transaction, notification, service, runtime, and process evidence.
+- Separated severity from evidence freshness so stale or missing values cannot masquerade as current failures.
+- Added a private Debug Workbench screen, Settings/Root Diagnostics/Release Readiness navigation, and support bundle format 18.
+- Kept evaluation root-free and command-free; source workbenches remain responsible for deliberate evidence refreshes.
+- Baseline: uploaded Phase 23 suite snapshot `mike-cli-suite-20260801-175015.tar.gz`.
+
+- Phase 24 r2 makes Debug Health transitively passive: history, active-run, and transaction evidence use cache-only accessors; missing/stale passive evidence is explicit; a device regression protects Room, legacy preferences, and transaction cache from evaluation side effects.
+
+## Phase 25: Guided fixes and redacted support
+- Added private, explicit, allowlisted guided repair flows with risk labels and confirmation.
+- Preserved passive Debug Health evaluation; repairs run only from the guided-fix activity.
+- Upgraded support bundle format to v12 with deterministic secret/path/package/address/identifier redaction and bounded evidence.
+
+## Phase 26: Authenticated event bridge and adaptive fallback
+- Root-owned HMAC-SHA256 envelopes authenticate canonical event/status snapshots.
+- Android enforces freshness, replay, duplicate, equivocation, key-rotation, and payload-size policy after root verification.
+- Explicit bounded direct polling remains available as a recorded fallback.
+- Cached bridge evidence is included in Debug Health, release readiness, diagnostics, Settings, and redacted support bundle format 18.
+
+- Phase 26 adaptive fallback is limited to non-security availability/freshness failures; authentication/replay failures fail closed and preserve security evidence.
+Phase 26 r2 uses an explicit availability/freshness fallback allowlist, serializes publication under a private file lock, rejects symlinked or insecure bridge state, and commits the Android replay cursor synchronously before returning authenticated data.
+Phase 25 r2 hardens redaction policy v2 for all Authorization schemes, quoted multi-word secrets, full private paths, two-component package names, IPv6 addresses, and modern UUID versions.
+
+Phase 27: Runtime Notification 2.0 adds authenticated transport presentation, state-bound action tokens, foreground-service launch evidence, timeout handling, and support bundle format 18.
+
+Phase 28: Tasker and external-entry hardening (signed bounded configurations, certificate/sender checks, safe completion intents, async receivers).
+
+Phase 29–30: combined manifest/path/stale-action security seal plus accessibility, adaptive layout, and bounded performance evidence.
+
+Phase 29–30 r2 audit correction: durable cancel-action replay protection, exact export/Tasker evidence, whole-screen accessibility enforcement, expanded max-width containment, and runtime UI-quality release evidence.

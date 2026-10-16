@@ -1,0 +1,21 @@
+{
+  "observed_exit_code": 1,
+  "stdout": {
+    "action": "event-bridge",
+    "app": "xbs",
+    "data": {
+      "bridge": {
+        "authenticated": false,
+        "detail": "Missing bridge input: /data/adb/XtremeBS",
+        "reason_code": "missing"
+      }
+    },
+    "error": {
+      "message": "Missing bridge input: /data/adb/XtremeBS"
+    },
+    "exit_code": 1,
+    "message": "Authenticated XBS event snapshot unavailable",
+    "ok": false,
+    "schema_version": "2.0.0"
+  }
+}

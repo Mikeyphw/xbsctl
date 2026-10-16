@@ -1,0 +1,247 @@
+plugins {
+    id 'com.android.application'
+    id 'androidx.baselineprofile'
+}
+
+def releaseKeystoreFile = System.getenv('ANDROID_KEYSTORE_FILE')
+def releaseKeystorePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('ANDROID_KEY_ALIAS')
+def releaseKeyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+def releaseSigningReady = [releaseKeystoreFile, releaseKeystorePassword, releaseKeyAlias, releaseKeyPassword].every { it != null && !it.trim().isEmpty() }
+def xbsReleaseVersionCode = 15
+def xbsReleaseVersionName = '4.2.0'
+def xbsReleaseTargetSdk = 36
+def phase31ReleaseCertSha256 = (findProperty('phase31ReleaseCertSha256') ?: System.getenv('PHASE31_RELEASE_CERT_SHA256') ?: '').toString().replaceAll('[^A-Fa-f0-9]', '').toLowerCase(Locale.ROOT)
+def phase31EvidenceAssetDir = (findProperty('phase31EvidenceAssetDir') ?: "$buildDir/generated/phase31ReleaseEvidence/assets").toString()
+
+android {
+    namespace 'io.github.mikeceead.xbscompanion'
+    compileSdk 36
+    buildToolsVersion '36.0.0'
+
+    defaultConfig {
+        applicationId 'io.github.mikeceead.xbscompanion'
+        minSdk 26
+        targetSdk xbsReleaseTargetSdk
+        versionCode xbsReleaseVersionCode
+        versionName xbsReleaseVersionName
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+        buildConfigField 'String', 'PHASE31_RELEASE_CERT_SHA256', '"' + phase31ReleaseCertSha256 + '"'
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                    'room.schemaLocation': file("$buildDir/generated/roomSchemas").absolutePath,
+                    'room.incremental': 'true',
+                    'room.generateKotlin': 'false'
+                ]
+            }
+        }
+    }
+
+    testBuildType 'release'
+
+    if (releaseSigningReady) {
+        signingConfigs {
+            release {
+                storeFile file(releaseKeystoreFile)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+                enableV4Signing true
+            }
+        }
+    }
+    buildFeatures { buildConfig true }
+    testOptions {
+        animationsDisabled true
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+    sourceSets {
+        main.assets.srcDir file(phase31EvidenceAssetDir)
+        androidTest.assets.srcDir file('schemas')
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+    buildTypes {
+        release {
+            if (releaseSigningReady) signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    lint { abortOnError true; warningsAsErrors true; checkReleaseBuilds true }
+}
+
+dependencies {
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-android:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-android:2.8.7'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.savedstate:savedstate:1.2.1'
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+    implementation 'androidx.profileinstaller:profileinstaller:1.4.1'
+    implementation 'com.google.android.material:material:1.12.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
+
+    androidTestImplementation 'androidx.test:core:1.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test:rules:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.7.0'
+    androidTestImplementation 'androidx.room:room-testing:2.6.1'
+    androidTestUtil 'androidx.test:orchestrator:1.6.1'
+
+    baselineProfile project(':benchmark')
+}
+
+afterEvaluate {
+    if (tasks.findByName('testDebugUnitTest') == null && tasks.findByName('testReleaseUnitTest') != null) {
+        tasks.register('testDebugUnitTest') {
+            group = 'verification'
+            description = 'Compatibility task for debug validation; runs release unit tests.'
+            dependsOn tasks.named('testReleaseUnitTest')
+        }
+    }
+}
+
+
+tasks.register('verifyReleaseSigning') {
+    doLast {
+        if (!releaseSigningReady) {
+            throw new GradleException('Release signing requires ANDROID_KEYSTORE_FILE, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD')
+        }
+        if (!file(releaseKeystoreFile).isFile()) {
+            throw new GradleException("Release keystore not found: ${releaseKeystoreFile}")
+        }
+    }
+}
+
+tasks.register('verifyReleaseReadiness') {
+    dependsOn tasks.named('verifyReleaseSigning')
+    doLast {
+        if (xbsReleaseVersionCode < 15) {
+            throw new GradleException('Phase 31 final release seal requires versionCode 15 or newer')
+        }
+        if (!xbsReleaseVersionName || xbsReleaseVersionName.toLowerCase(Locale.ROOT).contains('phase')) {
+            throw new GradleException('Release versionName must be non-empty and must not contain a phase suffix')
+        }
+        if (phase31ReleaseCertSha256.length() != 64) {
+            throw new GradleException('Phase 31 release seal requires PHASE31_RELEASE_CERT_SHA256 (64 hex characters)')
+        }
+        if (xbsReleaseTargetSdk < 36) {
+            throw new GradleException('Phase 31 final release seal requires targetSdk 36 or newer')
+        }
+        [
+            'src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/FinalReleaseSealActivity.java',
+            'src/androidTest/java/io/github/mikeceead/xbscompanion/Phase31RoomMigrationInstrumentedTest.java',
+            'src/androidTest/java/io/github/mikeceead/xbscompanion/Phase31AccessibilityInstrumentedTest.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ManagedPathPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/IntentSecurityPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SecuritySealReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SecuritySealPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SecuritySealStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SecuritySealEvaluator.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SecuritySealActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/AdaptiveLayoutPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/AccessibilityUiPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/UiQualityReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/UiQualityStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/PerformanceReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/PerformanceStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/UiUpdateDebouncer.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessEvaluator.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ReleaseReadinessReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/DebugHealthReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/DebugHealthPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/DebugHealthEvaluator.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/DebugHealthStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/DebugWorkbenchActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/GuidedFixPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/GuidedFixExecutor.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/GuidedFixActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SupportRedactor.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventBridgeReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventBridgePolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventBridgeStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventBridgeEnvelope.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventBridgeReader.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/RuntimeNotificationStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ForegroundServiceLauncher.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ForegroundServiceLaunchResult.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryExecutor.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerHostIdentity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerRequestPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerAuthorization.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerConfigCodec.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerCompletionPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerProtocol.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerPluginReceiver.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerConditionProtocol.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerConditionReceiver.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/TaskerEventDispatcher.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ExternalEntryStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/NotificationController.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/NotificationActionReceiver.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/RootCommandService.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/RootCommandRunner.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/EventMonitorService.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryStatus.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/HistoryDao.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryDatabase.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsHistoryStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ActivityWorkbenchActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ActivityQuery.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/ActivityExportFormatter.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/CommandCenterPolicy.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/QuickActionsSheet.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/CliCommandActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SettingsDestination.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SettingsCatalog.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/SettingsHubView.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/MoreSettingsActivity.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityReport.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityStore.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsCompatibilityProbe.java',
+            'src/main/java/io/github/mikeceead/xbscompanion/XbsCapabilityRegistry.java'
+        ].each { relative ->
+            if (!file(relative).isFile()) throw new GradleException("Missing release-readiness source: ${relative}")
+        }
+    }
+}
+
+tasks.configureEach { task ->
+    if (task.name in ['assembleRelease', 'bundleRelease']) {
+        task.dependsOn tasks.named('verifyReleaseReadiness')
+    }
+}
+
+
+baselineProfile {
+    // AGP 9.3 / Baseline Profile 1.5 rejects false/false during configuration.
+    // Keep generated profiles out of src while allowing release builds to generate build-dir evidence.
+    automaticGenerationDuringBuild true
+    saveInSrc false
+}
+
+
+tasks.named('preBuild').configure { dependsOn rootProject.tasks.named('verifyStableToolchainBaseline') }

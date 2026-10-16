@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!--
+        Phase 06: devtool may leave an empty legacy mipmap-anydpi-v26 directory
+        in a dirty working tree after earlier resource migrations. Git cannot track
+        or commit removal of an empty directory, so keep the lint policy scoped to
+        this exact stale resource folder while clean checkouts naturally omit it.
+    -->
+    <issue id="ObsoleteSdkInt">
+        <ignore path="src/main/res/mipmap-anydpi-v26" />
+    </issue>
+</lint>

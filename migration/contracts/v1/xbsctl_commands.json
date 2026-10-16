@@ -1,0 +1,94 @@
+{
+  "commands": [
+    {
+      "executable": "XBSctl",
+      "id": "ctl_help",
+      "path": [
+        "--help"
+      ],
+      "summary": "Print XBSctl help."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_active",
+      "path": [
+        "active"
+      ],
+      "summary": "Show active events."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_detail",
+      "path": [
+        "detail"
+      ],
+      "summary": "Show detailed status."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_status",
+      "path": [
+        "status"
+      ],
+      "summary": "Show controller status summary."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_validate",
+      "path": [
+        "validate"
+      ],
+      "summary": "Validate config structure and file paths."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_start",
+      "path": [
+        "start"
+      ],
+      "summary": "Start an event runner."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_stop",
+      "path": [
+        "stop"
+      ],
+      "summary": "Stop an event runner."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_reload",
+      "path": [
+        "reload"
+      ],
+      "summary": "Request runtime reload."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_pause",
+      "path": [
+        "pause"
+      ],
+      "summary": "Pause the daemon."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_resume",
+      "path": [
+        "resume"
+      ],
+      "summary": "Resume the daemon."
+    },
+    {
+      "executable": "XBSctl",
+      "id": "ctl_safe",
+      "path": [
+        "safe"
+      ],
+      "summary": "Enter safe mode."
+    }
+  ],
+  "schema_version": 1,
+  "source": "apps/xbs/system/bin/XBSctl"
+}

@@ -1,0 +1,30 @@
+{
+  "algorithm": "hmac-sha256",
+  "canonical_json": "sort_keys=true,separators=comma-colon,ensure_ascii=true",
+  "format_version": 1,
+  "limits": {
+    "max_envelope_bytes": 512000,
+    "max_source_bytes": 256000
+  },
+  "required_envelope_fields": [
+    "format_version",
+    "algorithm",
+    "sequence",
+    "created_at",
+    "sources",
+    "payload",
+    "signature"
+  ],
+  "schema_version": 1,
+  "security": {
+    "private_key_mode": "0600",
+    "private_parent_mode": "0700",
+    "sequence_replay_protection": true,
+    "symlink_components_rejected": true
+  },
+  "source": "apps/xbs/src/xbs_cli/event_bridge.py",
+  "source_files": [
+    "event_changes.json",
+    "XtremeBS.status"
+  ]
+}

@@ -1,0 +1,35 @@
+plugins {
+    id 'com.android.test'
+    id 'androidx.baselineprofile'
+}
+
+android {
+    namespace 'io.github.mikeceead.xbscompanion.benchmark'
+    compileSdk 36
+    buildToolsVersion '36.0.0'
+    targetProjectPath = ':app'
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 36
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+}
+
+baselineProfile {
+    useConnectedDevices = true
+}
+
+dependencies {
+    implementation 'androidx.test.ext:junit:1.3.0'
+    implementation 'androidx.test.espresso:espresso-core:3.7.0'
+    implementation 'androidx.benchmark:benchmark-macro-junit4:1.4.1'
+}
+
+
+tasks.named('preBuild').configure { dependsOn rootProject.tasks.named('verifyStableToolchainBaseline') }

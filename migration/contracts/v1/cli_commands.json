@@ -1,0 +1,405 @@
+{
+  "action": "schema.commands",
+  "app": "xbs",
+  "data": {
+    "commands": [
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "status",
+        "path": [
+          "status"
+        ],
+        "summary": "Show current runtime status."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "init",
+        "path": [
+          "init"
+        ],
+        "summary": "Seed the XBS config when missing."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "paths",
+        "path": [
+          "paths"
+        ],
+        "summary": "Show resolved paths."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "capabilities",
+        "path": [
+          "capabilities"
+        ],
+        "summary": "Publish module, config, command, and field capabilities."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "json_text",
+            "repeatable": false,
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "validate",
+        "path": [
+          "validate"
+        ],
+        "summary": "Validate config from disk or JSON."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "key",
+            "repeatable": false,
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "config get",
+        "path": [
+          "config",
+          "get"
+        ],
+        "summary": "Read a config value."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "key",
+            "repeatable": false,
+            "required": true,
+            "type": "string"
+          },
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "value",
+            "repeatable": false,
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "config set",
+        "path": [
+          "config",
+          "set"
+        ],
+        "summary": "Write a config value."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "json_text",
+            "repeatable": false,
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "config validate",
+        "path": [
+          "config",
+          "validate"
+        ],
+        "summary": "Validate config payload."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": true,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [
+          {
+            "help": "",
+            "kind": "flag",
+            "name": "--editor",
+            "repeatable": false,
+            "required": false,
+            "type": "string"
+          },
+          {
+            "help": "",
+            "kind": "flag",
+            "name": "--print-path",
+            "repeatable": false,
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "name": "config edit",
+        "path": [
+          "config",
+          "edit"
+        ],
+        "summary": "Open the active config in an editor."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "config schema",
+        "path": [
+          "config",
+          "schema"
+        ],
+        "summary": "Show the config payload JSON schema."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "runtime reload",
+        "path": [
+          "runtime",
+          "reload"
+        ],
+        "summary": "Reload the runtime."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "runtime pause",
+        "path": [
+          "runtime",
+          "pause"
+        ],
+        "summary": "Pause the runtime."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "runtime resume",
+        "path": [
+          "runtime",
+          "resume"
+        ],
+        "summary": "Resume the runtime."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "mode",
+            "repeatable": false,
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "runtime safe",
+        "path": [
+          "runtime",
+          "safe"
+        ],
+        "summary": "Apply runtime safe mode."
+      },
+      {
+        "args": [],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "event list",
+        "path": [
+          "event",
+          "list"
+        ],
+        "summary": "List event keys."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "event",
+            "repeatable": false,
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "event run",
+        "path": [
+          "event",
+          "run"
+        ],
+        "summary": "Start an event runner."
+      },
+      {
+        "args": [
+          {
+            "help": "",
+            "kind": "argument",
+            "name": "event",
+            "repeatable": false,
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "automation": {
+          "destructive": false,
+          "interactive": false,
+          "long_running": false,
+          "mobile_safe": true,
+          "safe": true
+        },
+        "examples": [],
+        "flags": [],
+        "name": "event stop",
+        "path": [
+          "event",
+          "stop"
+        ],
+        "summary": "Stop an event runner."
+      }
+    ],
+    "schema_version": "1.0.0"
+  },
+  "error": {
+    "message": "Canonical command catalog"
+  },
+  "exit_code": 0,
+  "message": "Canonical command catalog",
+  "ok": true,
+  "schema_version": "2.0.0"
+}

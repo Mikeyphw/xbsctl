@@ -1,0 +1,371 @@
+{
+  "action": "capabilities",
+  "app": "xbs",
+  "data": {
+    "compatibility": {
+      "android_contract": {
+        "maximum": 1,
+        "minimum": 1,
+        "minimum_app_version_code": 1
+      },
+      "capabilities": {
+        "authenticated_event_bridge": true,
+        "custom_events": true,
+        "schema_digest": true,
+        "schema_negotiation": true,
+        "simultaneous_events": true,
+        "transactional_android_editor": true,
+        "typed_machine_output": true
+      },
+      "cli": {
+        "command_schema_version": "1.1.0",
+        "machine_output_schema_version": "2.0.0",
+        "version": "1.3.0"
+      },
+      "commands": [
+        {
+          "executable": "xbs",
+          "id": "help",
+          "path": [
+            "--help"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "init",
+          "path": [
+            "init"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "paths",
+          "path": [
+            "paths"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "validate",
+          "path": [
+            "validate"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "capabilities",
+          "path": [
+            "capabilities"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "config_get",
+          "path": [
+            "config",
+            "get"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "config_set",
+          "path": [
+            "config",
+            "set"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "config_validate",
+          "path": [
+            "config",
+            "validate"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "config_edit_cli",
+          "path": [
+            "config",
+            "edit"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "config_schema",
+          "path": [
+            "config",
+            "schema"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "runtime_reload",
+          "path": [
+            "runtime",
+            "reload"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "runtime_pause",
+          "path": [
+            "runtime",
+            "pause"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "runtime_resume",
+          "path": [
+            "runtime",
+            "resume"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "runtime_safe",
+          "path": [
+            "runtime",
+            "safe"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "event_list",
+          "path": [
+            "event",
+            "list"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "event_run",
+          "path": [
+            "event",
+            "run"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "event_stop",
+          "path": [
+            "event",
+            "stop"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_help",
+          "path": [
+            "--help"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_start",
+          "path": [
+            "start"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_stop",
+          "path": [
+            "stop"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_reload",
+          "path": [
+            "reload"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_pause",
+          "path": [
+            "pause"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_resume",
+          "path": [
+            "resume"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_safe",
+          "path": [
+            "safe"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_active",
+          "path": [
+            "active"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_detail",
+          "path": [
+            "detail"
+          ]
+        },
+        {
+          "executable": "XBSctl",
+          "id": "ctl_validate",
+          "path": [
+            "validate"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "schema_root",
+          "path": [
+            "schema"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "schema_commands",
+          "path": [
+            "schema",
+            "commands"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "schema_command",
+          "path": [
+            "schema",
+            "command"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "schema_output",
+          "path": [
+            "schema",
+            "output"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "schema_config",
+          "path": [
+            "schema",
+            "config"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "completion_zsh",
+          "path": [
+            "completion",
+            "zsh"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "completion_install",
+          "path": [
+            "completion",
+            "install"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "completion_complete_zsh",
+          "path": [
+            "completion",
+            "complete-zsh"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "manpage_show",
+          "path": [
+            "manpage",
+            "show"
+          ]
+        },
+        {
+          "executable": "xbs",
+          "id": "manpage_install",
+          "path": [
+            "manpage",
+            "install"
+          ]
+        }
+      ],
+      "config": {
+        "active_version": 2,
+        "event_fields": [
+          "allowlist",
+          "denylist",
+          "disable_cores",
+          "doze",
+          "handle_apps",
+          "handle_cores",
+          "handle_gms",
+          "handle_proc",
+          "keep_on_charge",
+          "kill_wifi",
+          "low_ram",
+          "proc_file",
+          "quit"
+        ],
+        "maximum_supported_version": 2,
+        "schema_digest": "237caba0ac9dfd8e9ecd61ea97bcad375a3ce1e7a6fbbc6d77082c78a605f318"
+      },
+      "contract_version": "1.1.0",
+      "digest": "c38faee1997d7c1d9f382dd572bc44c494aab675fc523e7577dcf0eecba54d0b",
+      "digest_algorithm": "sha256",
+      "event_bridge": {
+        "algorithms": [
+          "hmac-sha256"
+        ],
+        "fallback_transport": "bounded_direct_poll",
+        "format_versions": [
+          1
+        ],
+        "preferred_transport": "root_verified_envelope",
+        "replay_protection": true,
+        "trust_boundary": "protects against non-root runtime-file tampering; root compromise is out of scope"
+      },
+      "generated_by": "xbs-cli",
+      "module": {
+        "id": "XtremeBS",
+        "version": "v2.1.6",
+        "version_code": 216
+      }
+    }
+  },
+  "error": {
+    "message": "XBS compatibility contract"
+  },
+  "exit_code": 0,
+  "message": "XBS compatibility contract",
+  "ok": true,
+  "schema_version": "2.0.0"
+}

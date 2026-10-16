@@ -1,0 +1,32 @@
+{
+  "observed_exit_code": 0,
+  "stdout": {
+    "action": "init",
+    "app": "xbs",
+    "data": {
+      "config_paths": [
+        "${XBS_EXTERNAL_ROOT}/XtremeBS.json"
+      ],
+      "created": [
+        "${XBS_EXTERNAL_ROOT}/XtremeBS.json"
+      ],
+      "paths": {
+        "config": "${XBS_EXTERNAL_ROOT}/XtremeBS.json",
+        "essentials": "${XBS_EXTERNAL_ROOT}/lists/essentials.allowlist",
+        "log": "${XBS_EXTERNAL_ROOT}/logs/XtremeBS.log",
+        "module_root": "${XBS_MODULE_DIR}",
+        "runtime": "${XBS_RUNTIME_DIR}",
+        "shared_root": "${XBS_SHARED_ROOT}",
+        "status": "${XBS_EXTERNAL_ROOT}/logs/XtremeBS.status"
+      },
+      "skipped": [],
+      "tasker_dir": "",
+      "updated": []
+    },
+    "error": null,
+    "exit_code": 0,
+    "message": "",
+    "ok": true,
+    "schema_version": "2.0.0"
+  }
+}

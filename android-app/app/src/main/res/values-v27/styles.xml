@@ -1,0 +1,23 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.XbsCompanion" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/devtool_green</item>
+        <item name="colorOnPrimary">@color/devtool_background</item>
+        <item name="colorSecondary">@color/devtool_cyan</item>
+        <item name="colorOnSecondary">@color/devtool_background</item>
+        <item name="colorSurface">@color/devtool_surface</item>
+        <item name="colorOnSurface">@color/devtool_text</item>
+        <item name="colorError">@color/devtool_red</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowBackground">@color/devtool_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:colorAccent">@color/devtool_green</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Compatibility alias retained for external Tasker/editor activity metadata. -->
+    <style name="Theme.MikeControl" parent="Theme.XbsCompanion" tools:ignore="UnusedResources" />
+</resources>

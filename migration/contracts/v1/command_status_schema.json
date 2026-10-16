@@ -1,0 +1,31 @@
+{
+  "action": "schema.command",
+  "app": "xbs",
+  "data": {
+    "command": {
+      "args": [],
+      "automation": {
+        "destructive": false,
+        "interactive": false,
+        "long_running": false,
+        "mobile_safe": true,
+        "safe": true
+      },
+      "examples": [],
+      "flags": [],
+      "name": "status",
+      "path": [
+        "status"
+      ],
+      "summary": "Show current runtime status."
+    },
+    "schema_version": "1.0.0"
+  },
+  "error": {
+    "message": "Command schema"
+  },
+  "exit_code": 0,
+  "message": "Command schema",
+  "ok": true,
+  "schema_version": "2.0.0"
+}

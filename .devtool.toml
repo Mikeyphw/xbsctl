@@ -1,0 +1,147 @@
+# Standalone XBS: Devtool DAG, EXO, wrapper, and hosted candidate builds.
+[project]
+root = "."
+python = "python3"
+runner = "command"
+platform = "cli"
+
+[execution]
+environment = "auto"
+
+[toolchain]
+manager = "auto"
+
+[build]
+max_workers = "auto"
+
+[jobs.xbs-go-mod-present]
+runner = "command"
+root = "."
+command = ["test", "-f", "go.mod"]
+
+[jobs.xbs-go-version]
+runner = "command"
+root = "."
+command = ["go", "version"]
+
+[jobs.xbs-go-test]
+runner = "command"
+root = "."
+command = ["go", "test", "./..."]
+
+[jobs.xbs-go-vet]
+runner = "command"
+root = "."
+command = ["go", "vet", "./..."]
+
+[jobs.xbs-contract-check]
+runner = "command"
+root = "."
+command = ["go", "run", "./cmd/xbs", "contracts", "check"]
+
+[jobs.xbs-final-seal]
+runner = "command"
+root = "."
+command = ["go", "run", "./cmd/xbsrepo", "final-seal"]
+
+[jobs.xbs-build-module]
+runner = "command"
+root = "."
+command = ["go", "run", "./cmd/xbsrepo", "build-module", "--out", "dist/XtremeBS-go.zip"]
+outputs = ["dist/XtremeBS-go.zip"]
+
+[targets.xbs]
+root = "."
+runner = "command"
+platform = "cli"
+run_command = "go run ./cmd/xbs --help"
+inputs = ["cmd/**", "internal/**", "module/**", "go.mod", ".devtool.toml"]
+outputs = [".tmp/**", "dist/**"]
+
+[targets.xbs.workflows]
+restore = ["job:xbs-go-mod-present", "job:xbs-go-version"]
+build = ["job:xbs-build-module"]
+test = ["job:xbs-go-test", "job:xbs-contract-check"]
+validate = ["job:xbs-go-test", "job:xbs-go-vet", "job:xbs-contract-check"]
+ci-preflight = [
+  { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
+  { id = "go", ref = "job:xbs-go-version", depends_on = ["source"] },
+]
+ci-local = [
+  { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
+  { id = "tests", ref = "job:xbs-go-test", depends_on = ["source"] },
+  { id = "vet", ref = "job:xbs-go-vet", depends_on = ["source"] },
+  { id = "contracts", ref = "job:xbs-contract-check", depends_on = ["tests", "vet"] },
+]
+ci-module = [
+  { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
+  { id = "tests", ref = "job:xbs-go-test", depends_on = ["source"] },
+  { id = "module", ref = "job:xbs-build-module", depends_on = ["tests"] },
+]
+
+[targets.xbs_android]
+root = "android-app"
+runner = "android"
+platform = "android"
+execution_environment = "auto"
+chroot_name = "androidos"
+inputs = ["android-app/**", ".devtool.toml"]
+outputs = ["android-app/**/build/**"]
+
+[targets.xbs_android.android]
+variant = "debug"
+aapt2_provider = "auto"
+prefer_native_termux = false
+instrumentation = "when-device-present"
+platform = "auto"
+build_tools = "auto"
+system_deps = "auto"
+
+[targets.xbs_android.gradle]
+version = "9.7.1"
+max_workers = 1
+parallel = false
+no_daemon = true
+build_cache = true
+structured_events = true
+daemon_idle_timeout_ms = 900000
+
+[targets.xbs_android.tasks]
+restore = ["help"]
+build = [":app:assembleDebug"]
+test = [":app:testDebugUnitTest"]
+lint = [":app:lintDebug"]
+clean = ["clean"]
+
+[targets.xbs_android.artifacts]
+output_directory = ".devtool/build-artifacts/xbs-companion/debug"
+output_name = "xbs-companion-debug.apk"
+required = false
+verify = false
+paths = ["android-app/app/build/outputs/apk/debug/app-debug.apk"]
+recursive = true
+
+[workspace]
+default_target = "xbs"
+
+[workspace.groups]
+all = ["xbs", "xbs_android"]
+
+[wrapper]
+schema = 2
+default_command = "ci-preflight"
+
+[wrapper.commands.ci-preflight]
+description = "Native XBS source and Go availability checks"
+workflow = "ci-preflight"
+target = "xbs"
+
+[wrapper.commands.ci-local]
+description = "Independent Go tests and vet followed by contract check"
+workflow = "ci-local"
+target = "xbs"
+
+[wrapper.commands.ci-module]
+description = "Source-bound Android module candidate after tests"
+workflow = "ci-module"
+target = "xbs"

@@ -1,0 +1,573 @@
+package daemon
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"sort"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/Mikeyphw/xbsctl/internal/config"
+	"github.com/Mikeyphw/xbsctl/internal/control"
+	"github.com/Mikeyphw/xbsctl/internal/eventbridge"
+	"github.com/Mikeyphw/xbsctl/internal/tuning"
+)
+
+type options struct {
+	jsonMode bool
+	once     bool
+	dryRun   bool
+	interval time.Duration
+}
+type state struct {
+	Mode             string
+	Active           map[string]bool
+	LastAppliedEvent string
+	LastAppliedTime  string
+	LastReloadTime   string
+	LastError        string
+	LastErrorTime    string
+	LogLevel         any
+	EffectResults    map[string]any
+	QuitRequested    bool
+	DryRun           bool
+}
+
+func Main(args []string, stdout io.Writer, stderr io.Writer) int {
+	opts, err := parse(args)
+	if err != nil {
+		fmt.Fprintln(stderr, "XtremeBSd:", err)
+		return 2
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		return finish(stdout, opts, false, "config load failed: "+err.Error(), 3)
+	}
+	s := &state{Mode: "normal", Active: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
+	engine := tuning.New(nil)
+	if err := recoverRuntimeState(engine, cfg, s, opts.dryRun); err != nil {
+		s.LastError = "restart reconciliation: " + err.Error()
+		s.LastErrorTime = now()
+	}
+	if err := writeStatus(cfg, s); err != nil {
+		return finish(stdout, opts, false, err.Error(), 6)
+	}
+	if opts.once {
+		change, err := processCtl(engine, cfg, s, opts.dryRun)
+		if err != nil {
+			return finish(stdout, opts, false, err.Error(), 6)
+		}
+		if change != nil {
+			if err := writeStatus(cfg, s); err != nil {
+				return finish(stdout, opts, false, err.Error(), 6)
+			}
+			if err := writeEventChanges(cfg, s, change); err != nil {
+				return finish(stdout, opts, false, err.Error(), 6)
+			}
+		}
+		return finish(stdout, opts, true, "XtremeBSd one-shot completed", 0)
+	}
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
+	defer signal.Stop(sigc)
+	for {
+		change, err := processCtl(engine, cfg, s, opts.dryRun)
+		if err != nil {
+			s.LastError = err.Error()
+			s.LastErrorTime = now()
+		}
+		if change != nil || err != nil {
+			_ = writeStatus(cfg, s)
+		}
+		if change != nil {
+			_ = writeEventChanges(cfg, s, change)
+		}
+		if s.QuitRequested {
+			return finish(stdout, opts, true, "XtremeBSd boot event requested quit", 0)
+		}
+		if s.Mode == "normal" {
+			for _, name := range activeList(s) {
+				if ev, x := tuning.Resolve(cfg, name); x == nil {
+					if x = engine.Maintain(ev); x != nil {
+						s.LastError = x.Error()
+						s.LastErrorTime = now()
+						_ = writeStatus(cfg, s)
+					}
+				}
+			}
+		}
+		select {
+		case <-time.After(opts.interval):
+		case <-sigc:
+			if err := restoreActive(engine, cfg, s); err != nil {
+				s.LastError = err.Error()
+				s.LastErrorTime = now()
+				_ = writeStatus(cfg, s)
+				return finish(stdout, opts, false, "shutdown restoration failed: "+err.Error(), 6)
+			}
+			s.Active = map[string]bool{}
+			s.Mode = "normal"
+			_ = persistRuntimeState(engine, cfg, s)
+			_ = writeStatus(cfg, s)
+			return finish(stdout, opts, true, "XtremeBSd stopped with effects restored", 0)
+		}
+	}
+}
+
+func parse(args []string) (options, error) {
+	opts := options{interval: 3 * time.Second}
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--json":
+			opts.jsonMode = true
+		case "--once":
+			opts.once = true
+		case "--dry-run":
+			opts.dryRun = true
+		case "--interval":
+			if i+1 >= len(args) {
+				return opts, errors.New("--interval requires seconds")
+			}
+			i++
+			var sec int
+			if _, err := fmt.Sscanf(args[i], "%d", &sec); err != nil || sec <= 0 {
+				return opts, errors.New("invalid --interval")
+			}
+			opts.interval = time.Duration(sec) * time.Second
+		case "-h", "--help":
+			opts.once = true
+		default:
+			return opts, fmt.Errorf("unknown argument: %s", args[i])
+		}
+	}
+	return opts, nil
+}
+
+func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool) (change map[string]any, retErr error) {
+	ctl := ctlPath(cfg)
+	req, reqPath, qerr := control.NextRequest(ctl)
+	if qerr != nil {
+		return nil, qerr
+	}
+	cmdline := ""
+	if reqPath != "" {
+		cmdline = strings.TrimSpace(req.Command + " " + req.Event)
+		defer func() {
+			_ = control.CompleteRequest(ctl, req, retErr)
+			_ = os.Remove(reqPath)
+		}()
+	} else {
+		data, err := os.ReadFile(ctl)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		cmdline = strings.TrimSpace(string(data))
+		if cmdline == "" {
+			return nil, nil
+		}
+		// A dry-run previews effects, not queue semantics: consume each command once.
+		_ = os.WriteFile(ctl, []byte("\n"), 0o644)
+	}
+
+	parts := strings.Fields(cmdline)
+	cmd := parts[0]
+	event := "manual"
+	if len(parts) > 1 {
+		event = parts[1]
+	}
+	if !eventExists(cfg, event) {
+		return nil, fmt.Errorf("unknown event: %s", event)
+	}
+	change = map[string]any{"type": "profile", "name": event, "timestamp": time.Now().Unix()}
+	switch cmd {
+	case "start":
+		ev, err := tuning.Resolve(cfg, event)
+		if err != nil {
+			return nil, err
+		}
+		result, err := engine.Apply(ev, dryRun)
+		s.EffectResults[event] = tuning.MarshalResult(result)
+		if err != nil {
+			return nil, fmt.Errorf("apply %s: %w", event, err)
+		}
+		if !result.Applied {
+			return nil, fmt.Errorf("apply %s did not commit", event)
+		}
+		s.Active[event] = true
+		s.LastAppliedEvent = event
+		s.LastAppliedTime = now()
+		if event == "boot" && ev.Quit {
+			s.QuitRequested = true
+		}
+		change["state"] = "active"
+		change["effects"] = tuning.MarshalResult(result)
+	case "stop":
+		ev, err := tuning.Resolve(cfg, event)
+		if err != nil {
+			return nil, err
+		}
+		result, err := engine.Restore(ev)
+		s.EffectResults[event] = tuning.MarshalResult(result)
+		if err != nil {
+			return nil, fmt.Errorf("restore %s: %w", event, err)
+		}
+		delete(s.Active, event)
+		if err := reapplyActive(engine, cfg, s, dryRun); err != nil {
+			return nil, err
+		}
+		s.LastAppliedEvent = event
+		s.LastAppliedTime = now()
+		change["state"] = "inactive"
+		change["effects"] = tuning.MarshalResult(result)
+	case "reload":
+		fresh, err := config.Load()
+		if err != nil {
+			return nil, fmt.Errorf("reload config: %w", err)
+		}
+		if errs := config.Validate(fresh); len(errs) > 0 {
+			return nil, fmt.Errorf("reload validation: %s", strings.Join(errs, "; "))
+		}
+		oldActive := activeList(s)
+		oldCfg := cloneConfig(cfg)
+		if err := restoreActive(engine, cfg, s); err != nil {
+			return nil, fmt.Errorf("reload restore: %w", err)
+		}
+		for k := range cfg {
+			delete(cfg, k)
+		}
+		for k, v := range fresh {
+			cfg[k] = v
+		}
+		for _, name := range oldActive {
+			if eventExists(cfg, name) {
+				s.Active[name] = true
+			} else {
+				delete(s.Active, name)
+			}
+		}
+		if s.Mode == "normal" {
+			if err := reapplyActive(engine, cfg, s, dryRun); err != nil {
+				_ = restoreActive(engine, cfg, s)
+				for k := range cfg {
+					delete(cfg, k)
+				}
+				for k, v := range oldCfg {
+					cfg[k] = v
+				}
+				s.Active = map[string]bool{}
+				for _, name := range oldActive {
+					s.Active[name] = true
+				}
+				_ = reapplyActive(engine, cfg, s, dryRun)
+				return nil, fmt.Errorf("reload reconcile: %w", err)
+			}
+		}
+		s.LogLevel = get(cfg, "header.log_level")
+		s.LastReloadTime = now()
+		change = map[string]any{"type": "reload", "name": "reload", "state": "applied", "timestamp": time.Now().Unix()}
+	case "pause":
+		if err := restoreActive(engine, cfg, s); err != nil {
+			return nil, err
+		}
+		s.Mode = "paused"
+		change = map[string]any{"type": "mode", "name": "pause", "state": "active", "timestamp": time.Now().Unix()}
+	case "safe":
+		if err := restoreActive(engine, cfg, s); err != nil {
+			return nil, err
+		}
+		s.Mode = "safe"
+		s.Active = map[string]bool{}
+		change = map[string]any{"type": "safe_mode", "name": "safe_mode", "state": "active", "timestamp": time.Now().Unix()}
+	case "resume":
+		wasPaused := s.Mode == "paused"
+		s.Mode = "normal"
+		if wasPaused {
+			if err := reapplyActive(engine, cfg, s, dryRun); err != nil {
+				return nil, err
+			}
+		}
+		change = map[string]any{"type": "safe_mode", "name": "safe_mode", "state": "inactive", "timestamp": time.Now().Unix()}
+	default:
+		return nil, fmt.Errorf("unknown control command: %s", cmd)
+	}
+	clearLastError(s)
+	if err := persistRuntimeState(engine, cfg, s); err != nil {
+		return nil, fmt.Errorf("persist runtime state: %w", err)
+	}
+	return change, nil
+}
+
+func restoreActive(engine *tuning.Engine, cfg map[string]any, s *state) error {
+	names := activeList(s)
+	for i := len(names) - 1; i >= 0; i-- {
+		ev, err := tuning.Resolve(cfg, names[i])
+		if err != nil {
+			return err
+		}
+		result, err := engine.Restore(ev)
+		s.EffectResults[names[i]] = tuning.MarshalResult(result)
+		if err != nil {
+			return fmt.Errorf("restore %s: %w", names[i], err)
+		}
+	}
+	return nil
+}
+func reapplyActive(engine *tuning.Engine, cfg map[string]any, s *state, dry bool) error {
+	for _, name := range activeList(s) {
+		ev, err := tuning.Resolve(cfg, name)
+		if err != nil {
+			return err
+		}
+		result, err := engine.Apply(ev, dry)
+		s.EffectResults[name] = tuning.MarshalResult(result)
+		if err != nil || !result.Applied {
+			if err == nil {
+				err = errors.New("effect plan did not commit")
+			}
+			return fmt.Errorf("reapply %s: %w", name, err)
+		}
+	}
+	return nil
+}
+func cloneConfig(cfg map[string]any) map[string]any {
+	b, _ := json.Marshal(cfg)
+	out := map[string]any{}
+	_ = json.Unmarshal(b, &out)
+	return out
+}
+
+func dryRunState(s *state) bool { return s.DryRun }
+
+func clearLastError(s *state) {
+	s.LastError = ""
+	s.LastErrorTime = ""
+}
+
+type runtimeState struct {
+	Version  int               `json:"version"`
+	Mode     string            `json:"mode"`
+	Active   []string          `json:"active"`
+	Original map[string]string `json:"original"`
+}
+
+func runtimeStatePath() string {
+	return filepath.Join(config.ResolvePaths().Runtime, "daemon_state_v1.json")
+}
+
+func persistRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state) error {
+	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: engine.Snapshot()}
+	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" {
+		if err := os.Remove(runtimeStatePath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		return nil
+	}
+	return atomicJSON(runtimeStatePath(), rs, 0o600)
+}
+
+func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dry bool) error {
+	b, err := os.ReadFile(runtimeStatePath())
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var rs runtimeState
+	if err := json.Unmarshal(b, &rs); err != nil {
+		return err
+	}
+	if rs.Version != 1 {
+		return fmt.Errorf("unsupported runtime state version %d", rs.Version)
+	}
+	engine.LoadSnapshot(rs.Original)
+	s.Mode = rs.Mode
+	if s.Mode == "" {
+		s.Mode = "normal"
+	}
+	for _, name := range rs.Active {
+		if !eventExists(cfg, name) {
+			return fmt.Errorf("persisted event %q is no longer configured", name)
+		}
+		s.Active[name] = true
+	}
+	if s.Mode == "normal" && len(rs.Active) > 0 {
+		if err := reapplyActive(engine, cfg, s, dry); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func bridgePaths() eventbridge.Paths {
+	p := eventbridge.DefaultPaths()
+	cp := config.ResolvePaths()
+	if strings.TrimSpace(os.Getenv("XBS_RUNTIME_DIR")) == "" {
+		p.Runtime = cp.Runtime
+	}
+	if strings.TrimSpace(os.Getenv("XBS_EVENT_CHANGES_FILE")) == "" {
+		p.Event = filepath.Join(p.Runtime, "event_changes.json")
+	}
+	if strings.TrimSpace(os.Getenv("XBS_EVENT_BRIDGE_FILE")) == "" {
+		p.Envelope = filepath.Join(p.Runtime, "event_bridge_v1.json")
+	}
+	if strings.TrimSpace(os.Getenv("XBS_EVENT_BRIDGE_SEQUENCE")) == "" {
+		p.Sequence = filepath.Join(p.Runtime, "event_bridge_v1.seq")
+	}
+	if strings.TrimSpace(os.Getenv("XBS_EXTERNAL_STATUS")) == "" {
+		p.Status = cp.Status
+	}
+	return p
+}
+
+func writeStatus(cfg map[string]any, s *state) error {
+	p := config.ResolvePaths()
+	active := activeList(s)
+	profiles := []string{}
+	if s.Mode == "safe" {
+		profiles = []string{"safe"}
+	} else {
+		profiles = append(profiles, active...)
+	}
+	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults}}
+	return atomicJSON(p.Status, payload, 0o644)
+}
+
+func writeEventChanges(cfg map[string]any, s *state, change map[string]any) error {
+	paths := bridgePaths()
+	events := eventKeys(cfg)
+	profiles := map[string]string{}
+	active := activeList(s)
+	activeSet := map[string]bool{}
+	for _, e := range active {
+		activeSet[e] = true
+	}
+	inactive := []string{}
+	for _, e := range events {
+		if activeSet[e] {
+			profiles[e] = "active"
+		} else {
+			profiles[e] = "inactive"
+			inactive = append(inactive, e)
+		}
+	}
+	payload := map[string]any{"safe_mode": s.Mode == "safe", "last_change": change, "profiles": profiles, "active": active, "inactive": inactive}
+	if err := atomicJSON(paths.Event, payload, 0o600); err != nil {
+		return err
+	}
+	_, _ = eventbridge.Publish(paths, nil)
+	return nil
+}
+
+func activeList(s *state) []string {
+	out := []string{}
+	for e, ok := range s.Active {
+		if ok {
+			out = append(out, e)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+func eventKeys(cfg map[string]any) []string {
+	out := []string{}
+	if ev, ok := cfg["events"].(map[string]any); ok {
+		for k := range ev {
+			if k != "template" {
+				out = append(out, k)
+			}
+		}
+	}
+	if !contains(out, "manual") {
+		out = append(out, "manual")
+	}
+	sort.Strings(out)
+	return out
+}
+func eventExists(cfg map[string]any, name string) bool {
+	if name == "manual" {
+		return true
+	}
+	return contains(eventKeys(cfg), name)
+}
+func contains(items []string, needle string) bool {
+	for _, item := range items {
+		if item == needle {
+			return true
+		}
+	}
+	return false
+}
+func ctlPath(cfg map[string]any) string {
+	if v, ok := get(cfg, "header.ctl_file").(string); ok && strings.TrimSpace(v) != "" {
+		return v
+	}
+	return filepath.Join(config.ResolvePaths().Runtime, "xbs.ctl")
+}
+func get(cfg map[string]any, key string) any { v, _ := config.GetByKey(cfg, key); return v }
+func now() string                            { return time.Now().Format("2006-01-02T15:04:05") }
+
+func atomicJSON(path string, payload any, mode os.FileMode) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+"-*.tmp")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	ok := false
+	defer func() {
+		if !ok {
+			_ = os.Remove(name)
+		}
+	}()
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Chmod(mode); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Rename(name, path); err != nil {
+		return err
+	}
+	if dir, err := os.Open(filepath.Dir(path)); err == nil {
+		_ = dir.Sync()
+		_ = dir.Close()
+	}
+	ok = true
+	return nil
+}
+
+func finish(stdout io.Writer, opts options, ok bool, message string, code int) int {
+	if opts.jsonMode {
+		b, _ := json.Marshal(map[string]any{"ok": ok, "message": message, "exit_code": code})
+		fmt.Fprintln(stdout, string(b))
+	} else {
+		fmt.Fprintln(stdout, message)
+	}
+	return code
+}
