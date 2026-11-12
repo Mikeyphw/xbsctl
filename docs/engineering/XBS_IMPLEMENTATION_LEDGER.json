@@ -842,7 +842,7 @@
       "gate_id": "G-R03",
       "gate": "Boot/charging/screen/battery/manual transitions are observed, deterministic and idempotent on fake backend and qualified device.",
       "focus": "CODE-07; automatic battery-saver behavior",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": [],
       "tasks": [
         {
@@ -862,10 +862,11 @@
           "id": "R03-02",
           "title": "Implement charging/unplugging observation",
           "acceptance": "Charging transition and disconnection deterministically reconcile desired profiles.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -875,10 +876,11 @@
           "id": "R03-03",
           "title": "Implement screen-off/on observation",
           "acceptance": "Screen state changes apply and remove configured profile effects without app dependency.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -888,10 +890,11 @@
           "id": "R03-04",
           "title": "Implement low-power threshold and hysteresis",
           "acceptance": "Boundary flapping is debounced and thresholds are explicitly validated.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -914,10 +917,11 @@
           "id": "R03-06",
           "title": "Read header.delay and header.dry_run",
           "acceptance": "Runtime policy honors validated config values and CLI overrides have documented precedence.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -979,10 +983,11 @@
           "id": "R03-11",
           "title": "Debounce repeated broadcasts and detect missed state transitions",
           "acceptance": "Repeated events do not duplicate actions; startup reads current observable state.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -992,10 +997,11 @@
           "id": "R03-12",
           "title": "Expose event source and effect outcomes in status",
           "acceptance": "Status reports trigger, requested profile, final actual effects and last error.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -1005,10 +1011,11 @@
           "id": "R03-13",
           "title": "Add deterministic event fixture/test suite",
           "acceptance": "Synthetic power/display/battery inputs exercise every transition without root.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
-          "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -3295,6 +3302,12 @@
       "actor": "R02 HF01 read-only inspection audit",
       "summary": "R02 HF01 audit: recovery inspection uses strictly read-only directory validation, rejecting unsafe legacy modes without chmod. Included negative mutation/Go tests.",
       "source_commit": "f048d2d5526a3d0d7632e477b6b4f052e41e30df"
+    },
+    {
+      "date": "2026-11-12",
+      "phase": "R03",
+      "change": "R03A opt-in automatic observation and deterministic event queue",
+      "evidence": "source-pinned overlay; isolated Go tests only; full Go and device gates pending"
     }
   ],
   "change_log": [

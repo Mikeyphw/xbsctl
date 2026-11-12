@@ -127,16 +127,19 @@ func Default() map[string]any {
 	}
 	return map[string]any{
 		"header": map[string]any{
-			"version":              ConfigVersion,
-			"delay":                3,
-			"log_file":             p.Log,
-			"log_level":            3,
-			"log_json":             false,
-			"dry_run":              false,
-			"lock_file":            lock,
-			"ctl_file":             ctl,
-			"essentials_allowlist": p.Essentials,
-			"notify":               true,
+			"version":                     ConfigVersion,
+			"delay":                       3,
+			"log_file":                    p.Log,
+			"log_level":                   3,
+			"log_json":                    false,
+			"dry_run":                     false,
+			"automatic_events_enabled":    false,
+			"low_power_threshold":         20,
+			"low_power_release_threshold": 25,
+			"lock_file":                   lock,
+			"ctl_file":                    ctl,
+			"essentials_allowlist":        p.Essentials,
+			"notify":                      true,
 		},
 		"events": events,
 	}
@@ -298,6 +301,27 @@ func Validate(cfg map[string]any) []string {
 			if _, ok := intValue(header[key]); !ok {
 				errs = append(errs, "header."+key+" must be an integer")
 			}
+		}
+		if delay, ok := intValue(header["delay"]); !ok || delay < 0 || delay > 300 {
+			errs = append(errs, "header.delay must be between 0 and 300 seconds")
+		}
+		if enabled, exists := header["automatic_events_enabled"]; exists {
+			if _, valid := enabled.(bool); !valid {
+				errs = append(errs, "header.automatic_events_enabled must be a boolean")
+			}
+		}
+		low, lowOK := intValue(header["low_power_threshold"])
+		if !lowOK && header["low_power_threshold"] == nil {
+			low = 20
+			lowOK = true
+		}
+		release, releaseOK := intValue(header["low_power_release_threshold"])
+		if !releaseOK && header["low_power_release_threshold"] == nil {
+			release = 25
+			releaseOK = true
+		}
+		if !lowOK || !releaseOK || low < 1 || low > 95 || release <= low || release > 100 {
+			errs = append(errs, "header low-power hysteresis thresholds are invalid")
 		}
 		for _, key := range []string{"log_file", "ctl_file", "lock_file", "essentials_allowlist"} {
 			v, exists := header[key]
