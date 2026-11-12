@@ -50,6 +50,9 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 	if err != nil {
 		return finish(stdout, opts, false, "config load failed: "+err.Error(), 3)
 	}
+	if errs := config.Validate(cfg); len(errs) > 0 {
+		return finish(stdout, opts, false, "initial config invalid: "+strings.Join(errs, "; "), 3)
+	}
 	s := &state{Mode: "normal", Active: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
 	// A second daemon must never race this instance on the .work queue.
 	lock, lockErr := acquireDaemonLock()
@@ -57,6 +60,16 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		return finish(stdout, opts, false, "daemon singleton lock: "+lockErr.Error(), 6)
 	}
 	defer lock.Close()
+	// Command-phase recovery MUST precede journal reconciliation and active
+	// profile replay. Otherwise an interrupted root command could execute twice.
+	unknown, scanErr := control.PendingUnknown(ctlPath(cfg))
+	if scanErr != nil || len(unknown) != 0 {
+		s.Mode = "recovery_required"
+		s.LastError = fmt.Sprintf("unknown command outcomes %v: %v; manual reconciliation required", unknown, scanErr)
+		s.LastErrorTime = now()
+		_ = writeStatus(cfg, s)
+		return finish(stdout, opts, false, s.LastError, 6)
+	}
 	engine := tuning.New(nil)
 	bindEngineJournal(engine, cfg, s)
 	if err := recoverRuntimeState(engine, cfg, s, opts.dryRun); err != nil {
@@ -96,13 +109,21 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 			s.LastErrorTime = now()
 		}
 		if change != nil || err != nil {
-			_ = writeStatus(cfg, s)
+			if writeErr := writeStatus(cfg, s); writeErr != nil {
+				return finish(stdout, opts, false, "status publication failed: "+writeErr.Error(), 6)
+			}
 		}
 		if s.Mode == "recovery_required" {
 			return finish(stdout, opts, false, "runtime restoration incomplete; refusing further commands", 6)
 		}
 		if change != nil {
-			_ = writeEventChanges(cfg, s, change)
+			if pubErr := writeEventChanges(cfg, s, change); pubErr != nil {
+				s.Mode = "recovery_required"
+				s.LastError = "event publication failure: " + pubErr.Error()
+				s.LastErrorTime = now()
+				_ = writeStatus(cfg, s)
+				return finish(stdout, opts, false, s.LastError, 6)
+			}
 		}
 		if s.QuitRequested {
 			return finish(stdout, opts, true, "XtremeBSd boot event requested quit", 0)
@@ -129,8 +150,16 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 			}
 			s.Active = map[string]bool{}
 			s.Mode = "normal"
-			_ = persistRuntimeState(engine, cfg, s)
-			_ = writeStatus(cfg, s)
+			if err := persistRuntimeState(engine, cfg, s); err != nil {
+				s.Mode = "recovery_required"
+				s.LastError = "shutdown persistence failed: " + err.Error()
+				s.LastErrorTime = now()
+				_ = writeStatus(cfg, s)
+				return finish(stdout, opts, false, s.LastError, 6)
+			}
+			if err := writeStatus(cfg, s); err != nil {
+				return finish(stdout, opts, false, "shutdown status publication failed: "+err.Error(), 6)
+			}
 			return finish(stdout, opts, true, "XtremeBSd stopped with effects restored", 0)
 		}
 	}
@@ -172,6 +201,11 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 	ctl := ctlPath(cfg)
 	req, reqPath, qerr := control.NextRequest(ctl)
 	if qerr != nil {
+		if errors.Is(qerr, control.ErrUnknownOutcome) {
+			s.Mode = "recovery_required"
+			s.LastError = qerr.Error()
+			s.LastErrorTime = now()
+		}
 		return nil, qerr
 	}
 	cmdline := ""
@@ -208,6 +242,13 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 	}
 	if !eventExists(cfg, event) {
 		return nil, fmt.Errorf("unknown event: %s", event)
+	}
+	// Strict WAL protocol: no privileged mutation before the applying phase
+	// is durably published for this exact queued request.
+	if reqPath != "" {
+		if err := control.MarkApplying(ctl, req); err != nil {
+			return nil, fmt.Errorf("durable command applying phase: %w", err)
+		}
 	}
 	change = map[string]any{"type": "profile", "name": event, "timestamp": time.Now().Unix()}
 	switch cmd {
@@ -629,11 +670,19 @@ func writeEventChanges(cfg map[string]any, s *state, change map[string]any) erro
 			inactive = append(inactive, e)
 		}
 	}
-	payload := map[string]any{"safe_mode": s.Mode == "safe", "last_change": change, "profiles": profiles, "active": active, "inactive": inactive}
+	payload := map[string]any{"version": 1, "safe_mode": s.Mode == "safe", "last_change": change, "profiles": profiles, "active": active, "inactive": inactive}
 	if err := atomicJSON(paths.Event, payload, 0o600); err != nil {
 		return err
 	}
-	_, _ = eventbridge.Publish(paths, nil)
+	if _, pubErr := eventbridge.Publish(paths, nil); pubErr != nil {
+		// The command may already have succeeded; do not mislabel its root
+		// outcome as a failure or replay it. Expose bridge errors in status.
+		s.LastError = "event bridge publication: " + pubErr.Error()
+		s.LastErrorTime = now()
+		if statusErr := writeStatus(cfg, s); statusErr != nil {
+			return errors.Join(pubErr, fmt.Errorf("persist event bridge failure: %w", statusErr))
+		}
+	}
 	return nil
 }
 
