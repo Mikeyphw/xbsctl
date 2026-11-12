@@ -1001,7 +1001,8 @@
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
-          "phase_test_suite_count": 13
+          "phase_test_suite_count": 13,
+          "notes": " R03C: deterministic no-replay pending watchdog, read-only queue diagnostics and API36 synthetic read-only sensor probe; full checkout/hosted/API36 physical acceptance still pending."
         },
         {
           "id": "R03-12",
@@ -1015,7 +1016,8 @@
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
-          "phase_test_suite_count": 13
+          "phase_test_suite_count": 13,
+          "notes": " R03C: deterministic no-replay pending watchdog, read-only queue diagnostics and API36 synthetic read-only sensor probe; full checkout/hosted/API36 physical acceptance still pending."
         },
         {
           "id": "R03-13",
@@ -1029,7 +1031,8 @@
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
-          "phase_test_suite_count": 13
+          "phase_test_suite_count": 13,
+          "notes": " R03C: deterministic no-replay pending watchdog, read-only queue diagnostics and API36 synthetic read-only sensor probe; full checkout/hosted/API36 physical acceptance still pending."
         }
       ],
       "test_ids": [
@@ -1046,7 +1049,8 @@
         "RD-004",
         "RD-005",
         "PF-006"
-      ]
+      ],
+      "notes": " R03C isolated Go/race/vet/Android crosscompile and simulated API36 sensor diagnostics; no physical device acceptance claimed."
     },
     {
       "id": "R04",
@@ -3365,6 +3369,14 @@
       "source_pin": "21603ae162dc2e3da8fa1bc7089740cc0ca9d005",
       "overlay": "XBS_R03B_LIFECYCLE_COMPLETION_20261112.zip",
       "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R03C source-pinned implementation",
+      "source_pin": "c5fc976749df7830308dc88d9a4577a21c689c58",
+      "overlay": "XBS_R03C_RELIABILITY_API36_DIAGNOSTICS_20261112.zip",
+      "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY_AND_DEVICE",
+      "change": "No-follow read-only queue lifecycle inspection; bounded 10-minute watchdog retaining unknown evidence; R03B pending-time migration and explicit no-replay block; deterministic Go fault tests and read-only Android API36 diagnostic harness, not privileged device acceptance."
     }
   ]
 }
