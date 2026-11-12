@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"syscall"
@@ -260,12 +261,11 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		if err != nil {
 			return nil, err
 		}
-		// Engine.Restore is currently global. Exclusive ownership makes
-		// restoration safe for the single privileged-effect owner; policy-
-		// only profiles must never restore another profile's effects.
+		// Restore ONLY this profile's resource domains; other active
+		// profiles retain their own original-value records and effects.
 		result := tuning.Result{Event: event, Applied: true}
 		if hasPrivilegedEffects(ev) {
-			result, err = engine.Restore(ev)
+			result, err = engine.RestoreResources(ev, resourceLeases(ev))
 			s.EffectResults[event] = tuning.MarshalResult(result)
 			if err != nil {
 				s.Mode = "recovery_required"
@@ -277,8 +277,7 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 			}
 		}
 		delete(s.Active, event)
-		// Under the exclusive-owner contract, remaining active profiles
-		// cannot hold privileged effects, so there is nothing to replay.
+		// Peer effect domains remain active and are not replayed or toggled.
 		s.EffectResults[event] = tuning.MarshalResult(result)
 		s.LastAppliedEvent = event
 		s.LastAppliedTime = now()
@@ -359,7 +358,11 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		s.Mode = "normal"
 		if wasPaused {
 			if err := reapplyActive(engine, cfg, s, dryRun); err != nil {
-				return nil, err
+				s.Mode = "recovery_required"
+				if persistErr := persistRuntimeState(engine, cfg, s); persistErr != nil {
+					return nil, errors.Join(err, fmt.Errorf("persist failed resume recovery: %w", persistErr))
+				}
+				return nil, fmt.Errorf("resume reconciliation: %w", err)
 			}
 		}
 		change = map[string]any{"type": "safe_mode", "name": "safe_mode", "state": "inactive", "timestamp": time.Now().Unix()}
@@ -374,37 +377,32 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 }
 
 func restoreActive(engine *tuning.Engine, cfg map[string]any, s *state) error {
-	// The engine snapshot is global. A policy-only event must never undo
-	// a concurrently active privileged owner's changes during pause/safe,
-	// reload, shutdown, or recovery.
-	owner, err := exclusiveActiveOwner(cfg, s.Active)
+	// Bulk transitions are deliberate global restoration boundaries. Validate
+	// every lease BEFORE writing anything, then restore the shared journal once.
+	owners, err := activeResourceLeases(cfg, s.Active)
 	if err != nil {
 		return fmt.Errorf("restore ownership: %w", err)
 	}
-	if owner == "" && len(engine.Snapshot()) > 0 {
+	if len(owners) == 0 && len(engine.Snapshot()) > 0 {
 		return errors.New("unowned privileged recovery snapshot: refusing to discard original state")
 	}
-	names := activeList(s)
-	for i := len(names) - 1; i >= 0; i-- {
-		ev, err := tuning.Resolve(cfg, names[i])
+	if len(owners) > 0 {
+		result, err := engine.Restore(tuning.Event{Name: "bulk-restoration"})
 		if err != nil {
-			return err
-		}
-		if names[i] != owner {
-			s.EffectResults[names[i]] = tuning.MarshalResult(tuning.Result{Event: names[i], Applied: true})
-			continue
-		}
-		result, err := engine.Restore(ev)
-		s.EffectResults[names[i]] = tuning.MarshalResult(result)
-		if err != nil {
-			// Any incomplete bulk restoration is not a usable normal state.
-			// Persist the refusal before returning to the control loop.
 			s.Mode = "recovery_required"
-			restoreErr := fmt.Errorf("restore %s: %w", names[i], err)
+			restoreErr := fmt.Errorf("bulk restore: %w", err)
 			if persistErr := persistRuntimeState(engine, cfg, s); persistErr != nil {
 				return errors.Join(restoreErr, fmt.Errorf("persist recovery-required: %w", persistErr))
 			}
 			return restoreErr
+		}
+		for name := range owners {
+			s.EffectResults[name] = tuning.MarshalResult(result)
+		}
+	}
+	for _, name := range activeList(s) {
+		if _, mutating := owners[name]; !mutating {
+			s.EffectResults[name] = tuning.MarshalResult(tuning.Result{Event: name, Applied: true})
 		}
 	}
 	return nil
@@ -446,10 +444,11 @@ func clearLastError(s *state) {
 }
 
 type runtimeState struct {
-	Version  int               `json:"version"`
-	Mode     string            `json:"mode"`
-	Active   []string          `json:"active"`
-	Original map[string]string `json:"original"`
+	Version        int                 `json:"version"`
+	Mode           string              `json:"mode"`
+	Active         []string            `json:"active"`
+	Original       map[string]string   `json:"original"`
+	ResourceLeases map[string][]string `json:"resource_leases,omitempty"`
 }
 
 func runtimeStatePath() string {
@@ -469,7 +468,7 @@ func persistRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state) er
 }
 
 func persistRuntimeSnapshot(cfg map[string]any, s *state, snapshot map[string]string) error {
-	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot}
+	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot, ResourceLeases: declaredLeases(cfg, s.Active)}
 	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" {
 		if err := os.Remove(runtimeStatePath()); errors.Is(err, os.ErrNotExist) {
 			return nil
@@ -513,6 +512,20 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 	}
 	if rs.Version != 1 {
 		return fmt.Errorf("unsupported runtime state version %d", rs.Version)
+	}
+	// When present, compare durable lease intentions to the current config.
+	// Refuse recovery after an out-of-band active-profile policy change.
+	if len(rs.ResourceLeases) > 0 {
+		current := declaredLeases(cfg, func() map[string]bool {
+			a := map[string]bool{}
+			for _, name := range rs.Active {
+				a[name] = true
+			}
+			return a
+		}())
+		if !reflect.DeepEqual(rs.ResourceLeases, current) {
+			return fmt.Errorf("persisted resource lease drift; recovery requires explicit reconciliation")
+		}
 	}
 	engine.LoadSnapshot(rs.Original)
 	s.Mode = rs.Mode

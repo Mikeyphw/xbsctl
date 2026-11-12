@@ -745,6 +745,26 @@ func readProc(path string) (map[string]int, error) {
 	return r, nil
 }
 func (e *Engine) Restore(ev Event) (Result, error) {
+	return e.restoreScoped(ev, nil)
+}
+
+// RestoreResources releases only the recorded effects belonging to a named
+// profile's leased domains. It never toggles the originals held by peers.
+func (e *Engine) RestoreResources(ev Event, resources []string) (Result, error) {
+	allowed := map[string]bool{}
+	for _, name := range resources {
+		allowed[name] = true
+	}
+	for key := range e.original {
+		if resource := RecoveryResource(key); resource == "" {
+			return Result{Event: ev.Name}, fmt.Errorf("unrecognized recovery key %q; scoped restoration refused", key)
+		}
+	}
+	return e.restoreScoped(ev, allowed)
+}
+
+func (e *Engine) restoreScoped(ev Event, allowed map[string]bool) (Result, error) {
+	accept := func(key string) bool { return allowed == nil || allowed[RecoveryResource(key)] }
 	r := Result{Event: ev.Name}
 	add := func(f, s, d string) { r.Outcomes = append(r.Outcomes, Outcome{f, s, d}) }
 	var errs []string
@@ -758,7 +778,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 	}
 	// Restore every sysfs value from the exact pre-apply snapshot.
 	for key, old := range clone(e.original) {
-		if strings.HasPrefix(key, "file:") {
+		if strings.HasPrefix(key, "file:") && accept(key) {
 			p := strings.TrimPrefix(key, "file:")
 			err := e.R.Write(p, old)
 			fail("cpu", err)
@@ -772,7 +792,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 	// Never unforce an idle state unless XBS recorded ownership of the
 	// force-idle operation. Older unjournaled Doze effects require a
 	// deliberate migration decision; do not guess during recovery.
-	if _, owned := e.original["doze:owned"]; owned {
+	if _, owned := e.original["doze:owned"]; owned && accept("doze:owned") {
 		_, err := e.R.Run("dumpsys", "deviceidle", "unforce")
 		fail("doze", err)
 		if err == nil {
@@ -781,7 +801,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			}
 		}
 	}
-	if old, ok := e.original["wifi-enabled"]; ok {
+	if old, ok := e.original["wifi-enabled"]; ok && accept("wifi-enabled") {
 		want, _ := strconv.ParseBool(old)
 		var err error
 		if want {
@@ -794,7 +814,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			}
 		}
 	}
-	if old, ok := e.original["low_ram"]; ok {
+	if old, ok := e.original["low_ram"]; ok && accept("low_ram") {
 		_, err := e.R.Run("resetprop", "-n", "ro.config.low_ram", old)
 		fail("low_ram", err)
 		if err == nil {
@@ -803,7 +823,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			}
 		}
 	}
-	if old, ok := e.original["gms-enabled"]; ok {
+	if old, ok := e.original["gms-enabled"]; ok && accept("gms-enabled") {
 		wasEnabled, _ := strconv.ParseBool(old)
 		var err error
 		if wasEnabled {
@@ -819,7 +839,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 	// Restore only exact packages that XBS recorded as originally unsuspended.
 	// Never re-enumerate or unsuspend newly matched or pre-suspended packages.
 	for key, old := range clone(e.original) {
-		if !strings.HasPrefix(key, "suspend:user0:") {
+		if !strings.HasPrefix(key, "suspend:user0:") || !accept(key) {
 			continue
 		}
 		if old != "false" {
@@ -840,7 +860,7 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 		}
 	}
 	for key, old := range clone(e.original) {
-		if strings.HasPrefix(key, "nice:") {
+		if strings.HasPrefix(key, "nice:") && accept(key) {
 			pid := strings.TrimPrefix(key, "nice:")
 			_, err := e.R.Run("renice", old, "-p", pid)
 			fail("nice", err)

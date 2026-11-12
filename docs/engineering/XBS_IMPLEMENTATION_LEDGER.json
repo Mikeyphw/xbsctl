@@ -346,7 +346,9 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+          ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
           ],
@@ -361,7 +363,9 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+          ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
           ],
@@ -376,7 +380,9 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+          ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
           ],
@@ -392,7 +398,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
           ],
           "blockers": [],
           "test_refs": [],
@@ -487,7 +494,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch",
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
           ],
           "blockers": [],
           "test_refs": [],
@@ -561,10 +569,12 @@
           "id": "R02-02",
           "title": "Enforce strict inbox path/ownership/mode rules",
           "acceptance": "Request, ack, journal and parent paths reject symlinks, bad modes and nonregular nodes.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -578,7 +588,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
           ],
           "blockers": [],
           "test_refs": [],
@@ -3189,6 +3200,15 @@
       "source_pin": "5c90596a44d8b8ce875b7e6803f3dbe9bc7fb169",
       "overlay": "XBS_R01C_EXCLUSIVE_EFFECT_OWNERSHIP_20261112.zip",
       "qualification": "SOURCE_PINNED_OVERLAY_PREPARED_HOSTED_AND_PHYSICAL_PENDING"
+    }
+  ],
+  "change_log": [
+    {
+      "date": "2026-11-12",
+      "actor": "R01D source-bound local overlay preparation",
+      "change": "Lease domains, scoped restoration, restart metadata, hosted Actions SHA-bound watcher; no hosted or device qualification claimed",
+      "source_pin": "5b6c812fcb9c8c3f244238a02abf2956903deba4",
+      "overlay": "XBS_R01D_RESOURCE_LEASES_AND_HOSTED_WATCHER_20261112.zip"
     }
   ]
 }
