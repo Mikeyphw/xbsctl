@@ -202,6 +202,9 @@ func Load() (map[string]any, error) {
 		return nil, fmt.Errorf("config is invalid JSON: %w", err)
 	}
 	deepUpdate(cfg, raw)
+	if errs := Validate(cfg); len(errs) > 0 {
+		return nil, fmt.Errorf("config validation failed: %s", strings.Join(errs, "; "))
+	}
 	return cfg, nil
 }
 

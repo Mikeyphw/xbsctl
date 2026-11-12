@@ -5,13 +5,11 @@ POSTFSDATA=false
 LATESTARTSERVICE=true
 
 MODDIR="${MODPATH:-${0%/*}}"
-PATHS_LIB="$MODDIR/bin/xbs-paths.sh"
-[ -f "$PATHS_LIB" ] && . "$PATHS_LIB"
 
-ui_print "- Preparing XBS directories..."
-command -v xbs_mkdirs >/dev/null 2>&1 && xbs_mkdirs
-command -v xbs_seed_external_config >/dev/null 2>&1 && xbs_seed_external_config >/dev/null 2>&1 || true
-ui_print "✔ XBS config root ready at ${XBS_EXTERNAL_ROOT:-/sdcard/.config/xbs}"
+# The former bin/xbs-paths.sh helper is not present in the standalone module.
+# Initialization is handled by the bundled Go xbs CLI in service.sh after
+# shared storage is mounted, not silently skipped during installation.
+ui_print "- Go-native XBS config initialization is scheduled for first boot"
 
 ui_print "- Setting Go-native runtime permissions..."
 set_perm_recursive "$MODPATH" 0 0 0755 0644

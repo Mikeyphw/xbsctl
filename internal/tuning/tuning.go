@@ -296,15 +296,23 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 	}
 	if ev.HandleGMS != "false" {
 		if ev.HandleGMS == "kill" {
-			disabled, _ := e.R.Run("pm", "list", "packages", "-d", "com.google.android.gms")
-			e.remember("gms-enabled", strconv.FormatBool(!strings.Contains(disabled, "com.google.android.gms")))
+			disabled, probeErr := e.R.Run("pm", "list", "packages", "-d", "com.google.android.gms")
+			if probeErr != nil {
+				return fail(fmt.Errorf("cannot determine prior GMS enabled state: %w", probeErr))
+			}
+			wasEnabled := !strings.Contains(disabled, "com.google.android.gms")
+			e.remember("gms-enabled", strconv.FormatBool(wasEnabled))
+			// Register recovery before disabling: a partially applied command may fail.
+			// Never enable a package that was disabled before this operation.
+			if wasEnabled {
+				undo = append(undo, func() error { _, x := e.R.Run("pm", "enable", "com.google.android.gms"); return x })
+			}
 			if _, err = e.R.Run("pm", "disable", "com.google.android.gms"); err != nil {
 				return fail(err)
 			}
 			if _, err = e.R.Run("am", "force-stop", "com.google.android.gms"); err != nil {
 				return fail(err)
 			}
-			undo = append(undo, func() error { _, x := e.R.Run("pm", "enable", "com.google.android.gms"); return x })
 		} else if err := e.appAction(ev.HandleGMS, "com.google.android.gms"); err != nil {
 			return fail(err)
 		}
@@ -333,12 +341,18 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		add("handle_proc", "disabled", "")
 	}
 	if ev.LowRAM {
-		old, _ := e.R.Run("getprop", "ro.config.low_ram")
+		old, probeErr := e.R.Run("getprop", "ro.config.low_ram")
+		if probeErr != nil {
+			return fail(fmt.Errorf("cannot determine prior low_ram property: %w", probeErr))
+		}
+		o := strings.TrimSpace(old)
+		if o != "true" && o != "false" {
+			return fail(fmt.Errorf("prior ro.config.low_ram is not a boolean: %q", o))
+		}
+		e.remember("low_ram", o)
 		if _, err = e.R.Run("resetprop", "-n", "ro.config.low_ram", "true"); err != nil {
 			return fail(err)
 		}
-		o := strings.TrimSpace(old)
-		e.remember("low_ram", o)
 		undo = append(undo, func() error { _, x := e.R.Run("resetprop", "-n", "ro.config.low_ram", o); return x })
 		add("low_ram", "applied", "ro.config.low_ram=true")
 	} else {
@@ -358,8 +372,15 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		add("doze", "disabled", "")
 	}
 	if ev.KillWiFi {
-		out, _ := e.R.Run("cmd", "wifi", "status")
-		wasOn := strings.Contains(strings.ToLower(out), "enabled")
+		out, probeErr := e.R.Run("cmd", "wifi", "status")
+		if probeErr != nil {
+			return fail(fmt.Errorf("cannot determine prior Wi-Fi state: %w", probeErr))
+		}
+		status := strings.ToLower(strings.TrimSpace(out))
+		wasOn := strings.Contains(status, "enabled")
+		if !wasOn && !strings.Contains(status, "disabled") {
+			return fail(fmt.Errorf("cannot determine prior Wi-Fi state from status output: %q", strings.TrimSpace(out)))
+		}
 		e.remember("wifi-enabled", strconv.FormatBool(wasOn))
 		if _, err = e.R.Run("svc", "wifi", "disable"); err != nil {
 			return fail(err)
