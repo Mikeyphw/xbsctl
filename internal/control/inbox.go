@@ -27,6 +27,7 @@ type Request struct {
 	Event    string `json:"event,omitempty"`
 	Created  int64  `json:"created"`
 	Deadline int64  `json:"deadline_unix_nano,omitempty"`
+	Origin   string `json:"origin,omitempty"`
 }
 
 var requestCounter uint64
@@ -257,6 +258,21 @@ func QueueRequest(ctl, command, event string) (Request, error) {
 // QueueRequestWithDeadline imposes only a pre-execution deadline. In-flight
 // Android operations must never be interrupted by a client-side timeout.
 func QueueRequestWithDeadline(ctl, command, event string, ttl time.Duration) (Request, error) {
+	return queueRequestWithOrigin(ctl, command, event, ttl, "")
+}
+
+// QueueAutomaticRequest publishes through the same audited WAL and private
+// Android-compatible spool. Manual clients continue using QueueRequest.
+func QueueAutomaticRequest(ctl, command, event string) (Request, error) {
+	if command != "start" && command != "stop" {
+		return Request{}, errors.New("automatic command must be start or stop")
+	}
+	if event != "charging" && event != "screen_off" && event != "low_power" {
+		return Request{}, errors.New("automatic event name not allowlisted")
+	}
+	return queueRequestWithOrigin(ctl, command, event, 0, "automatic")
+}
+func queueRequestWithOrigin(ctl, command, event string, ttl time.Duration, origin string) (Request, error) {
 	if ttl < 0 || ttl > 24*time.Hour {
 		return Request{}, errors.New("invalid command TTL")
 	}
@@ -271,7 +287,7 @@ func QueueRequestWithDeadline(ctl, command, event string, ttl time.Duration) (Re
 		return Request{}, err
 	}
 	id := fmt.Sprintf("%020d-%d-%06d", time.Now().UnixNano(), os.Getpid(), atomic.AddUint64(&requestCounter, 1))
-	r := Request{ID: id, Command: command, Event: event, Created: time.Now().Unix()}
+	r := Request{ID: id, Command: command, Event: event, Created: time.Now().Unix(), Origin: origin}
 	if ttl > 0 {
 		r.Deadline = time.Now().Add(ttl).UnixNano()
 	}
@@ -384,7 +400,7 @@ func NextRequest(ctl string) (Request, string, error) {
 			return Request{}, bad, fmt.Errorf("unsafe control request: %w", err)
 		}
 		var r Request
-		if err = json.Unmarshal(b, &r); err != nil || !validRequestID(r.ID) || r.ID != requestBase(name) || !validCommand(r.Command) || len(r.Event) > 128 || strings.ContainsAny(r.Event, "\x00\r\n\t ") || r.Deadline < 0 {
+		if err = json.Unmarshal(b, &r); err != nil || !validRequestID(r.ID) || r.ID != requestBase(name) || !validCommand(r.Command) || len(r.Event) > 128 || strings.ContainsAny(r.Event, "\x00\r\n\t ") || r.Deadline < 0 || (r.Origin != "" && r.Origin != "automatic") {
 			bad, qerr := quarantine(dir, p, ".bad")
 			if qerr != nil {
 				return Request{}, p, qerr

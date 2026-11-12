@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Mikeyphw/xbsctl/internal/autoevents"
 	"github.com/Mikeyphw/xbsctl/internal/config"
 	"github.com/Mikeyphw/xbsctl/internal/control"
 	"github.com/Mikeyphw/xbsctl/internal/eventbridge"
@@ -38,6 +39,11 @@ type state struct {
 	EffectResults    map[string]any
 	QuitRequested    bool
 	DryRun           bool
+	AutoOwned        map[string]bool
+	AutoPending      *autoPending
+	AutoPlanner      *autoevents.Planner
+	AutoBlocked      bool
+	AutoReport       map[string]any
 }
 
 func Main(args []string, stdout io.Writer, stderr io.Writer) int {
@@ -53,7 +59,10 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 	if errs := config.Validate(cfg); len(errs) > 0 {
 		return finish(stdout, opts, false, "initial config invalid: "+strings.Join(errs, "; "), 3)
 	}
-	s := &state{Mode: "normal", Active: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
+	if configured, ok := get(cfg, "header.dry_run").(bool); ok && configured {
+		opts.dryRun = true
+	}
+	s := &state{Mode: "normal", Active: map[string]bool{}, AutoOwned: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
 	// A second daemon must never race this instance on the .work queue.
 	lock, lockErr := acquireDaemonLock()
 	if lockErr != nil {
@@ -127,6 +136,17 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		}
 		if s.QuitRequested {
 			return finish(stdout, opts, true, "XtremeBSd boot event requested quit", 0)
+		}
+		if changed, autoErr := automaticCycle(engine, cfg, s); autoErr != nil {
+			s.LastError = "automatic event planner: " + autoErr.Error()
+			s.LastErrorTime = now()
+			if err := writeStatus(cfg, s); err != nil {
+				return finish(stdout, opts, false, "automatic status publication: "+err.Error(), 6)
+			}
+		} else if changed {
+			if err := writeStatus(cfg, s); err != nil {
+				return finish(stdout, opts, false, "automatic status publication: "+err.Error(), 6)
+			}
 		}
 		if s.Mode == "normal" {
 			for _, name := range activeList(s) {
@@ -242,6 +262,11 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 	}
 	if !eventExists(cfg, event) {
 		return nil, fmt.Errorf("unknown event: %s", event)
+	}
+	if reqPath != "" {
+		if err := validateAutoRequest(cfg, s, req); err != nil {
+			return nil, err
+		}
 	}
 	// Strict WAL protocol: no privileged mutation before the applying phase
 	// is durably published for this exact queued request.
@@ -382,6 +407,8 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		}
 		s.LogLevel = get(cfg, "header.log_level")
 		s.LastReloadTime = now()
+		s.AutoPlanner = nil
+		s.AutoBlocked = false
 		change = map[string]any{"type": "reload", "name": "reload", "state": "applied", "timestamp": time.Now().Unix()}
 	case "pause":
 		if err := restoreActive(engine, cfg, s); err != nil {
@@ -395,6 +422,7 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		}
 		s.Mode = "safe"
 		s.Active = map[string]bool{}
+		s.AutoOwned = map[string]bool{}
 		change = map[string]any{"type": "safe_mode", "name": "safe_mode", "state": "active", "timestamp": time.Now().Unix()}
 	case "resume":
 		wasPaused := s.Mode == "paused"
@@ -411,6 +439,16 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		change = map[string]any{"type": "safe_mode", "name": "safe_mode", "state": "inactive", "timestamp": time.Now().Unix()}
 	default:
 		return nil, fmt.Errorf("unknown control command: %s", cmd)
+	}
+	if reqPath != "" && (cmd == "start" || cmd == "stop") {
+		if s.AutoOwned == nil {
+			s.AutoOwned = map[string]bool{}
+		}
+		if req.Origin == "automatic" && cmd == "start" && s.Active[event] {
+			s.AutoOwned[event] = true
+		} else {
+			delete(s.AutoOwned, event)
+		}
 	}
 	clearLastError(s)
 	if err := persistRuntimeState(engine, cfg, s); err != nil {
@@ -492,6 +530,7 @@ type runtimeState struct {
 	Active         []string            `json:"active"`
 	Original       map[string]string   `json:"original"`
 	ResourceLeases map[string][]string `json:"resource_leases,omitempty"`
+	Automatic      []string            `json:"automatic_owned,omitempty"`
 }
 
 func runtimeStatePath() string {
@@ -511,7 +550,7 @@ func persistRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state) er
 }
 
 func persistRuntimeSnapshot(cfg map[string]any, s *state, snapshot map[string]string) error {
-	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot, ResourceLeases: declaredLeases(cfg, s.Active)}
+	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot, ResourceLeases: declaredLeases(cfg, s.Active), Automatic: autoOwnedList(s)}
 	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" {
 		if err := os.Remove(runtimeStatePath()); errors.Is(err, os.ErrNotExist) {
 			return nil
@@ -581,6 +620,18 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 		}
 		s.Active[name] = true
 	}
+	if s.AutoOwned == nil {
+		s.AutoOwned = map[string]bool{}
+	}
+	for _, name := range rs.Automatic {
+		if name != "charging" && name != "screen_off" && name != "low_power" {
+			return fmt.Errorf("invalid automatic recovery owner %q", name)
+		}
+		if !s.Active[name] || s.AutoOwned[name] {
+			return fmt.Errorf("orphaned or duplicate automatic recovery owner %q", name)
+		}
+		s.AutoOwned[name] = true
+	}
 	if dry {
 		if len(rs.Original) > 0 {
 			return errors.New("dry-run cannot reconcile pending privileged changes")
@@ -603,6 +654,7 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 		// a successful repair. Enter safe mode and require deliberate resume.
 		s.Mode = "safe"
 		s.Active = map[string]bool{}
+		s.AutoOwned = map[string]bool{}
 		if err := persistRuntimeState(engine, cfg, s); err != nil {
 			return fmt.Errorf("persist post-recovery safe mode: %w", err)
 		}
@@ -648,7 +700,7 @@ func writeStatus(cfg map[string]any, s *state) error {
 	} else {
 		profiles = append(profiles, active...)
 	}
-	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults}}
+	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults, "automatic": s.AutoReport, "automatic_owned": autoOwnedList(s)}}
 	return atomicJSON(p.Status, payload, 0o644)
 }
 
