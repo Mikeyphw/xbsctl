@@ -323,7 +323,8 @@ func stringSlice(v any) []string {
 }
 
 func emitError(stdout io.Writer, opts options, message string, code int) int {
-	return emit(stdout, opts, "error", message, nil, false) | code - code + code
+	emit(stdout, opts, "error", message, nil, false)
+	return code
 }
 
 func emit(stdout io.Writer, opts options, status, message string, data any, dataIsJSON bool) int {
