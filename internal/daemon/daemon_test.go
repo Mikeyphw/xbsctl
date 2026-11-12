@@ -231,14 +231,14 @@ func TestRuntimeStateRecoversActiveEventsAndSnapshot(t *testing.T) {
 	}
 	s2 := &state{Mode: "normal", Active: map[string]bool{}, EffectResults: map[string]any{}}
 	e2 := tuning.New(nil)
-	if err := recoverRuntimeState(e2, cfg, s2, true); err != nil {
-		t.Fatal(err)
+	if err := recoverRuntimeState(e2, cfg, s2, true); err == nil || !strings.Contains(err.Error(), "dry-run cannot reconcile") {
+		t.Fatalf("unrestored privileged snapshot accepted in dry-run: %v", err)
 	}
 	if s2.Mode != "paused" || !s2.Active["manual"] {
 		t.Fatalf("state=%+v", s2)
 	}
 	if e2.Snapshot()["file:/tmp/example"] != "before" {
-		t.Fatalf("snapshot=%v", e2.Snapshot())
+		t.Fatalf("durable recovery evidence disappeared: %v", e2.Snapshot())
 	}
 }
 

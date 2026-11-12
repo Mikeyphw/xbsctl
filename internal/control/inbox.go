@@ -75,6 +75,9 @@ func NextRequest(ctl string) (Request, string, error) {
 
 		name := names[0]
 		p := filepath.Join(dir, name)
+		// A claim created by this invocation is fresh work. Only an older
+		// unacknowledged .work file can be treated as an interrupted claim.
+		claimedHere := false
 		if strings.HasSuffix(name, ".json") {
 			claimed := filepath.Join(dir, strings.TrimSuffix(name, ".json")+".work")
 			if err := os.Rename(p, claimed); err != nil {
@@ -84,6 +87,7 @@ func NextRequest(ctl string) (Request, string, error) {
 				return Request{}, "", err
 			}
 			p = claimed
+			claimedHere = true
 		}
 		b, err := os.ReadFile(p)
 		if err != nil {
@@ -93,7 +97,7 @@ func NextRequest(ctl string) (Request, string, error) {
 			return Request{}, "", err
 		}
 		var r Request
-		if err = json.Unmarshal(b, &r); err != nil || r.ID == "" || r.Command == "" {
+		if err = json.Unmarshal(b, &r); err != nil || !validRequestID(r.ID) || r.ID != requestBase(name) || r.Command == "" {
 			bad := p + ".bad"
 			_ = os.Rename(p, bad)
 			if err != nil {
@@ -107,6 +111,19 @@ func NextRequest(ctl string) (Request, string, error) {
 			_ = os.Remove(p)
 			continue
 		}
+		if !claimedHere && strings.HasSuffix(p, ".work") {
+			// The previous process may have applied root effects before dying.
+			// Fail closed: never replay this request with an unknown commit state.
+			cause := fmt.Errorf("interrupted command %s requires reconciliation; not replayed", r.ID)
+			if err := CompleteRequest(ctl, r, cause); err != nil {
+				return Request{}, p, fmt.Errorf("persist interrupted request acknowledgement: %w", err)
+			}
+			interrupted := strings.TrimSuffix(p, ".work") + ".interrupted"
+			if err := os.Rename(p, interrupted); err != nil {
+				return Request{}, p, fmt.Errorf("quarantine interrupted request: %w", err)
+			}
+			return Request{}, interrupted, cause
+		}
 		return r, p, nil
 	}
 }
@@ -117,7 +134,24 @@ func requestBase(name string) string {
 	return name
 }
 
+// validRequestID allows only the local queue ID grammar. In particular it
+// cannot escape the ack directory via slashes, traversal or encoded paths.
+func validRequestID(id string) bool {
+	if len(id) < 3 || len(id) > 96 {
+		return false
+	}
+	for _, c := range id {
+		if c != '-' && (c < '0' || c > '9') {
+			return false
+		}
+	}
+	return true
+}
+
 func CompleteRequest(ctl string, r Request, err error) error {
+	if !validRequestID(r.ID) {
+		return fmt.Errorf("invalid acknowledgement id")
+	}
 	dir := ctl + ".ack"
 	if e := os.MkdirAll(dir, 0755); e != nil {
 		return e
@@ -130,18 +164,46 @@ func CompleteRequest(ctl string, r Request, err error) error {
 	b, _ := json.Marshal(a)
 	tmp := filepath.Join(dir, "."+r.ID+".tmp")
 	dst := filepath.Join(dir, r.ID+".json")
-	if e := os.WriteFile(tmp, append(b, '\n'), 0644); e != nil {
+	f, e := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+	if e != nil {
 		return e
 	}
-	return os.Rename(tmp, dst)
+	defer os.Remove(tmp)
+	if _, e = f.Write(append(b, '\n')); e != nil {
+		_ = f.Close()
+		return e
+	}
+	if e = f.Sync(); e != nil {
+		_ = f.Close()
+		return e
+	}
+	if e = f.Close(); e != nil {
+		return e
+	}
+	if e = os.Rename(tmp, dst); e != nil {
+		return e
+	}
+	d, e := os.Open(dir)
+	if e != nil {
+		return e
+	}
+	e = d.Sync()
+	closeErr := d.Close()
+	if e != nil {
+		return e
+	}
+	return closeErr
 }
 func ReadAck(ctl, id string) (Ack, bool) {
+	if !validRequestID(id) {
+		return Ack{}, false
+	}
 	b, e := os.ReadFile(filepath.Join(ctl+".ack", id+".json"))
 	if e != nil {
 		return Ack{}, false
 	}
 	var a Ack
-	if json.Unmarshal(b, &a) != nil {
+	if json.Unmarshal(b, &a) != nil || a.ID != id {
 		return Ack{}, false
 	}
 	return a, true

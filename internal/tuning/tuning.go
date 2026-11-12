@@ -59,6 +59,9 @@ func (SystemRunner) Glob(p string) ([]string, error) { return filepath.Glob(p) }
 type Engine struct {
 	R        Runner
 	original map[string]string
+	// journal commits the next recovery snapshot before the corresponding root write.
+	// A failed commit prevents the write; it never silently degrades to RAM-only.
+	journal func(map[string]string) error
 }
 
 func New(r Runner) *Engine {
@@ -131,11 +134,42 @@ func boolean(v any) bool {
 	return false
 }
 
-func (e *Engine) remember(key, value string) {
-	if _, ok := e.original[key]; !ok {
-		e.original[key] = value
+// SetJournal enables write-ahead persistence for every newly owned reversible effect.
+// The callback must durably commit the supplied snapshot or return an error.
+func (e *Engine) SetJournal(fn func(map[string]string) error) { e.journal = fn }
+
+func (e *Engine) remember(key, value string) error {
+	if _, ok := e.original[key]; ok {
+		return nil
 	}
+	next := clone(e.original)
+	next[key] = value
+	if e.journal != nil {
+		if err := e.journal(clone(next)); err != nil {
+			return fmt.Errorf("write-ahead journal %s: %w", key, err)
+		}
+	}
+	e.original = next
+	return nil
 }
+
+// release is deliberately ordered: commit removal before forgetting the record
+// in memory. A failed commit retains the record for an idempotent retry.
+func (e *Engine) release(key string) error {
+	if _, ok := e.original[key]; !ok {
+		return nil
+	}
+	next := clone(e.original)
+	delete(next, key)
+	if e.journal != nil {
+		if err := e.journal(clone(next)); err != nil {
+			return fmt.Errorf("journal release %s: %w", key, err)
+		}
+	}
+	e.original = next
+	return nil
+}
+
 func (e *Engine) restoreRemembered(key string, restore func(string) error) error {
 	v, ok := e.original[key]
 	if !ok {
@@ -144,8 +178,7 @@ func (e *Engine) restoreRemembered(key string, restore func(string) error) error
 	if err := restore(v); err != nil {
 		return err
 	}
-	delete(e.original, key)
-	return nil
+	return e.release(key)
 }
 func (e *Engine) niceOf(pid string) (string, error) {
 	s, err := e.R.Read(filepath.Join("/proc", pid, "stat"))
@@ -170,7 +203,9 @@ func (e *Engine) renice(pid string, value int) error {
 		if err != nil {
 			return err
 		}
-		e.remember(key, old)
+		if err := e.remember(key, old); err != nil {
+			return err
+		}
 	}
 	_, err := e.R.Run("renice", strconv.Itoa(value), "-p", pid)
 	return err
@@ -221,7 +256,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			}
 			if step.key != "" {
 				if _, existed := before[step.key]; !existed {
-					delete(e.original, step.key)
+					if journalErr := e.release(step.key); journalErr != nil {
+						rollbackErrors = append(rollbackErrors, journalErr.Error())
+					}
 				}
 			}
 		}
@@ -233,8 +270,8 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			}
 			if _, err := e.R.Run("renice", old, "-p", strings.TrimPrefix(key, "nice:")); err != nil {
 				rollbackErrors = append(rollbackErrors, fmt.Sprintf("%s: %v", key, err))
-			} else {
-				delete(e.original, key)
+			} else if journalErr := e.release(key); journalErr != nil {
+				rollbackErrors = append(rollbackErrors, journalErr.Error())
 			}
 		}
 		var pending []string
@@ -263,7 +300,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			if er != nil {
 				return fail(er)
 			}
-			e.remember("file:"+p, old)
+			if er = e.remember("file:"+p, old); er != nil {
+				return fail(er)
+			}
 			pp, oo := p, old
 			deferUndo("file:"+pp, func() error { return e.R.Write(pp, oo) })
 			if er = e.R.Write(p, "powersave"); er != nil {
@@ -288,7 +327,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			if er != nil {
 				return fail(er)
 			}
-			e.remember("file:"+p, old)
+			if er = e.remember("file:"+p, old); er != nil {
+				return fail(er)
+			}
 			pp, oo := p, old
 			deferUndo("file:"+pp, func() error { return e.R.Write(pp, oo) })
 			if er = e.R.Write(p, "0"); er != nil {
@@ -349,7 +390,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			wasEnabled := !strings.Contains(disabled, "com.google.android.gms")
 			// A pre-disabled package must never be enabled by rollback or restore.
 			if wasEnabled {
-				e.remember("gms-enabled", "true")
+				if err = e.remember("gms-enabled", "true"); err != nil {
+					return fail(err)
+				}
 				deferUndo("gms-enabled", func() error { _, x := e.R.Run("pm", "enable", "com.google.android.gms"); return x })
 			}
 			if _, err = e.R.Run("pm", "disable", "com.google.android.gms"); err != nil {
@@ -394,7 +437,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		if o != "true" && o != "false" {
 			return fail(fmt.Errorf("prior ro.config.low_ram is not a boolean: %q", o))
 		}
-		e.remember("low_ram", o)
+		if err = e.remember("low_ram", o); err != nil {
+			return fail(err)
+		}
 		deferUndo("low_ram", func() error { _, x := e.R.Run("resetprop", "-n", "ro.config.low_ram", o); return x })
 		if _, err = e.R.Run("resetprop", "-n", "ro.config.low_ram", "true"); err != nil {
 			return fail(err)
@@ -408,10 +453,15 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		if ev.Doze == "light" {
 			args = append(args, "light")
 		}
+		// This is an XBS-owned force-idle action: record the inverse before
+		// invoking Android, including commands that partially succeed then fail.
+		if err = e.remember("doze:owned", "unforce"); err != nil {
+			return fail(err)
+		}
+		deferUndo("doze:owned", func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
 		if _, err = e.R.Run("dumpsys", args...); err != nil {
 			return fail(err)
 		}
-		deferUndo("", func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
 		add("doze", "applied", ev.Doze)
 	} else {
 		add("doze", "disabled", "")
@@ -427,7 +477,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			return fail(fmt.Errorf("cannot determine prior Wi-Fi state from status output: %q", strings.TrimSpace(out)))
 		}
 		if wasOn {
-			e.remember("wifi-enabled", "true")
+			if err = e.remember("wifi-enabled", "true"); err != nil {
+				return fail(err)
+			}
 			deferUndo("wifi-enabled", func() error { _, x := e.R.Run("svc", "wifi", "enable"); return x })
 		}
 		if _, err = e.R.Run("svc", "wifi", "disable"); err != nil {
@@ -595,7 +647,9 @@ func (e *Engine) suspendPackage(pkg string, deferUndo func(string, func() error)
 		// Not ours to modify or to undo.
 		return nil
 	}
-	e.remember(key, "false")
+	if err := e.remember(key, "false"); err != nil {
+		return err
+	}
 	deferUndo(key, func() error { _, restoreErr := e.R.Run("pm", "unsuspend", "--user", "0", pkg); return restoreErr })
 	return e.appAction("suspend", pkg)
 }
@@ -709,13 +763,23 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			err := e.R.Write(p, old)
 			fail("cpu", err)
 			if err == nil {
-				delete(e.original, key)
+				if journalErr := e.release(key); journalErr != nil {
+					fail("cpu_journal", journalErr)
+				}
 			}
 		}
 	}
-	if ev.Doze != "false" {
+	// Never unforce an idle state unless XBS recorded ownership of the
+	// force-idle operation. Older unjournaled Doze effects require a
+	// deliberate migration decision; do not guess during recovery.
+	if _, owned := e.original["doze:owned"]; owned {
 		_, err := e.R.Run("dumpsys", "deviceidle", "unforce")
 		fail("doze", err)
+		if err == nil {
+			if journalErr := e.release("doze:owned"); journalErr != nil {
+				fail("doze_journal", journalErr)
+			}
+		}
 	}
 	if old, ok := e.original["wifi-enabled"]; ok {
 		want, _ := strconv.ParseBool(old)
@@ -725,14 +789,18 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 		}
 		fail("kill_wifi", err)
 		if err == nil {
-			delete(e.original, "wifi-enabled")
+			if journalErr := e.release("wifi-enabled"); journalErr != nil {
+				fail("kill_wifi_journal", journalErr)
+			}
 		}
 	}
 	if old, ok := e.original["low_ram"]; ok {
 		_, err := e.R.Run("resetprop", "-n", "ro.config.low_ram", old)
 		fail("low_ram", err)
 		if err == nil {
-			delete(e.original, "low_ram")
+			if journalErr := e.release("low_ram"); journalErr != nil {
+				fail("low_ram_journal", journalErr)
+			}
 		}
 	}
 	if old, ok := e.original["gms-enabled"]; ok {
@@ -743,7 +811,9 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 		}
 		fail("handle_gms", err)
 		if err == nil {
-			delete(e.original, "gms-enabled")
+			if journalErr := e.release("gms-enabled"); journalErr != nil {
+				fail("handle_gms_journal", journalErr)
+			}
 		}
 	}
 	// Restore only exact packages that XBS recorded as originally unsuspended.
@@ -764,7 +834,9 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 		_, err := e.R.Run("pm", "unsuspend", "--user", "0", pkg)
 		fail("handle_apps", err)
 		if err == nil {
-			delete(e.original, key)
+			if journalErr := e.release(key); journalErr != nil {
+				fail("suspend_journal", journalErr)
+			}
 		}
 	}
 	for key, old := range clone(e.original) {
@@ -773,7 +845,9 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			_, err := e.R.Run("renice", old, "-p", pid)
 			fail("nice", err)
 			if err == nil {
-				delete(e.original, key)
+				if journalErr := e.release(key); journalErr != nil {
+					fail("nice_journal", journalErr)
+				}
 			}
 		}
 	}
