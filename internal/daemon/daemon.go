@@ -44,6 +44,7 @@ type state struct {
 	AutoPlanner      *autoevents.Planner
 	AutoBlocked      bool
 	AutoReport       map[string]any
+	AutoDesired      []string
 }
 
 func Main(args []string, stdout io.Writer, stderr io.Writer) int {
@@ -106,7 +107,31 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 				return finish(stdout, opts, false, err.Error(), 6)
 			}
 		}
+		if s.QuitRequested {
+			if err := finishBootQuit(engine, cfg, s); err != nil {
+				return finish(stdout, opts, false, err.Error(), 6)
+			}
+		}
 		return finish(stdout, opts, true, "XtremeBSd one-shot completed", 0)
+	}
+	if started, bootErr := startBootOnce(engine, cfg, s, opts.dryRun); bootErr != nil {
+		s.Mode = "recovery_required"
+		s.LastError = "boot lifecycle: " + bootErr.Error()
+		s.LastErrorTime = now()
+		_ = writeStatus(cfg, s)
+		return finish(stdout, opts, false, s.LastError, 6)
+	} else if started {
+		if err := writeStatus(cfg, s); err != nil {
+			return finish(stdout, opts, false, err.Error(), 6)
+		}
+		change := map[string]any{"type": "profile", "name": "boot", "state": "active", "source": "boot_once", "timestamp": time.Now().Unix()}
+		if err := writeEventChanges(cfg, s, change); err != nil {
+			s.Mode = "recovery_required"
+			s.LastError = "boot event publication: " + err.Error()
+			s.LastErrorTime = now()
+			_ = writeStatus(cfg, s)
+			return finish(stdout, opts, false, s.LastError, 6)
+		}
 	}
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
@@ -135,15 +160,29 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 			}
 		}
 		if s.QuitRequested {
-			return finish(stdout, opts, true, "XtremeBSd boot event requested quit", 0)
+			if err := finishBootQuit(engine, cfg, s); err != nil {
+				s.Mode = "recovery_required"
+				s.LastError = err.Error()
+				s.LastErrorTime = now()
+				_ = writeStatus(cfg, s)
+				return finish(stdout, opts, false, "boot quit restoration failed: "+err.Error(), 6)
+			}
+			return finish(stdout, opts, true, "XtremeBSd boot event requested quit; effects restored", 0)
 		}
 		if changed, autoErr := automaticCycle(engine, cfg, s); autoErr != nil {
+			s.AutoBlocked = true
 			s.LastError = "automatic event planner: " + autoErr.Error()
 			s.LastErrorTime = now()
+			if err := persistRuntimeState(engine, cfg, s); err != nil {
+				return finish(stdout, opts, false, "automatic WAL persistence failed: "+err.Error(), 6)
+			}
 			if err := writeStatus(cfg, s); err != nil {
 				return finish(stdout, opts, false, "automatic status publication: "+err.Error(), 6)
 			}
 		} else if changed {
+			if err := persistRuntimeState(engine, cfg, s); err != nil {
+				return finish(stdout, opts, false, "automatic WAL persistence failed: "+err.Error(), 6)
+			}
 			if err := writeStatus(cfg, s); err != nil {
 				return finish(stdout, opts, false, "automatic status publication: "+err.Error(), 6)
 			}
@@ -531,6 +570,10 @@ type runtimeState struct {
 	Original       map[string]string   `json:"original"`
 	ResourceLeases map[string][]string `json:"resource_leases,omitempty"`
 	Automatic      []string            `json:"automatic_owned,omitempty"`
+	AutoDesired    []string            `json:"automatic_desired,omitempty"`
+	AutoObserved   map[string]any      `json:"automatic_observed,omitempty"`
+	AutoPending    *autoPending        `json:"automatic_pending,omitempty"`
+	AutoBlocked    bool                `json:"automatic_blocked,omitempty"`
 }
 
 func runtimeStatePath() string {
@@ -550,8 +593,8 @@ func persistRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state) er
 }
 
 func persistRuntimeSnapshot(cfg map[string]any, s *state, snapshot map[string]string) error {
-	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot, ResourceLeases: declaredLeases(cfg, s.Active), Automatic: autoOwnedList(s)}
-	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" {
+	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot, ResourceLeases: declaredLeases(cfg, s.Active), Automatic: autoOwnedList(s), AutoDesired: append([]string{}, s.AutoDesired...), AutoObserved: s.AutoReport, AutoPending: s.AutoPending, AutoBlocked: s.AutoBlocked}
+	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" && len(rs.AutoDesired) == 0 && len(rs.AutoObserved) == 0 && rs.AutoPending == nil && !rs.AutoBlocked {
 		if err := os.Remove(runtimeStatePath()); errors.Is(err, os.ErrNotExist) {
 			return nil
 		} else if err != nil {
@@ -632,6 +675,18 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 		}
 		s.AutoOwned[name] = true
 	}
+	// Desired/observed sensor data is diagnostic, NEVER proof that a
+	// privileged transition was executed. The planner always reobserves.
+	s.AutoDesired = append([]string{}, rs.AutoDesired...)
+	s.AutoReport = rs.AutoObserved
+	s.AutoBlocked = rs.AutoBlocked
+	if rs.AutoPending != nil {
+		if rs.AutoPending.ID == "" || (rs.AutoPending.Command != "start" && rs.AutoPending.Command != "stop") ||
+			(rs.AutoPending.Event != "charging" && rs.AutoPending.Event != "screen_off" && rs.AutoPending.Event != "low_power") {
+			return fmt.Errorf("invalid persisted automatic pending command")
+		}
+		s.AutoPending = rs.AutoPending
+	}
 	if dry {
 		if len(rs.Original) > 0 {
 			return errors.New("dry-run cannot reconcile pending privileged changes")
@@ -659,8 +714,17 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 			return fmt.Errorf("persist post-recovery safe mode: %w", err)
 		}
 	}
-	if s.Mode == "normal" && len(rs.Active) > 0 {
-		if err := reapplyActive(engine, cfg, s, false); err != nil {
+	bootWasActive := s.Active["boot"]
+	if err := guardBootReplay(engine, cfg, s); err != nil {
+		return fmt.Errorf("boot restart replay guard: %w", err)
+	}
+	if bootWasActive && !s.Active["boot"] {
+		if err := persistRuntimeState(engine, cfg, s); err != nil {
+			return fmt.Errorf("persist consumed boot-once runtime profile: %w", err)
+		}
+	}
+	if s.Mode == "normal" && len(s.Active) > 0 {
+		if err := reapplyActive(engine, cfg, s, dry); err != nil {
 			return fmt.Errorf("reapply recovered profiles: %w", err)
 		}
 		if err := persistRuntimeState(engine, cfg, s); err != nil {
@@ -700,7 +764,7 @@ func writeStatus(cfg map[string]any, s *state) error {
 	} else {
 		profiles = append(profiles, active...)
 	}
-	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults, "automatic": s.AutoReport, "automatic_owned": autoOwnedList(s)}}
+	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults, "automatic": s.AutoReport, "automatic_owned": autoOwnedList(s), "automatic_desired": s.AutoDesired, "automatic_pending": s.AutoPending, "automatic_blocked": s.AutoBlocked}}
 	return atomicJSON(p.Status, payload, 0o644)
 }
 
