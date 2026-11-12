@@ -22,10 +22,11 @@ import (
 const maxRequestBytes = 4096
 
 type Request struct {
-	ID      string `json:"id"`
-	Command string `json:"command"`
-	Event   string `json:"event,omitempty"`
-	Created int64  `json:"created"`
+	ID       string `json:"id"`
+	Command  string `json:"command"`
+	Event    string `json:"event,omitempty"`
+	Created  int64  `json:"created"`
+	Deadline int64  `json:"deadline_unix_nano,omitempty"`
 }
 
 var requestCounter uint64
@@ -37,7 +38,59 @@ type Ack struct {
 	Completed int64  `json:"completed"`
 }
 
+// spoolPathComponents refuses symbolic links in every existing ancestor.
+// The final directory alone is insufficient: a symlinked parent would let
+// a privileged daemon read or publish in a different filesystem tree.
+func spoolPathComponents(path string) error {
+	for cur := filepath.Clean(path); ; cur = filepath.Dir(cur) {
+		info, err := os.Lstat(cur)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		if err == nil && info.Mode()&os.ModeSymlink != 0 {
+			// Android's system-managed /data/data -> /data/user/0 alias
+			// appears in Termux's documented private path. Permit ONLY
+			// this root-owned, exact, platform-provided alias.
+			if cur == "/data/data" && runtime.GOOS == "android" {
+				owner, ok := info.Sys().(*syscall.Stat_t)
+				target, resolveErr := filepath.EvalSymlinks(cur)
+				if ok && owner.Uid == 0 && resolveErr == nil && filepath.Clean(target) == "/data/user/0" {
+					continue
+				}
+			}
+			return fmt.Errorf("symlinked queue path component: %s", cur)
+		}
+		parent := filepath.Dir(cur)
+		if parent == cur {
+			return nil
+		}
+	}
+}
+
+// inspectSpoolDir is strictly read-only. Never chmod during `runtime
+// recovery` or while inspecting phase/ack evidence.
+func inspectSpoolDir(path string) error {
+	if err := spoolPathComponents(path); err != nil {
+		return err
+	}
+	st, err := os.Lstat(path)
+	if err != nil {
+		return err
+	}
+	if st.Mode()&os.ModeSymlink != 0 || !st.IsDir() || st.Mode().Perm() != 0700 {
+		return fmt.Errorf("unsafe spool directory mode/type: %s", path)
+	}
+	owner, ok := st.Sys().(*syscall.Stat_t)
+	if !ok || owner.Uid != uint32(os.Geteuid()) {
+		return fmt.Errorf("queue spool owner mismatch: %s", path)
+	}
+	return nil
+}
+
 func privateSpoolDir(path string, create bool) error {
+	if err := spoolPathComponents(path); err != nil {
+		return err
+	}
 	if create {
 		// Legacy spools may exist with 0755. Tighten them before accessing data.
 		if err := os.MkdirAll(path, 0700); err != nil {
@@ -50,6 +103,15 @@ func privateSpoolDir(path string, create bool) error {
 	}
 	if st.Mode()&os.ModeSymlink != 0 || !st.IsDir() {
 		return fmt.Errorf("unsafe queue directory %s", path)
+	}
+	// Never chmod an untrusted owner-controlled queue as privileged root.
+	// The controller and daemon must use the same trusted runtime owner.
+	owner, ok := st.Sys().(*syscall.Stat_t)
+	if !ok || owner.Uid != uint32(os.Geteuid()) {
+		return fmt.Errorf("queue spool owner mismatch: %s", path)
+	}
+	if err := spoolPathComponents(path); err != nil {
+		return err
 	}
 	if st.Mode().Perm() != 0700 {
 		if err := os.Chmod(path, 0700); err != nil {
@@ -189,6 +251,15 @@ func publishNewFile(tmp, dst string) error {
 	return nil
 }
 func QueueRequest(ctl, command, event string) (Request, error) {
+	return QueueRequestWithDeadline(ctl, command, event, 0)
+}
+
+// QueueRequestWithDeadline imposes only a pre-execution deadline. In-flight
+// Android operations must never be interrupted by a client-side timeout.
+func QueueRequestWithDeadline(ctl, command, event string, ttl time.Duration) (Request, error) {
+	if ttl < 0 || ttl > 24*time.Hour {
+		return Request{}, errors.New("invalid command TTL")
+	}
 	if !validCommand(command) {
 		return Request{}, fmt.Errorf("invalid queue command %q", command)
 	}
@@ -201,6 +272,9 @@ func QueueRequest(ctl, command, event string) (Request, error) {
 	}
 	id := fmt.Sprintf("%020d-%d-%06d", time.Now().UnixNano(), os.Getpid(), atomic.AddUint64(&requestCounter, 1))
 	r := Request{ID: id, Command: command, Event: event, Created: time.Now().Unix()}
+	if ttl > 0 {
+		r.Deadline = time.Now().Add(ttl).UnixNano()
+	}
 	b, err := json.Marshal(r)
 	if err != nil {
 		return Request{}, err
@@ -310,16 +384,26 @@ func NextRequest(ctl string) (Request, string, error) {
 			return Request{}, bad, fmt.Errorf("unsafe control request: %w", err)
 		}
 		var r Request
-		if err = json.Unmarshal(b, &r); err != nil || !validRequestID(r.ID) || r.ID != requestBase(name) || !validCommand(r.Command) || len(r.Event) > 128 || strings.ContainsAny(r.Event, "\x00\r\n\t ") {
+		if err = json.Unmarshal(b, &r); err != nil || !validRequestID(r.ID) || r.ID != requestBase(name) || !validCommand(r.Command) || len(r.Event) > 128 || strings.ContainsAny(r.Event, "\x00\r\n\t ") || r.Deadline < 0 {
 			bad, qerr := quarantine(dir, p, ".bad")
 			if qerr != nil {
 				return Request{}, p, qerr
 			}
 			return Request{}, bad, fmt.Errorf("invalid control request %s", name)
 		}
-		if _, present, err := strictAck(ctl, r.ID); err != nil {
+		if claimedHere {
+			// A crash between claim and this write has NOT reached privileged
+			// execution, but is conservatively treated as unknown on recovery.
+			if err := writePhase(ctl, r, "claimed"); err != nil {
+				return Request{}, p, fmt.Errorf("durable claim phase: %w", err)
+			}
+		}
+		if ack, present, err := strictAck(ctl, r.ID); err != nil {
 			return Request{}, p, err
 		} else if present {
+			if ack.State == "unknown" {
+				return Request{}, p, fmt.Errorf("%w: command %s", ErrUnknownOutcome, r.ID)
+			}
 			if err := os.Remove(p); err != nil {
 				return Request{}, p, err
 			}
@@ -328,8 +412,35 @@ func NextRequest(ctl string) (Request, string, error) {
 			}
 			continue
 		}
+		if claimedHere && r.Deadline > 0 && time.Now().UnixNano() > r.Deadline {
+			cause := fmt.Errorf("command %s deadline expired before execution; not replayed", r.ID)
+			if err := CompleteRequest(ctl, r, cause); err != nil {
+				return Request{}, p, err
+			}
+			expired, err := quarantine(dir, p, ".interrupted")
+			if err != nil {
+				return Request{}, p, err
+			}
+			return Request{}, expired, cause
+		}
 		if !claimedHere {
-			cause := fmt.Errorf("interrupted command %s requires reconciliation; not replayed", r.ID)
+			claimed, err := readPhase(ctl, r, "claimed")
+			if err != nil {
+				return Request{}, p, err
+			}
+			applying, err := readPhase(ctl, r, "applying")
+			if err != nil {
+				return Request{}, p, err
+			}
+			if applying || !claimed {
+				// Root effects MAY have happened: UNKNOWN is not FAILED, and the
+				// original .work evidence must survive daemon restarts.
+				if err := CompleteUnknownRequest(ctl, r); err != nil {
+					return Request{}, p, fmt.Errorf("persist unknown outcome: %w", err)
+				}
+				return Request{}, p, fmt.Errorf("%w: command %s", ErrUnknownOutcome, r.ID)
+			}
+			cause := fmt.Errorf("interrupted command %s before privileged execution; not replayed", r.ID)
 			if err := CompleteRequest(ctl, r, cause); err != nil {
 				return Request{}, p, fmt.Errorf("persist interrupted receipt: %w", err)
 			}
@@ -361,7 +472,7 @@ func strictAck(ctl, id string) (Ack, bool, error) {
 		return Ack{}, false, errors.New("invalid acknowledgement id")
 	}
 	dir := ctl + ".ack"
-	if err := privateSpoolDir(dir, false); errors.Is(err, os.ErrNotExist) {
+	if err := inspectSpoolDir(dir); errors.Is(err, os.ErrNotExist) {
 		return Ack{}, false, nil
 	} else if err != nil {
 		return Ack{}, false, err
@@ -374,7 +485,7 @@ func strictAck(ctl, id string) (Ack, bool, error) {
 		return Ack{}, false, fmt.Errorf("read acknowledgement: %w", err)
 	}
 	var a Ack
-	if err := json.Unmarshal(b, &a); err != nil || a.ID != id || (a.State != "applied" && a.State != "failed") {
+	if err := json.Unmarshal(b, &a); err != nil || a.ID != id || (a.State != "applied" && a.State != "failed" && a.State != "unknown") {
 		return Ack{}, false, fmt.Errorf("invalid acknowledgement record for %s", id)
 	}
 	return a, true, nil

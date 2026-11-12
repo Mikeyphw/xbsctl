@@ -564,10 +564,12 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
           ],
           "blockers": [
-            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
+            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -582,9 +584,13 @@
           "implementation_sha": null,
           "evidence": [
             "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
-            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 HF01 audit additionally enforces owned private spool directory and rejects attacker-controlled symlink parents; permits only the system-root-owned Android /data/data -> /data/user/0 compatibility alias. Cross-UID rooted-device acceptance is pending."
           ],
-          "blockers": [],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -599,9 +605,12 @@
           "evidence": [
             "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
             "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
-            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
           ],
-          "blockers": [],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -610,11 +619,17 @@
           "id": "R02-04",
           "title": "Journal command lifecycle and ack separately",
           "acceptance": "Queued/claimed/executing/applied/failed/recovery required are durably distinguishable.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
+          ],
+          "blockers": [
+            "R02B: full Go and hosted checks, Android physical crash-window injection and manual unknown-outcome reconciliation signoff remain pending",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -628,9 +643,14 @@
           "implementation_sha": null,
           "evidence": [
             "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
-            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
           ],
-          "blockers": [],
+          "blockers": [
+            "R02B: full Go and hosted checks, Android physical crash-window injection and manual unknown-outcome reconciliation signoff remain pending",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -643,9 +663,12 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
           ],
-          "blockers": [],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -657,9 +680,12 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
+          ],
           "blockers": [
-            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
+            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -673,9 +699,14 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
           ],
-          "blockers": [],
+          "blockers": [
+            "R02B: full Go and hosted checks, Android physical crash-window injection and manual unknown-outcome reconciliation signoff remain pending",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -688,9 +719,14 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
           ],
-          "blockers": [],
+          "blockers": [
+            "R02B: full Go and hosted checks, Android physical crash-window injection and manual unknown-outcome reconciliation signoff remain pending",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -699,11 +735,15 @@
           "id": "R02-10",
           "title": "Configure bounded command deadlines and cancellation",
           "acceptance": "Timeouts preserve unknown-outcome state until observed; no blind redispatch.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
+          ],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -712,11 +752,16 @@
           "id": "R02-11",
           "title": "Keep status and event changes atomic and versioned",
           "acceptance": "Truncated/invalid status never causes optimistic transition or false acknowledgement.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
+          ],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -725,11 +770,15 @@
           "id": "R02-12",
           "title": "Define orderly termination and restoration",
           "acceptance": "SIGTERM/SIGINT/HUP paths have explicit fail-closed restoration and service lifecycle reporting.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified."
+          ],
+          "blockers": [
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
           "phase_test_suite_count": 18
@@ -741,9 +790,13 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+            "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending."
+          ],
           "blockers": [
-            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
+            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet",
+            "G-R02: full Go/hosted CI and Android API36/physical crash-window acceptance required before ACCEPTED"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -772,7 +825,11 @@
       ],
       "notes": [
         "First source-pinned patch prepared. No hosted Go/Android/device evidence yet; no acceptance claimed.",
-        "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+        "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending.",
+        "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+        "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending.",
+        "R02 HF01 audit additionally enforces owned private spool directory and rejects attacker-controlled symlink parents; permits only the system-root-owned Android /data/data -> /data/user/0 compatibility alias. Cross-UID rooted-device acceptance is pending.",
+        "R02 HF01 audit: recovery inspection uses strictly read-only directory validation, rejecting unsafe legacy modes without chmod. Included negative mutation/Go tests."
       ]
     },
     {
@@ -3214,6 +3271,30 @@
       "source_pin": "5c90596a44d8b8ce875b7e6803f3dbe9bc7fb169",
       "overlay": "XBS_R01C_EXCLUSIVE_EFFECT_OWNERSHIP_20261112.zip",
       "qualification": "SOURCE_PINNED_OVERLAY_PREPARED_HOSTED_AND_PHYSICAL_PENDING"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02 consolidated source overlay preparation",
+      "summary": "R02 consolidated source overlay prepared on f38a051: R02B claimed/applying journal plus guarded recovery inspection, bounded pre-execution TTL, queue-only cancellation, startup validation, status publication and checked shutdown. Full repository/hosted/API36/physical gates not yet qualified.",
+      "source_commit": "f38a051e64b1b8b5b842f23f4b887597b9b65058"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02 full HF01 source audit",
+      "summary": "R02 full HF01 audit: independently scan orphan unknown acknowledgements and applying phase records on daemon startup even when .work is absent; read-only recovery inspection shows same evidence; authenticated event bridge errors are reported durably without replaying executed root actions. Original R02B/R02 consolidated implementation preserved. Full repository/hosted/API36/physical runtime and authorized manual reconciliation acceptance still pending.",
+      "source_commit": "f38a051e64b1b8b5b842f23f4b887597b9b65058"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02 full HF01 ownership audit",
+      "summary": "R02 HF01 audit additionally enforces owned private spool directory and rejects attacker-controlled symlink parents; permits only the system-root-owned Android /data/data -> /data/user/0 compatibility alias. Cross-UID rooted-device acceptance is pending.",
+      "source_commit": "f38a051e64b1b8b5b842f23f4b887597b9b65058"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02 HF01 read-only inspection audit",
+      "summary": "R02 HF01 audit: recovery inspection uses strictly read-only directory validation, rejecting unsafe legacy modes without chmod. Included negative mutation/Go tests.",
+      "source_commit": "f048d2d5526a3d0d7632e477b6b4f052e41e30df"
     }
   ],
   "change_log": [
@@ -3238,6 +3319,14 @@
       "change": "Secure private request/ack directories; no-follow bounded reads; same-filesystem non-overwriting durable publication; daemon singleton flock; legacy command bounds; explicit --wait failure receipt. Isolated Go/race checks only; full-repo/hosted/physical gates pending.",
       "source_pin": "e273ac711e5d334c9552f3fb7d386aa15ad18066",
       "overlay": "XBS_R02A_SECURE_DAEMON_QUEUE_20261112.zip",
+      "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02B source-bound overlay preparation",
+      "change": "Durable claimed/applying phase markers; explicit unknown immutable receipt and preserved work evidence for interrupted privileged execution; startup replay hold before tuning WAL and active profile reapply; CLI unknown outcome. Offline isolated Go/race/crosscompile verification only; hosted and physical pending. Manual reconciliation intentionally required for unknown outcomes.",
+      "source_pin": "f38a051e64b1b8b5b842f23f4b887597b9b65058",
+      "overlay": "XBS_R02B_DURABLE_COMMAND_LIFECYCLE_20261112.zip",
       "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
     }
   ]

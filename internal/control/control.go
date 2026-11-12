@@ -27,6 +27,7 @@ type options struct {
 	jsonMode bool
 	wait     bool
 	timeout  time.Duration
+	ttl      time.Duration
 }
 
 type StatusSnapshot struct {
@@ -80,6 +81,39 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		return emit(stdout, opts, "ok", "Validation OK", nil, false)
 	case "start", "stop":
 		return queueEvent(stdout, opts, clean)
+	case "cancel":
+		if len(clean) != 2 {
+			return emitError(stdout, opts, "cancel requires one request ID", ExitInvalidArgs)
+		}
+		cfg, code, msg := loadConfigRequireExists()
+		if code != 0 {
+			return emitError(stdout, opts, msg, code)
+		}
+		ctl, err := ctlPath(cfg)
+		if err != nil {
+			return emitError(stdout, opts, err.Error(), ExitParseError)
+		}
+		if err = CancelQueuedRequest(ctl, clean[1]); err != nil {
+			return emitError(stdout, opts, "Cannot cancel claimed or unsafe request: "+err.Error(), ExitRuntime)
+		}
+		return emitControl(stdout, opts, "ok", "Cancelled before claim", "cancelled", "cancel", "", 0)
+	case "recovery":
+		if len(clean) != 1 {
+			return emitError(stdout, opts, "recovery is read-only; no arguments allowed", ExitInvalidArgs)
+		}
+		cfg, code, msg := loadConfigRequireExists()
+		if code != 0 {
+			return emitError(stdout, opts, msg, code)
+		}
+		ctl, err := ctlPath(cfg)
+		if err != nil {
+			return emitError(stdout, opts, err.Error(), ExitParseError)
+		}
+		report, err := InspectRecovery(ctl, config.ResolvePaths().Runtime)
+		if err != nil {
+			return emitError(stdout, opts, err.Error(), ExitRuntime)
+		}
+		return emit(stdout, opts, "ok", "Read-only recovery inspection", report, true)
 	case "reload", "pause", "resume", "safe":
 		return queueMode(stdout, opts, clean)
 	default:
@@ -97,6 +131,16 @@ func parse(args []string) (options, []string, error) {
 			opts.jsonMode = true
 		case "--wait":
 			opts.wait = true
+		case "--ttl":
+			if i+1 >= len(args) {
+				return opts, clean, errors.New("--ttl requires seconds")
+			}
+			i++
+			sec, err := strconv.Atoi(args[i])
+			if err != nil || sec < 1 || sec > 3600 {
+				return opts, clean, errors.New("invalid --ttl (1-3600 seconds)")
+			}
+			opts.ttl = time.Duration(sec) * time.Second
 		case "--timeout":
 			if i+1 >= len(args) {
 				return opts, clean, errors.New("--timeout")
@@ -131,7 +175,7 @@ func queueEvent(stdout io.Writer, opts options, clean []string) int {
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitParseError)
 	}
-	req, err := QueueRequest(ctl, action, event)
+	req, err := QueueRequestWithDeadline(ctl, action, event, opts.ttl)
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
 	}
@@ -139,6 +183,9 @@ func queueEvent(stdout io.Writer, opts options, clean []string) int {
 		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
 			if ack.State == "applied" {
 				return emitControl(stdout, opts, "ok", "Applied: "+action+" "+event, "applied", action, event, 0)
+			}
+			if ack.State == "unknown" {
+				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, event, ExitRuntime)
 			}
 			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, event, ExitRuntime)
 		}
@@ -160,7 +207,7 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitParseError)
 	}
-	req, err := QueueRequest(ctl, action, "")
+	req, err := QueueRequestWithDeadline(ctl, action, "", opts.ttl)
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
 	}
@@ -168,6 +215,9 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
 			if ack.State == "applied" {
 				return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0)
+			}
+			if ack.State == "unknown" {
+				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, "", ExitRuntime)
 			}
 			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, "", ExitRuntime)
 		}
@@ -385,5 +435,8 @@ func printHelp(w io.Writer) {
   Flags:
     --json          emit JSON output
     --wait          wait for the requested state transition
-    --timeout SEC   wait timeout in seconds (default: 8)`)
+    --timeout SEC   wait timeout in seconds (default: 8)
+    --ttl SEC       optional pre-execution queue deadline (1-3600 seconds)
+    cancel ID       cancel a request only if not yet claimed
+    recovery        read-only unknown-outcome and WAL inspection`)
 }
