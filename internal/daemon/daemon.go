@@ -51,9 +51,15 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 	}
 	s := &state{Mode: "normal", Active: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
 	engine := tuning.New(nil)
+	bindEngineJournal(engine, cfg, s)
 	if err := recoverRuntimeState(engine, cfg, s, opts.dryRun); err != nil {
+		// Never begin the control loop with a failed recovery; preserve the
+		// durable journal and expose explicit recovery_required state.
+		s.Mode = "recovery_required"
 		s.LastError = "restart reconciliation: " + err.Error()
 		s.LastErrorTime = now()
+		_ = writeStatus(cfg, s)
+		return finish(stdout, opts, false, s.LastError, 6)
 	}
 	if err := writeStatus(cfg, s); err != nil {
 		return finish(stdout, opts, false, err.Error(), 6)
@@ -84,6 +90,9 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		}
 		if change != nil || err != nil {
 			_ = writeStatus(cfg, s)
+		}
+		if s.Mode == "recovery_required" {
+			return finish(stdout, opts, false, "runtime restoration incomplete; refusing further commands", 6)
 		}
 		if change != nil {
 			_ = writeEventChanges(cfg, s, change)
@@ -150,6 +159,9 @@ func parse(args []string) (options, error) {
 }
 
 func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool) (change map[string]any, retErr error) {
+	if s.Mode == "recovery_required" {
+		return nil, errors.New("unresolved privileged restoration; control is disabled")
+	}
 	ctl := ctlPath(cfg)
 	req, reqPath, qerr := control.NextRequest(ctl)
 	if qerr != nil {
@@ -159,8 +171,15 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 	if reqPath != "" {
 		cmdline = strings.TrimSpace(req.Command + " " + req.Event)
 		defer func() {
-			_ = control.CompleteRequest(ctl, req, retErr)
-			_ = os.Remove(reqPath)
+			if ackErr := control.CompleteRequest(ctl, req, retErr); ackErr != nil {
+				// Preserve the .work file if the receipt could not be written.
+				// The next daemon refuses to replay that interrupted claim.
+				retErr = errors.Join(retErr, fmt.Errorf("durable command acknowledgement: %w", ackErr))
+				return
+			}
+			if removeErr := os.Remove(reqPath); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
+				retErr = errors.Join(retErr, fmt.Errorf("remove acknowledged claim: %w", removeErr))
+			}
 		}()
 	} else {
 		data, err := os.ReadFile(ctl)
@@ -197,6 +216,12 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		result, err := engine.Apply(ev, dryRun)
 		s.EffectResults[event] = tuning.MarshalResult(result)
 		if err != nil {
+			if strings.Contains(err.Error(), "rollback incomplete") {
+				s.Mode = "recovery_required"
+				if persistErr := persistRuntimeState(engine, cfg, s); persistErr != nil {
+					return nil, errors.Join(err, fmt.Errorf("persist recovery-required state: %w", persistErr))
+				}
+			}
 			return nil, fmt.Errorf("apply %s: %w", event, err)
 		}
 		if !result.Applied {
@@ -363,15 +388,47 @@ func runtimeStatePath() string {
 	return filepath.Join(config.ResolvePaths().Runtime, "daemon_state_v1.json")
 }
 
+// bindEngineJournal installs a per-effect write-ahead barrier. Its callback
+// commits the ORIGINAL state before the first irreversible system call.
+func bindEngineJournal(engine *tuning.Engine, cfg map[string]any, s *state) {
+	engine.SetJournal(func(next map[string]string) error {
+		return persistRuntimeSnapshot(cfg, s, next)
+	})
+}
+
 func persistRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state) error {
-	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: engine.Snapshot()}
+	return persistRuntimeSnapshot(cfg, s, engine.Snapshot())
+}
+
+func persistRuntimeSnapshot(cfg map[string]any, s *state, snapshot map[string]string) error {
+	rs := runtimeState{Version: 1, Mode: s.Mode, Active: activeList(s), Original: snapshot}
 	if len(rs.Active) == 0 && len(rs.Original) == 0 && s.Mode == "normal" {
-		if err := os.Remove(runtimeStatePath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := os.Remove(runtimeStatePath()); errors.Is(err, os.ErrNotExist) {
+			return nil
+		} else if err != nil {
 			return err
 		}
-		return nil
+		return syncRuntimeDirectory()
 	}
-	return atomicJSON(runtimeStatePath(), rs, 0o600)
+	if err := atomicJSON(runtimeStatePath(), rs, 0o600); err != nil {
+		return err
+	}
+	return syncRuntimeDirectory()
+}
+
+// Only the internal runtime WAL has a strict directory-sync barrier. Keep
+// status/log writes on shared-storage compatible with their existing policy.
+func syncRuntimeDirectory() error {
+	dir, err := os.Open(filepath.Dir(runtimeStatePath()))
+	if err != nil {
+		return err
+	}
+	syncErr := dir.Sync()
+	closeErr := dir.Close()
+	if syncErr != nil {
+		return fmt.Errorf("sync WAL directory: %w", syncErr)
+	}
+	return closeErr
 }
 
 func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dry bool) error {
@@ -400,8 +457,37 @@ func recoverRuntimeState(engine *tuning.Engine, cfg map[string]any, s *state, dr
 		}
 		s.Active[name] = true
 	}
+	if dry {
+		if len(rs.Original) > 0 {
+			return errors.New("dry-run cannot reconcile pending privileged changes")
+		}
+		return nil
+	}
+	if len(rs.Original) > 0 {
+		// A crash may occur after any root write but before the profile becomes
+		// active. Restore the complete owned preimage before replaying desired
+		// profiles; incomplete restoration must fail closed and retain the WAL.
+		if _, err := engine.Restore(tuning.Event{Name: "startup-recovery"}); err != nil {
+			return fmt.Errorf("restore pending write-ahead journal: %w", err)
+		}
+		if err := persistRuntimeState(engine, cfg, s); err != nil {
+			return fmt.Errorf("persist recovered journal: %w", err)
+		}
+	}
+	if s.Mode == "recovery_required" {
+		// Uncertain interrupted work must never reactivate by itself after
+		// a successful repair. Enter safe mode and require deliberate resume.
+		s.Mode = "safe"
+		s.Active = map[string]bool{}
+		if err := persistRuntimeState(engine, cfg, s); err != nil {
+			return fmt.Errorf("persist post-recovery safe mode: %w", err)
+		}
+	}
 	if s.Mode == "normal" && len(rs.Active) > 0 {
-		if err := reapplyActive(engine, cfg, s, dry); err != nil {
+		if err := reapplyActive(engine, cfg, s, false); err != nil {
+			return fmt.Errorf("reapply recovered profiles: %w", err)
+		}
+		if err := persistRuntimeState(engine, cfg, s); err != nil {
 			return err
 		}
 	}

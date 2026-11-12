@@ -240,10 +240,12 @@
           "id": "R01-01",
           "title": "Write-ahead durable per-effect journal",
           "acceptance": "Original state and operation ID become durable before privileged mutation is attempted.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -386,10 +388,12 @@
           "id": "R01-11",
           "title": "Record Doze transition ownership and rollback outcome",
           "acceptance": "Unforce and prior state handling are validated on supported devices and unsupported variants fail clearly.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -568,10 +572,12 @@
           "id": "R02-03",
           "title": "Validate request IDs and payload before paths",
           "acceptance": "JSON IDs and commands have bounded grammars and cannot traverse ack directories.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -594,10 +600,12 @@
           "id": "R02-05",
           "title": "Prove post-mutation crash deduplication",
           "acceptance": "A reused .work command cannot re-apply already committed effects after lost ack.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -635,10 +643,12 @@
           "id": "R02-08",
           "title": "Reconcile runtime state before ready state",
           "acceptance": "No healthy/ready response is published while unapplied recovery work exists.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -648,10 +658,12 @@
           "id": "R02-09",
           "title": "Persist and expose failed reconciliation",
           "acceptance": "Restart failure retains error and original journal; subsequent operation does not hide it.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -2893,7 +2905,7 @@
       "primary_phase": "R01",
       "source_path": "internal/daemon/daemon.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -2943,7 +2955,7 @@
       "primary_phase": "R02",
       "source_path": "internal/control/inbox.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -2993,7 +3005,7 @@
       "primary_phase": "R02",
       "source_path": "internal/control/inbox.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -3152,6 +3164,21 @@
       "change": "Beginning rollback-error propagation and retained snapshots, user-0 suspension ownership and essential-app fail-closed guards; new Go tests staged; all hosted/emulator/device evidence pending.",
       "source_pin": "c22d1643067d9a96fe0d85404790ca9505668f4a",
       "overlay": "XBS_R01A_ROLLBACK_OWNERSHIP_20261112.zip"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R01B source-pinned overlay preparation",
+      "change": "Write-ahead persistence barriers, daemon startup recovery refusal, interrupted queue claim fail-closed, Doze ownership marker and fault-injection tests. Real host/device tests pending.",
+      "source_pin": "2d02abb8cd3fe94b6d3656174521ec11edb26fd8",
+      "overlay": "XBS_R01B_WRITEAHEAD_CRASH_RECOVERY_20261112.zip"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R01B HF02 regression remediation",
+      "change": "Update internal/cli integration test for R01B interrupted-claim semantics; require durable ack and completed-claim cleanup before next FIFO command. Add isolated control regression. No production replay bypass; full Go execution pending.",
+      "source_pin": "2d02abb8cd3fe94b6d3656174521ec11edb26fd8",
+      "overlay": "XBS_R01B_WRITEAHEAD_CRASH_RECOVERY_HF02_20261112.zip",
+      "qualification": "SOURCE_AND_ISOLATED_TESTS_ONLY_REAL_CHECKOUT_PENDING"
     }
   ]
 }
