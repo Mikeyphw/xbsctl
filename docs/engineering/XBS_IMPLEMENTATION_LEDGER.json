@@ -849,10 +849,12 @@
           "id": "R03-01",
           "title": "Start configured boot event from late-start lifecycle",
           "acceptance": "First boot applies only configured boot actions and records outcome.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03B source-pinned Go overlay with bundled fake-backend tests; full repository, hosted and Android/device qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -904,10 +906,12 @@
           "id": "R03-05",
           "title": "Implement keep_on_charge policy",
           "acceptance": "Relevant screen/low-power actions respect charging policy and a documented priority order.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03B source-pinned Go overlay with bundled fake-backend tests; full repository, hosted and Android/device qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -931,10 +935,12 @@
           "id": "R03-07",
           "title": "Define quit-on-boot semantics",
           "acceptance": "Quit never abandons unrecovered effects and leaves truthful state.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03B source-pinned Go overlay with bundled fake-backend tests; full repository, hosted and Android/device qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -957,10 +963,12 @@
           "id": "R03-09",
           "title": "Reconcile overlapping profiles",
           "acceptance": "Remove only effects no longer requested by any active event.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03B source-pinned Go overlay with bundled fake-backend tests; full repository, hosted and Android/device qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -970,10 +978,12 @@
           "id": "R03-10",
           "title": "Persist desired and observed event state separately",
           "acceptance": "Restart does not fabricate new charging/screen transitions or assume events applied.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R03B source-pinned Go overlay with bundled fake-backend tests; full repository, hosted and Android/device qualification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R03",
@@ -3308,6 +3318,12 @@
       "phase": "R03",
       "change": "R03A opt-in automatic observation and deterministic event queue",
       "evidence": "source-pinned overlay; isolated Go tests only; full Go and device gates pending"
+    },
+    {
+      "date": "2026-11-12",
+      "phase": "R03",
+      "change": "R03B opt-in per-boot guard, safe quit, charging policy, resource-lease-aware overlapping desires, separate durable observed/desire/pending data",
+      "evidence": "bundled tests; source-pinned overlay; full Go and physical gates pending"
     }
   ],
   "change_log": [
@@ -3340,6 +3356,14 @@
       "change": "Durable claimed/applying phase markers; explicit unknown immutable receipt and preserved work evidence for interrupted privileged execution; startup replay hold before tuning WAL and active profile reapply; CLI unknown outcome. Offline isolated Go/race/crosscompile verification only; hosted and physical pending. Manual reconciliation intentionally required for unknown outcomes.",
       "source_pin": "f38a051e64b1b8b5b842f23f4b887597b9b65058",
       "overlay": "XBS_R02B_DURABLE_COMMAND_LIFECYCLE_20261112.zip",
+      "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R03B source-bound overlay preparation",
+      "change": "At-most-once physical boot ID intent/receipt and WAL restoration on quit; charging screen_off.keep_on_charge; priority lease co-existence; persist observed desired and pending separate from actual effects; fail-closed unknown transitions. No physical qualification claimed.",
+      "source_pin": "21603ae162dc2e3da8fa1bc7089740cc0ca9d005",
+      "overlay": "XBS_R03B_LIFECYCLE_COMPLETION_20261112.zip",
       "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
     }
   ]

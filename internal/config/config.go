@@ -134,6 +134,7 @@ func Default() map[string]any {
 			"log_json":                    false,
 			"dry_run":                     false,
 			"automatic_events_enabled":    false,
+			"automatic_boot_enabled":      false,
 			"low_power_threshold":         20,
 			"low_power_release_threshold": 25,
 			"lock_file":                   lock,
@@ -308,6 +309,11 @@ func Validate(cfg map[string]any) []string {
 		if enabled, exists := header["automatic_events_enabled"]; exists {
 			if _, valid := enabled.(bool); !valid {
 				errs = append(errs, "header.automatic_events_enabled must be a boolean")
+			}
+		}
+		if enabled, exists := header["automatic_boot_enabled"]; exists {
+			if _, valid := enabled.(bool); !valid {
+				errs = append(errs, "header.automatic_boot_enabled must be a boolean")
 			}
 		}
 		low, lowOK := intValue(header["low_power_threshold"])

@@ -122,6 +122,7 @@ func (p Policy) Validate() error {
 // responsible for resource leases, execution, WAL and acknowledgement receipts.
 type Desired struct {
 	Event       string      `json:"event"`
+	Events      []string    `json:"events"`
 	Observation Observation `json:"observation"`
 	Stable      bool        `json:"stable"`
 }
@@ -176,16 +177,23 @@ func (p *Planner) Next(obs Observation, at time.Time) (Desired, error) {
 	} else if obs.BatteryPercent >= p.policy.ReleaseThreshold {
 		p.low = false
 	}
-	event := ""
-	// Charging takes precedence. A screen-off event can run while charging
-	// only when the configured keep-on-charge policy is false; charging still
-	// wins if both request the same resource domain.
+	// The order is priority, NOT a request to mutate overlapping resources.
+	// The daemon applies the resource-lease gate to this ordered candidate set.
+	// Charging suppresses low-power; screen_off can remain during charging
+	// only if the resolved screen_off event explicitly sets keep_on_charge.
+	events := []string{}
 	if obs.Charging {
-		event = "charging"
-	} else if obs.ScreenOff {
-		event = "screen_off"
-	} else if p.low {
-		event = "low_power"
+		events = append(events, "charging")
 	}
-	return Desired{Event: event, Observation: obs, Stable: true}, nil
+	if obs.ScreenOff && (!obs.Charging || p.policy.KeepOnCharge) {
+		events = append(events, "screen_off")
+	}
+	if !obs.Charging && p.low {
+		events = append(events, "low_power")
+	}
+	event := ""
+	if len(events) > 0 {
+		event = events[0]
+	}
+	return Desired{Event: event, Events: events, Observation: obs, Stable: true}, nil
 }
