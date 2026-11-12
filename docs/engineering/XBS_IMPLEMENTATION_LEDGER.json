@@ -347,7 +347,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R01E source-pinned implementation planned against ce49ec0a; real test evidence and physical Android API36 verification pending"
           ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
@@ -364,7 +365,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R01E source-pinned implementation planned against ce49ec0a; real test evidence and physical Android API36 verification pending"
           ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
@@ -399,7 +401,8 @@
           "implementation_sha": null,
           "evidence": [
             "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R01E source-pinned implementation planned against ce49ec0a; real test evidence and physical Android API36 verification pending"
           ],
           "blockers": [],
           "test_refs": [],
@@ -410,10 +413,12 @@
           "id": "R01-12",
           "title": "Bind renice recovery to stable process identity",
           "acceptance": "PID reuse cannot cause a newly started unrelated process to receive old nice values.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01E source-pinned implementation planned against ce49ec0a; real test evidence and physical Android API36 verification pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -495,7 +500,8 @@
           "implementation_sha": null,
           "evidence": [
             "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch",
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R01E source-pinned implementation planned against ce49ec0a; real test evidence and physical Android API36 verification pending"
           ],
           "blockers": [],
           "test_refs": [],
@@ -3008,7 +3014,7 @@
       "primary_phase": "R01",
       "source_path": "internal/tuning/tuning.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -3209,6 +3215,14 @@
       "change": "Lease domains, scoped restoration, restart metadata, hosted Actions SHA-bound watcher; no hosted or device qualification claimed",
       "source_pin": "5b6c812fcb9c8c3f244238a02abf2956903deba4",
       "overlay": "XBS_R01D_RESOURCE_LEASES_AND_HOSTED_WATCHER_20261112.zip"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R01E code overlay preparation",
+      "change": "PID+starttime niceness records; no blind legacy/PID reuse restore; exact GMS query; strict WiFi status; probe Doze forced owner before mutation; regression and hosted watcher carryover. No Android/root qualification claimed.",
+      "source_pin": "ce49ec0a8d0cd12f737892ce7817bd31018161b5",
+      "overlay": "XBS_R01E_RESTORATION_IDENTITY_20261112.zip",
+      "qualification": "PREPARED_NOT_APPLIED"
     }
   ]
 }
