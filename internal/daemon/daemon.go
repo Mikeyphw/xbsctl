@@ -51,6 +51,12 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		return finish(stdout, opts, false, "config load failed: "+err.Error(), 3)
 	}
 	s := &state{Mode: "normal", Active: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
+	// A second daemon must never race this instance on the .work queue.
+	lock, lockErr := acquireDaemonLock()
+	if lockErr != nil {
+		return finish(stdout, opts, false, "daemon singleton lock: "+lockErr.Error(), 6)
+	}
+	defer lock.Close()
 	engine := tuning.New(nil)
 	bindEngineJournal(engine, cfg, s)
 	if err := recoverRuntimeState(engine, cfg, s, opts.dryRun); err != nil {
@@ -183,19 +189,15 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 			}
 		}()
 	} else {
-		data, err := os.ReadFile(ctl)
-		if errors.Is(err, os.ErrNotExist) {
-			return nil, nil
+		// Legacy control-file compatibility: no symlinks, FIFOs, or oversized data.
+		// The durable queue is the preferred path for new clients.
+		cmdline, qerr = consumeLegacyControl(ctl)
+		if qerr != nil {
+			return nil, qerr
 		}
-		if err != nil {
-			return nil, err
-		}
-		cmdline = strings.TrimSpace(string(data))
 		if cmdline == "" {
 			return nil, nil
 		}
-		// A dry-run previews effects, not queue semantics: consume each command once.
-		_ = os.WriteFile(ctl, []byte("\n"), 0o644)
 	}
 
 	parts := strings.Fields(cmdline)
