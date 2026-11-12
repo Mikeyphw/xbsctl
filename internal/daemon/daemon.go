@@ -209,6 +209,19 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 	change = map[string]any{"type": "profile", "name": event, "timestamp": time.Now().Unix()}
 	switch cmd {
 	case "start":
+		// Starting while paused/safe would change the device despite the mode.
+		if s.Mode != "normal" {
+			return nil, fmt.Errorf("cannot start profile %q while mode=%s", event, s.Mode)
+		}
+		// Duplicate starts are idempotent; never repeat privileged commands.
+		if s.Active[event] {
+			change["state"] = "active"
+			change["effects"] = map[string]any{"state": "already_active", "mutations": "none"}
+			break
+		}
+		if err := checkStartOwnership(cfg, s.Active, event); err != nil {
+			return nil, err
+		}
 		ev, err := tuning.Resolve(cfg, event)
 		if err != nil {
 			return nil, err
@@ -236,19 +249,37 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		change["state"] = "active"
 		change["effects"] = tuning.MarshalResult(result)
 	case "stop":
+		// Do not call the global Engine.Restore for a profile that is not
+		// active; that would undo another profile's owned effects.
+		if !s.Active[event] {
+			change["state"] = "inactive"
+			change["effects"] = map[string]any{"state": "already_inactive", "mutations": "none"}
+			break
+		}
 		ev, err := tuning.Resolve(cfg, event)
 		if err != nil {
 			return nil, err
 		}
-		result, err := engine.Restore(ev)
-		s.EffectResults[event] = tuning.MarshalResult(result)
-		if err != nil {
-			return nil, fmt.Errorf("restore %s: %w", event, err)
+		// Engine.Restore is currently global. Exclusive ownership makes
+		// restoration safe for the single privileged-effect owner; policy-
+		// only profiles must never restore another profile's effects.
+		result := tuning.Result{Event: event, Applied: true}
+		if hasPrivilegedEffects(ev) {
+			result, err = engine.Restore(ev)
+			s.EffectResults[event] = tuning.MarshalResult(result)
+			if err != nil {
+				s.Mode = "recovery_required"
+				restoreErr := fmt.Errorf("restore %s: %w", event, err)
+				if persistErr := persistRuntimeState(engine, cfg, s); persistErr != nil {
+					return nil, errors.Join(restoreErr, fmt.Errorf("persist recovery-required: %w", persistErr))
+				}
+				return nil, restoreErr
+			}
 		}
 		delete(s.Active, event)
-		if err := reapplyActive(engine, cfg, s, dryRun); err != nil {
-			return nil, err
-		}
+		// Under the exclusive-owner contract, remaining active profiles
+		// cannot hold privileged effects, so there is nothing to replay.
+		s.EffectResults[event] = tuning.MarshalResult(result)
 		s.LastAppliedEvent = event
 		s.LastAppliedTime = now()
 		change["state"] = "inactive"
@@ -260,6 +291,17 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		}
 		if errs := config.Validate(fresh); len(errs) > 0 {
 			return nil, fmt.Errorf("reload validation: %s", strings.Join(errs, "; "))
+		}
+		// A configuration update may turn policy-only profiles into mutators.
+		// Refuse the conflicting new plan before restoring anything live.
+		projected := map[string]bool{}
+		for name, active := range s.Active {
+			if active && eventExists(fresh, name) {
+				projected[name] = true
+			}
+		}
+		if _, err := exclusiveActiveOwner(fresh, projected); err != nil {
+			return nil, fmt.Errorf("reload ownership: %w", err)
 		}
 		oldActive := activeList(s)
 		oldCfg := cloneConfig(cfg)
@@ -332,21 +374,47 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 }
 
 func restoreActive(engine *tuning.Engine, cfg map[string]any, s *state) error {
+	// The engine snapshot is global. A policy-only event must never undo
+	// a concurrently active privileged owner's changes during pause/safe,
+	// reload, shutdown, or recovery.
+	owner, err := exclusiveActiveOwner(cfg, s.Active)
+	if err != nil {
+		return fmt.Errorf("restore ownership: %w", err)
+	}
+	if owner == "" && len(engine.Snapshot()) > 0 {
+		return errors.New("unowned privileged recovery snapshot: refusing to discard original state")
+	}
 	names := activeList(s)
 	for i := len(names) - 1; i >= 0; i-- {
 		ev, err := tuning.Resolve(cfg, names[i])
 		if err != nil {
 			return err
 		}
+		if names[i] != owner {
+			s.EffectResults[names[i]] = tuning.MarshalResult(tuning.Result{Event: names[i], Applied: true})
+			continue
+		}
 		result, err := engine.Restore(ev)
 		s.EffectResults[names[i]] = tuning.MarshalResult(result)
 		if err != nil {
-			return fmt.Errorf("restore %s: %w", names[i], err)
+			// Any incomplete bulk restoration is not a usable normal state.
+			// Persist the refusal before returning to the control loop.
+			s.Mode = "recovery_required"
+			restoreErr := fmt.Errorf("restore %s: %w", names[i], err)
+			if persistErr := persistRuntimeState(engine, cfg, s); persistErr != nil {
+				return errors.Join(restoreErr, fmt.Errorf("persist recovery-required: %w", persistErr))
+			}
+			return restoreErr
 		}
 	}
 	return nil
 }
 func reapplyActive(engine *tuning.Engine, cfg map[string]any, s *state, dry bool) error {
+	// Reject corrupt or formerly valid multi-owner runtime states before
+	// performing ANY privileged reapplication (including after a restart).
+	if _, err := exclusiveActiveOwner(cfg, s.Active); err != nil {
+		return fmt.Errorf("reapply ownership: %w", err)
+	}
 	for _, name := range activeList(s) {
 		ev, err := tuning.Resolve(cfg, name)
 		if err != nil {

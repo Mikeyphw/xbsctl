@@ -429,10 +429,12 @@
           "id": "R01-14",
           "title": "Define multi-profile effects ownership and precedence",
           "acceptance": "Ending one active profile does not undo effects still needed by a different profile.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01C exclusive privileged-owner gate prepared at 5c90596; shared per-resource leases and physical acceptance remain pending"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -3179,6 +3181,14 @@
       "source_pin": "2d02abb8cd3fe94b6d3656174521ec11edb26fd8",
       "overlay": "XBS_R01B_WRITEAHEAD_CRASH_RECOVERY_HF02_20261112.zip",
       "qualification": "SOURCE_AND_ISOLATED_TESTS_ONLY_REAL_CHECKOUT_PENDING"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R01C exclusive-owner safety tranche",
+      "change": "Conservative exclusive privileged-effect ownership; allow concurrent policy-only profiles; ignore duplicate start/stop; refuse conflicting start/reload/reapply before root mutations; enter recovery_required on failed owner restore; future per-resource shared leases explicitly pending",
+      "source_pin": "5c90596a44d8b8ce875b7e6803f3dbe9bc7fb169",
+      "overlay": "XBS_R01C_EXCLUSIVE_EFFECT_OWNERSHIP_20261112.zip",
+      "qualification": "SOURCE_PINNED_OVERLAY_PREPARED_HOSTED_AND_PHYSICAL_PENDING"
     }
   ]
 }
