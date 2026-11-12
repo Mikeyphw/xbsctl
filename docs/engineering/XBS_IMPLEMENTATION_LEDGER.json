@@ -266,10 +266,12 @@
           "id": "R01-03",
           "title": "Propagate rollback errors instead of discarding them",
           "acceptance": "Failed restore returns nonzero and retains unresolved records for later reconciliation.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -279,10 +281,12 @@
           "id": "R01-04",
           "title": "Rollback never claims applied unless verified",
           "acceptance": "Result, CLI status and UI all distinguish full rollback from partial rollback.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -292,10 +296,12 @@
           "id": "R01-05",
           "title": "Snapshot exact CPU governor and core online states",
           "acceptance": "Each file restores its own original value, with failed writes retaining a journal entry.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -305,10 +311,12 @@
           "id": "R01-06",
           "title": "Snapshot package suspension per user and ownership",
           "acceptance": "Pre-existing suspended packages remain suspended; only XBS-owned suspensions are reversed.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -318,10 +326,12 @@
           "id": "R01-07",
           "title": "Enforce essentials and critical-app protection",
           "acceptance": "Built-in essentials cannot be accidentally killed/suspended by denylist or template overrides.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -467,10 +477,12 @@
           "id": "R01-18",
           "title": "Test partial rollback on every effect family",
           "acceptance": "Fault injection demonstrates durable unresolved snapshots and no false success.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R01A source-bound implementation overlay based on xbsctl c22d164; regression execution pending on target branch"
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R01",
@@ -2851,7 +2863,7 @@
       "primary_phase": "R01",
       "source_path": "internal/tuning/tuning.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -2861,7 +2873,7 @@
       "primary_phase": "R01",
       "source_path": "internal/tuning/tuning.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -2941,7 +2953,7 @@
       "primary_phase": "R01",
       "source_path": "internal/tuning/tuning.go",
       "baseline_evidence": "SOURCE_CONFIRMED",
-      "resolution": "OPEN",
+      "resolution": "IN_PROGRESS",
       "closing_evidence": []
     },
     {
@@ -3133,6 +3145,13 @@
       "overlay_status": "PREPARED_NOT_APPLIED",
       "remote_write_blocker": "GitHub integration refused branch creation (HTTP 403)",
       "qualification": "UNQUALIFIED"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R01A local overlay preparation",
+      "change": "Beginning rollback-error propagation and retained snapshots, user-0 suspension ownership and essential-app fail-closed guards; new Go tests staged; all hosted/emulator/device evidence pending.",
+      "source_pin": "c22d1643067d9a96fe0d85404790ca9505668f4a",
+      "overlay": "XBS_R01A_ROLLBACK_OWNERSHIP_20261112.zip"
     }
   ]
 }

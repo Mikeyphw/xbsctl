@@ -23,6 +23,8 @@ func (f *fakeRunner) Run(n string, a ...string) (string, error) {
 	switch c {
 	case "pm list packages -3":
 		return "package:app.one\npackage:app.keep\n", nil
+	case "dumpsys package app.one":
+		return "Packages:\n  User 0: installed=true suspended=false hidden=false\n", nil
 	case "pidof app.one":
 		return "101", nil
 	case "pidof com.google.android.gms":

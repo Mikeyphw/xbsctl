@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/Mikeyphw/xbsctl/internal/config"
 )
 
 const maxRuleBytes = 1 << 20
@@ -18,6 +20,7 @@ const maxRuleBytes = 1 << 20
 type Event struct {
 	Name                                             string `json:"name"`
 	Allowlist, Denylist, ProcFile                    string
+	EssentialsPath                                   string
 	KeepOnCharge, Quit                               bool
 	HandleCores, DisableCores, HandleApps, HandleGMS string
 	HandleProc, LowRAM                               bool
@@ -92,6 +95,7 @@ func Resolve(cfg map[string]any, name string) (Event, error) {
 		merged[k] = v
 	}
 	e := Event{Name: name, HandleCores: "false", DisableCores: "false", HandleApps: "false", HandleGMS: "false", Doze: "false"}
+	e.EssentialsPath = config.ResolvePaths().Essentials
 	e.Allowlist = str(merged["allowlist"])
 	e.Denylist = str(merged["denylist"])
 	e.ProcFile = str(merged["proc_file"])
@@ -196,25 +200,56 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		r.Applied = true
 		return r, nil
 	}
-	undo := []func() error{}
+	// Undo entries are keyed to the exact original-state record. A failed
+	// rollback must retain its record for a later explicit restoration attempt.
+	type undoStep struct {
+		key string
+		fn  func() error
+	}
+	undo := []undoStep{}
+	deferUndo := func(key string, fn func() error) {
+		undo = append(undo, undoStep{key: key, fn: fn})
+	}
 	before := clone(e.original)
-	fail := func(err error) (Result, error) {
+	fail := func(applyErr error) (Result, error) {
+		var rollbackErrors []string
 		for i := len(undo) - 1; i >= 0; i-- {
-			_ = undo[i]()
-		}
-		// renice changes are snapshot-backed rather than individual undo closures.
-		for key, old := range e.original {
-			if _, existed := before[key]; !existed && strings.HasPrefix(key, "nice:") {
-				_, _ = e.R.Run("renice", old, "-p", strings.TrimPrefix(key, "nice:"))
+			step := undo[i]
+			if err := step.fn(); err != nil {
+				rollbackErrors = append(rollbackErrors, fmt.Sprintf("%s: %v", step.key, err))
+				continue
+			}
+			if step.key != "" {
+				if _, existed := before[step.key]; !existed {
+					delete(e.original, step.key)
+				}
 			}
 		}
-		for key := range e.original {
-			if _, existed := before[key]; !existed {
+		// A nice value is independently snapshot-backed; never delete it if
+		// renice fails. Restore will retry the preserved record later.
+		for key, old := range clone(e.original) {
+			if _, existed := before[key]; existed || !strings.HasPrefix(key, "nice:") {
+				continue
+			}
+			if _, err := e.R.Run("renice", old, "-p", strings.TrimPrefix(key, "nice:")); err != nil {
+				rollbackErrors = append(rollbackErrors, fmt.Sprintf("%s: %v", key, err))
+			} else {
 				delete(e.original, key)
 			}
 		}
-		add("rollback", "applied", "effect application failed")
-		return r, err
+		var pending []string
+		for key := range e.original {
+			if _, existed := before[key]; !existed {
+				pending = append(pending, key)
+			}
+		}
+		sort.Strings(pending)
+		if len(rollbackErrors) > 0 || len(pending) > 0 {
+			add("rollback", "failed", fmt.Sprintf("errors=%d pending_records=%d", len(rollbackErrors), len(pending)))
+			return r, fmt.Errorf("apply failed: %w; rollback incomplete (errors=%v, pending=%v)", applyErr, rollbackErrors, pending)
+		}
+		add("rollback", "applied", "all registered undo steps succeeded")
+		return r, applyErr
 	}
 	// CPU governors.
 	if ev.HandleCores != "false" {
@@ -229,11 +264,11 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 				return fail(er)
 			}
 			e.remember("file:"+p, old)
+			pp, oo := p, old
+			deferUndo("file:"+pp, func() error { return e.R.Write(pp, oo) })
 			if er = e.R.Write(p, "powersave"); er != nil {
 				return fail(er)
 			}
-			pp, oo := p, old
-			undo = append(undo, func() error { return e.R.Write(pp, oo) })
 		}
 		add("handle_cores", "applied", strings.Join(cores, " "))
 	} else {
@@ -254,11 +289,11 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 				return fail(er)
 			}
 			e.remember("file:"+p, old)
+			pp, oo := p, old
+			deferUndo("file:"+pp, func() error { return e.R.Write(pp, oo) })
 			if er = e.R.Write(p, "0"); er != nil {
 				return fail(er)
 			}
-			pp, oo := p, old
-			undo = append(undo, func() error { return e.R.Write(pp, oo) })
 		}
 		add("disable_cores", "applied", strings.Join(cores, " "))
 	} else {
@@ -281,16 +316,27 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			return fail(er)
 		}
 		targets := filterPackages(pkgs, allow, deny)
-		for _, p := range targets {
-			if er = e.appAction(ev.HandleApps, p); er != nil {
-				return fail(er)
-			}
-			if ev.HandleApps == "suspend" {
-				pkg := p
-				undo = append(undo, func() error { _, x := e.R.Run("pm", "unsuspend", "--user", "0", pkg); return x })
+		protected, er := protectedPackages(ev.EssentialsPath)
+		if er != nil {
+			return fail(fmt.Errorf("essentials protection: %w", er))
+		}
+		// Refuse the complete selection before acting on any package.
+		for _, pkg := range targets {
+			if protected[pkg] {
+				return fail(fmt.Errorf("protected essential package: %s", pkg))
 			}
 		}
-		add("handle_apps", "applied", fmt.Sprintf("%d packages", len(targets)))
+		for _, pkg := range targets {
+			if ev.HandleApps == "suspend" {
+				er = e.suspendPackage(pkg, deferUndo)
+			} else {
+				er = e.appAction(ev.HandleApps, pkg)
+			}
+			if er != nil {
+				return fail(er)
+			}
+		}
+		add("handle_apps", "applied", fmt.Sprintf("%d packages selected", len(targets)))
 	} else {
 		add("handle_apps", "disabled", "")
 	}
@@ -301,11 +347,10 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 				return fail(fmt.Errorf("cannot determine prior GMS enabled state: %w", probeErr))
 			}
 			wasEnabled := !strings.Contains(disabled, "com.google.android.gms")
-			e.remember("gms-enabled", strconv.FormatBool(wasEnabled))
-			// Register recovery before disabling: a partially applied command may fail.
-			// Never enable a package that was disabled before this operation.
+			// A pre-disabled package must never be enabled by rollback or restore.
 			if wasEnabled {
-				undo = append(undo, func() error { _, x := e.R.Run("pm", "enable", "com.google.android.gms"); return x })
+				e.remember("gms-enabled", "true")
+				deferUndo("gms-enabled", func() error { _, x := e.R.Run("pm", "enable", "com.google.android.gms"); return x })
 			}
 			if _, err = e.R.Run("pm", "disable", "com.google.android.gms"); err != nil {
 				return fail(err)
@@ -350,10 +395,10 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			return fail(fmt.Errorf("prior ro.config.low_ram is not a boolean: %q", o))
 		}
 		e.remember("low_ram", o)
+		deferUndo("low_ram", func() error { _, x := e.R.Run("resetprop", "-n", "ro.config.low_ram", o); return x })
 		if _, err = e.R.Run("resetprop", "-n", "ro.config.low_ram", "true"); err != nil {
 			return fail(err)
 		}
-		undo = append(undo, func() error { _, x := e.R.Run("resetprop", "-n", "ro.config.low_ram", o); return x })
 		add("low_ram", "applied", "ro.config.low_ram=true")
 	} else {
 		add("low_ram", "disabled", "")
@@ -366,7 +411,7 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		if _, err = e.R.Run("dumpsys", args...); err != nil {
 			return fail(err)
 		}
-		undo = append(undo, func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
+		deferUndo("", func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
 		add("doze", "applied", ev.Doze)
 	} else {
 		add("doze", "disabled", "")
@@ -381,12 +426,12 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		if !wasOn && !strings.Contains(status, "disabled") {
 			return fail(fmt.Errorf("cannot determine prior Wi-Fi state from status output: %q", strings.TrimSpace(out)))
 		}
-		e.remember("wifi-enabled", strconv.FormatBool(wasOn))
+		if wasOn {
+			e.remember("wifi-enabled", "true")
+			deferUndo("wifi-enabled", func() error { _, x := e.R.Run("svc", "wifi", "enable"); return x })
+		}
 		if _, err = e.R.Run("svc", "wifi", "disable"); err != nil {
 			return fail(err)
-		}
-		if wasOn {
-			undo = append(undo, func() error { _, x := e.R.Run("svc", "wifi", "enable"); return x })
 		}
 		add("kill_wifi", "applied", "")
 	} else {
@@ -477,6 +522,84 @@ func (e *Engine) cores(v string, high bool) ([]string, error) {
 	}
 	return want, nil
 }
+
+// protectedPackages combines non-overridable built-in Android essentials with
+// the configured global essentials file (including user-selected protections).
+// The file is mandatory for config-resolved events: unreadable policy is unsafe.
+func protectedPackages(essentialsPath string) (map[string]bool, error) {
+	protected := map[string]bool{}
+	for _, name := range strings.Fields(config.EssentialsAllowlist) {
+		protected[name] = true
+	}
+	if essentialsPath != "" {
+		additional, err := readLines(essentialsPath)
+		if err != nil {
+			return nil, err
+		}
+		for _, name := range additional {
+			protected[name] = true
+		}
+	}
+	return protected, nil
+}
+
+// packageSuspended requires an unambiguous Android user-0 state; never infer
+// unsuspended merely from a missing, changed, or failed diagnostic command.
+func (e *Engine) packageSuspended(pkg string) (bool, error) {
+	output, err := e.R.Run("dumpsys", "package", pkg)
+	if err != nil {
+		return false, fmt.Errorf("inspect suspension of %s: %w", pkg, err)
+	}
+	found := false
+	wasSuspended := false
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "User 0:") {
+			continue
+		}
+		for _, word := range strings.Fields(line) {
+			if !strings.HasPrefix(word, "suspended=") {
+				continue
+			}
+			if found {
+				return false, fmt.Errorf("ambiguous suspension state for %s", pkg)
+			}
+			found = true
+			switch word {
+			case "suspended=true":
+				wasSuspended = true
+			case "suspended=false":
+				wasSuspended = false
+			default:
+				return false, fmt.Errorf("unrecognized suspension state for %s: %q", pkg, word)
+			}
+		}
+	}
+	if !found {
+		return false, fmt.Errorf("missing user-0 suspension state for %s", pkg)
+	}
+	return wasSuspended, nil
+}
+
+func (e *Engine) suspendPackage(pkg string, deferUndo func(string, func() error)) error {
+	key := "suspend:user0:" + pkg
+	if _, managed := e.original[key]; managed {
+		// XBS already owns this transition from the original unsuspended state.
+		return nil
+	}
+	wasSuspended, err := e.packageSuspended(pkg)
+	if err != nil {
+		return err
+	}
+	if wasSuspended {
+		// Not ours to modify or to undo.
+		return nil
+	}
+	e.remember(key, "false")
+	deferUndo(key, func() error { _, restoreErr := e.R.Run("pm", "unsuspend", "--user", "0", pkg); return restoreErr })
+	return e.appAction("suspend", pkg)
+}
+
 func (e *Engine) packages() ([]string, error) {
 	out, err := e.R.Run("pm", "list", "packages", "-3")
 	if err != nil {
@@ -623,13 +746,25 @@ func (e *Engine) Restore(ev Event) (Result, error) {
 			delete(e.original, "gms-enabled")
 		}
 	}
-	if ev.HandleApps == "suspend" {
-		user, _ := e.packages()
-		allow, _ := readLines(ev.Allowlist)
-		deny, _ := readLines(ev.Denylist)
-		for _, pkg := range filterPackages(user, allow, deny) {
-			_, err := e.R.Run("pm", "unsuspend", "--user", "0", pkg)
-			fail("handle_apps", err)
+	// Restore only exact packages that XBS recorded as originally unsuspended.
+	// Never re-enumerate or unsuspend newly matched or pre-suspended packages.
+	for key, old := range clone(e.original) {
+		if !strings.HasPrefix(key, "suspend:user0:") {
+			continue
+		}
+		if old != "false" {
+			fail("handle_apps", fmt.Errorf("invalid suspension recovery state for %s", key))
+			continue
+		}
+		pkg := strings.TrimPrefix(key, "suspend:user0:")
+		if pkg == "" {
+			fail("handle_apps", errors.New("empty package in suspension snapshot"))
+			continue
+		}
+		_, err := e.R.Run("pm", "unsuspend", "--user", "0", pkg)
+		fail("handle_apps", err)
+		if err == nil {
+			delete(e.original, key)
 		}
 	}
 	for key, old := range clone(e.original) {
