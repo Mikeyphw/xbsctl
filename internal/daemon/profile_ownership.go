@@ -2,60 +2,134 @@ package daemon
 
 import (
 	"fmt"
-	"sort"
-
 	"github.com/Mikeyphw/xbsctl/internal/tuning"
+	"sort"
 )
 
-// R01C uses an explicit exclusive privileged-effect lease. The tuning engine
-// currently stores one global reversible snapshot, not per-resource owner
-// reference counts; allowing two mutators would make a stop of either unsafe.
-// Benign policy-only events can still coexist. A future lease-based phase may
-// safely relax this restriction after its own crash/reload acceptance gates.
-func hasPrivilegedEffects(ev tuning.Event) bool {
-	return (ev.HandleCores != "" && ev.HandleCores != "false") ||
-		(ev.DisableCores != "" && ev.DisableCores != "false") ||
-		(ev.HandleApps != "" && ev.HandleApps != "false") ||
-		(ev.HandleGMS != "" && ev.HandleGMS != "false") ||
-		ev.HandleProc || ev.LowRAM ||
-		(ev.Doze != "" && ev.Doze != "false") || ev.KillWiFi
+// resourceLeases is intentionally conservative: each named domain covers all
+// values within that effect family. Separate packages or CPUs do not share a
+// domain until more granular recovery and PID-identity gates are qualified.
+// A lease may be held by only one active profile.
+func resourceLeases(ev tuning.Event) []string {
+	leased := map[string]bool{}
+	if ev.HandleCores != "" && ev.HandleCores != "false" {
+		leased["cpu-governor"] = true
+	}
+	if ev.DisableCores != "" && ev.DisableCores != "false" {
+		leased["cpu-online"] = true
+	}
+	if ev.HandleApps != "" && ev.HandleApps != "false" {
+		leased["app-packages"] = true
+		if ev.HandleApps == "nice" {
+			leased["process-nice"] = true
+		}
+	}
+	if ev.HandleGMS != "" && ev.HandleGMS != "false" {
+		leased["gms"] = true
+		if ev.HandleGMS == "nice" {
+			leased["process-nice"] = true
+		}
+	}
+	if ev.HandleProc {
+		leased["process-nice"] = true
+	}
+	if ev.LowRAM {
+		leased["low-ram"] = true
+	}
+	if ev.Doze != "" && ev.Doze != "false" {
+		leased["doze"] = true
+	}
+	if ev.KillWiFi {
+		leased["wifi"] = true
+	}
+	result := make([]string, 0, len(leased))
+	for k := range leased {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return result
 }
 
-// exclusiveActiveOwner validates the complete desired active set, not just a
-// candidate. This is called before start, resume/recovery, and reload.
-func exclusiveActiveOwner(cfg map[string]any, active map[string]bool) (string, error) {
+// hasPrivilegedEffects remains the fail-closed runtime classification.
+func hasPrivilegedEffects(ev tuning.Event) bool { return len(resourceLeases(ev)) > 0 }
+
+// All profiles are checked before any privilege-changing command. Two profiles
+// may coexist only when their claimed effect domains are disjoint.
+func activeResourceLeases(cfg map[string]any, active map[string]bool) (map[string][]string, error) {
+	owners := map[string]string{}
+	result := map[string][]string{}
 	names := make([]string, 0, len(active))
-	for name, enabled := range active {
-		if enabled {
+	for name, yes := range active {
+		if yes {
 			names = append(names, name)
 		}
 	}
 	sort.Strings(names)
-	owner := ""
 	for _, name := range names {
 		ev, err := tuning.Resolve(cfg, name)
 		if err != nil {
-			return "", fmt.Errorf("resolve active profile %q: %w", name, err)
+			return nil, fmt.Errorf("resolve active profile %q: %w", name, err)
 		}
-		if !hasPrivilegedEffects(ev) {
-			continue
+		resources := resourceLeases(ev)
+		for _, resource := range resources {
+			if prev, exists := owners[resource]; exists {
+				return nil, fmt.Errorf("conflicting privileged owners %q and %q for resource %q", prev, name, resource)
+			}
+			owners[resource] = name
 		}
-		if owner != "" {
-			return "", fmt.Errorf("conflicting privileged owners %q and %q: the global effect snapshot permits only one active mutating profile", owner, name)
+		if len(resources) > 0 {
+			result[name] = resources
 		}
-		owner = name
 	}
-	return owner, nil
+	return result, nil
+}
+
+// The legacy helper is kept for callers/tests that only need to detect whether
+// any mutating owner exists. The returned owner is the first in stable order;
+// it must never be used to restore all active owners' independent resources.
+func exclusiveActiveOwner(cfg map[string]any, active map[string]bool) (string, error) {
+	owners, err := activeResourceLeases(cfg, active)
+	if err != nil {
+		return "", err
+	}
+	names := make([]string, 0, len(owners))
+	for name := range owners {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	if len(names) == 0 {
+		return "", nil
+	}
+	return names[0], nil
 }
 
 func checkStartOwnership(cfg map[string]any, active map[string]bool, candidate string) error {
 	proposed := make(map[string]bool, len(active)+1)
-	for name, enabled := range active {
-		if enabled {
+	for name, yes := range active {
+		if yes {
 			proposed[name] = true
 		}
 	}
 	proposed[candidate] = true
-	_, err := exclusiveActiveOwner(cfg, proposed)
+	_, err := activeResourceLeases(cfg, proposed)
 	return err
+}
+
+// The durable lease metadata is descriptive and prevents recovering a runtime
+// whose active plan has drifted since the last source-bound journal commit.
+func declaredLeases(cfg map[string]any, active map[string]bool) map[string][]string {
+	out := map[string][]string{}
+	for name, yes := range active {
+		if !yes {
+			continue
+		}
+		ev, err := tuning.Resolve(cfg, name)
+		if err != nil {
+			continue
+		} // reapply/recovery will refuse unresolved profiles
+		if r := resourceLeases(ev); len(r) > 0 {
+			out[name] = r
+		}
+	}
+	return out
 }

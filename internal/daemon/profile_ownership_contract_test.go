@@ -52,15 +52,15 @@ func TestR01COnlyOnePrivilegedOwner(t *testing.T) {
 	if err != nil || owner != "boot" {
 		t.Fatalf("owner=%q err=%v", owner, err)
 	}
-	if err := checkStartOwnership(cfg, map[string]bool{"boot": true, "manual": true}, "charging"); err == nil || !strings.Contains(err.Error(), "conflicting privileged owners") {
-		t.Fatalf("overlapping mutators allowed: %v", err)
+	if err := checkStartOwnership(cfg, map[string]bool{"boot": true, "manual": true}, "charging"); err != nil {
+		t.Fatalf("disjoint Wi-Fi and low-RAM leases must coexist: %v", err)
 	}
 }
 
 func TestR01COwnerCheckRefusesUnrelatedPrivilegedFamilies(t *testing.T) {
 	cfg := ownershipFixture()
-	if err := checkStartOwnership(cfg, map[string]bool{"boot": true}, "screen_off"); err == nil {
-		t.Fatal("global snapshot allows disjoint owners to overwrite each other")
+	if err := checkStartOwnership(cfg, map[string]bool{"boot": true}, "screen_off"); err != nil {
+		t.Fatalf("disjoint Doze and Wi-Fi domains refused: %v", err)
 	}
 }
 
