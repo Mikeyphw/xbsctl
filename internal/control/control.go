@@ -136,8 +136,11 @@ func queueEvent(stdout io.Writer, opts options, clean []string) int {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
 	}
 	if opts.wait {
-		if waitForRequest(ctl, req.ID, opts.timeout) {
-			return emitControl(stdout, opts, "ok", "Applied: "+action+" "+event, "applied", action, event, 0)
+		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
+			if ack.State == "applied" {
+				return emitControl(stdout, opts, "ok", "Applied: "+action+" "+event, "applied", action, event, 0)
+			}
+			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, event, ExitRuntime)
 		}
 		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action+" "+event, "timeout", action, event, ExitRuntime)
 	}
@@ -162,8 +165,11 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
 	}
 	if opts.wait {
-		if waitForRequest(ctl, req.ID, opts.timeout) {
-			return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0)
+		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
+			if ack.State == "applied" {
+				return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0)
+			}
+			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, "", ExitRuntime)
 		}
 		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action, "timeout", action, "", ExitRuntime)
 	}
@@ -244,14 +250,14 @@ func snapshotFromRaw(raw map[string]any) StatusSnapshot {
 	return s
 }
 
-func waitForRequest(ctl, id string, timeout time.Duration) bool {
+func waitForRequest(ctl, id string, timeout time.Duration) (Ack, bool) {
 	deadline := time.Now().Add(timeout)
 	for {
 		if ack, ok := ReadAck(ctl, id); ok {
-			return ack.State == "applied"
+			return ack, true
 		}
 		if time.Now().After(deadline) {
-			return false
+			return Ack{}, false
 		}
 		time.Sleep(100 * time.Millisecond)
 	}

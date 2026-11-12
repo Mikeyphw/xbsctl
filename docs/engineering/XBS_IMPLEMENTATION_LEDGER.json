@@ -563,7 +563,9 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+          ],
           "blockers": [
             "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
           ],
@@ -579,7 +581,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
           ],
           "blockers": [],
           "test_refs": [],
@@ -595,7 +598,8 @@
           "implementation_sha": null,
           "evidence": [
             "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
-            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending"
+            "R01D source-pinned domain-lease implementation prepared; real Go/hosted/physical gates pending",
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
           ],
           "blockers": [],
           "test_refs": [],
@@ -623,7 +627,8 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending"
+            "R01B source implementation prepared on 2d02abb; precise hosted/physical gates pending",
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
           ],
           "blockers": [],
           "test_refs": [],
@@ -634,10 +639,12 @@
           "id": "R02-06",
           "title": "Add concurrent request serialization and conflict policy",
           "acceptance": "Multiple control writers do not race on state files or privilege effects.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
+          ],
           "blockers": [],
           "test_refs": [],
           "acceptance_gate": "G-R02",
@@ -764,7 +771,8 @@
         "RD-006"
       ],
       "notes": [
-        "First source-pinned patch prepared. No hosted Go/Android/device evidence yet; no acceptance claimed."
+        "First source-pinned patch prepared. No hosted Go/Android/device evidence yet; no acceptance claimed.",
+        "R02A secure queue implementation prepared against e273ac7: private spool paths, bounded no-follow reads, daemon singleton, durable non-overwriting receipts, explicit failed --wait, legacy control validation. Full repository and hosted CI pending."
       ]
     },
     {
@@ -3223,6 +3231,14 @@
       "source_pin": "ce49ec0a8d0cd12f737892ce7817bd31018161b5",
       "overlay": "XBS_R01E_RESTORATION_IDENTITY_20261112.zip",
       "qualification": "PREPARED_NOT_APPLIED"
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R02A source-bound implementation preparation",
+      "change": "Secure private request/ack directories; no-follow bounded reads; same-filesystem non-overwriting durable publication; daemon singleton flock; legacy command bounds; explicit --wait failure receipt. Isolated Go/race checks only; full-repo/hosted/physical gates pending.",
+      "source_pin": "e273ac711e5d334c9552f3fb7d386aa15ad18066",
+      "overlay": "XBS_R02A_SECURE_DAEMON_QUEUE_20261112.zip",
+      "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY"
     }
   ]
 }
