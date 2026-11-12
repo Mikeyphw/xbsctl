@@ -180,36 +180,9 @@ func (e *Engine) restoreRemembered(key string, restore func(string) error) error
 	}
 	return e.release(key)
 }
-func (e *Engine) niceOf(pid string) (string, error) {
-	s, err := e.R.Read(filepath.Join("/proc", pid, "stat"))
-	if err != nil {
-		return "", err
-	}
-	// comm may contain spaces inside parentheses; fields after the final ')' begin at field 3.
-	i := strings.LastIndex(s, ")")
-	if i < 0 || i+2 >= len(s) {
-		return "", errors.New("malformed /proc stat")
-	}
-	f := strings.Fields(s[i+2:])
-	if len(f) < 17 {
-		return "", errors.New("short /proc stat")
-	}
-	return f[16], nil // process stat field 19 (nice)
-}
-func (e *Engine) renice(pid string, value int) error {
-	key := "nice:" + pid
-	if _, ok := e.original[key]; !ok {
-		old, err := e.niceOf(pid)
-		if err != nil {
-			return err
-		}
-		if err := e.remember(key, old); err != nil {
-			return err
-		}
-	}
-	_, err := e.R.Run("renice", strconv.Itoa(value), "-p", pid)
-	return err
-}
+
+// Renice and niceness restoration are implemented in process_identity.go.
+// The WAL is keyed by PID AND /proc/PID/stat starttime, not PID alone.
 func unique(xs []string) []string {
 	m := map[string]bool{}
 	out := []string{}
@@ -268,10 +241,8 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 			if _, existed := before[key]; existed || !strings.HasPrefix(key, "nice:") {
 				continue
 			}
-			if _, err := e.R.Run("renice", old, "-p", strings.TrimPrefix(key, "nice:")); err != nil {
+			if _, err := e.restoreNiceJournal(key, old); err != nil {
 				rollbackErrors = append(rollbackErrors, fmt.Sprintf("%s: %v", key, err))
-			} else if journalErr := e.release(key); journalErr != nil {
-				rollbackErrors = append(rollbackErrors, journalErr.Error())
 			}
 		}
 		var pending []string
@@ -383,11 +354,10 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 	}
 	if ev.HandleGMS != "false" {
 		if ev.HandleGMS == "kill" {
-			disabled, probeErr := e.R.Run("pm", "list", "packages", "-d", "com.google.android.gms")
+			wasEnabled, probeErr := e.initiallyEnabledGMS()
 			if probeErr != nil {
 				return fail(fmt.Errorf("cannot determine prior GMS enabled state: %w", probeErr))
 			}
-			wasEnabled := !strings.Contains(disabled, "com.google.android.gms")
 			// A pre-disabled package must never be enabled by rollback or restore.
 			if wasEnabled {
 				if err = e.remember("gms-enabled", "true"); err != nil {
@@ -449,20 +419,27 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		add("low_ram", "disabled", "")
 	}
 	if ev.Doze != "false" {
-		args := []string{"deviceidle", "force-idle"}
-		if ev.Doze == "light" {
-			args = append(args, "light")
+		alreadyForced, probeErr := e.initiallyForcedDoze()
+		if probeErr != nil {
+			return fail(probeErr)
 		}
-		// This is an XBS-owned force-idle action: record the inverse before
-		// invoking Android, including commands that partially succeed then fail.
-		if err = e.remember("doze:owned", "unforce"); err != nil {
-			return fail(err)
+		if alreadyForced {
+			// Another actor owns force-idle; never issue force or unforce.
+			add("doze", "already_forced_externally", "no mutation and no XBS ownership")
+		} else {
+			args := []string{"deviceidle", "force-idle"}
+			if ev.Doze == "light" {
+				args = append(args, "light")
+			}
+			if err = e.remember("doze:owned", "unforce"); err != nil {
+				return fail(err)
+			}
+			deferUndo("doze:owned", func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
+			if _, err = e.R.Run("dumpsys", args...); err != nil {
+				return fail(err)
+			}
+			add("doze", "applied", ev.Doze)
 		}
-		deferUndo("doze:owned", func() error { _, x := e.R.Run("dumpsys", "deviceidle", "unforce"); return x })
-		if _, err = e.R.Run("dumpsys", args...); err != nil {
-			return fail(err)
-		}
-		add("doze", "applied", ev.Doze)
 	} else {
 		add("doze", "disabled", "")
 	}
@@ -471,10 +448,9 @@ func (e *Engine) Apply(ev Event, dry bool) (Result, error) {
 		if probeErr != nil {
 			return fail(fmt.Errorf("cannot determine prior Wi-Fi state: %w", probeErr))
 		}
-		status := strings.ToLower(strings.TrimSpace(out))
-		wasOn := strings.Contains(status, "enabled")
-		if !wasOn && !strings.Contains(status, "disabled") {
-			return fail(fmt.Errorf("cannot determine prior Wi-Fi state from status output: %q", strings.TrimSpace(out)))
+		wasOn, statusErr := originalWiFiEnabled(out)
+		if statusErr != nil {
+			return fail(statusErr)
 		}
 		if wasOn {
 			if err = e.remember("wifi-enabled", "true"); err != nil {
@@ -861,13 +837,11 @@ func (e *Engine) restoreScoped(ev Event, allowed map[string]bool) (Result, error
 	}
 	for key, old := range clone(e.original) {
 		if strings.HasPrefix(key, "nice:") && accept(key) {
-			pid := strings.TrimPrefix(key, "nice:")
-			_, err := e.R.Run("renice", old, "-p", pid)
-			fail("nice", err)
-			if err == nil {
-				if journalErr := e.release(key); journalErr != nil {
-					fail("nice_journal", journalErr)
-				}
+			outcome, err := e.restoreNiceJournal(key, old)
+			if err != nil {
+				fail("nice", err)
+			} else {
+				add("nice", outcome, "identity-verified")
 			}
 		}
 	}

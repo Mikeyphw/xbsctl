@@ -79,6 +79,7 @@ func TestPreDisabledGmsIsNeverReenabled(t *testing.T) {
 	fake := &fakeRunner{files: map[string]string{}}
 	r := &probeOverrideRunner{fakeRunner: fake, probes: map[string]string{
 		"pm list packages -d com.google.android.gms": "package:com.google.android.gms\n",
+		"pm list packages -e com.google.android.gms": "",
 	}}
 	ev := safeEvent()
 	ev.HandleGMS = "kill"
@@ -102,6 +103,7 @@ func TestPreDisabledGmsIsNotEnabledDuringRollback(t *testing.T) {
 	fake := &fakeRunner{files: map[string]string{}, fail: "svc wifi disable"}
 	r := &probeOverrideRunner{fakeRunner: fake, probes: map[string]string{
 		"pm list packages -d com.google.android.gms": "package:com.google.android.gms\n",
+		"pm list packages -e com.google.android.gms": "",
 	}}
 	ev := safeEvent()
 	ev.HandleGMS = "kill"

@@ -12,9 +12,10 @@ import (
 )
 
 type recoveryRunner struct {
-	files        map[string]string
-	fail         bool
-	observeOnRun func(string, []string) error
+	files         map[string]string
+	fail          bool
+	observeOnRun  func(string, []string) error
+	preForcedDoze bool
 }
 
 func (r *recoveryRunner) Run(name string, args ...string) (string, error) {
@@ -22,6 +23,14 @@ func (r *recoveryRunner) Run(name string, args ...string) (string, error) {
 		if err := r.observeOnRun(name, args); err != nil {
 			return "", err
 		}
+	}
+	// R01E probes existing forced-idle ownership before journaling. This
+	// simulated Android runner must return a definite observed state, not "".
+	if name == "dumpsys" && strings.Join(args, " ") == "deviceidle get force" {
+		if r.preForcedDoze {
+			return "true", nil
+		}
+		return "false", nil
 	}
 	return "", nil
 }
