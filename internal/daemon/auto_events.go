@@ -14,9 +14,10 @@ import (
 // autoPending is volatile queue bookkeeping. The privileged decision and
 // claim are durable in R02's spool and engine WAL, never in this cache.
 type autoPending struct {
-	ID      string
-	Command string
-	Event   string
+	ID       string `json:"id"`
+	Command  string `json:"command"`
+	Event    string `json:"event"`
+	QueuedAt int64  `json:"queued_at,omitempty"`
 }
 
 func autoEnabled(cfg map[string]any) bool {
@@ -133,16 +134,16 @@ func automaticCycle(engine *tuning.Engine, cfg map[string]any, s *state) (bool, 
 	}
 	ctl := ctlPath(cfg)
 	if s.AutoPending != nil {
-		ack, present := control.ReadAck(ctl, s.AutoPending.ID)
-		if !present {
-			return false, nil
-		}
-		pending := s.AutoPending
-		s.AutoPending = nil
-		if ack.State != "applied" {
+		completed, changed, pendingErr := checkAutoPending(ctl, s.AutoPending, time.Now())
+		if pendingErr != nil {
 			s.AutoBlocked = true
-			return true, fmt.Errorf("automatic %s %s rejected: %s", pending.Command, pending.Event, ack.Error)
+			// Preserve the original pending record for operator diagnostics.
+			return true, pendingErr
 		}
+		if !completed {
+			return changed, nil
+		}
+		s.AutoPending = nil
 	}
 	if s.AutoBlocked {
 		return false, nil
@@ -203,7 +204,7 @@ func automaticCycle(engine *tuning.Engine, cfg map[string]any, s *state) (bool, 
 			if err != nil {
 				return changed, err
 			}
-			s.AutoPending = &autoPending{ID: req.ID, Command: "stop", Event: name}
+			s.AutoPending = &autoPending{ID: req.ID, Command: "stop", Event: name, QueuedAt: time.Now().Unix()}
 			return true, nil
 		}
 	}
@@ -218,7 +219,7 @@ func automaticCycle(engine *tuning.Engine, cfg map[string]any, s *state) (bool, 
 			if err != nil {
 				return changed, err
 			}
-			s.AutoPending = &autoPending{ID: req.ID, Command: "start", Event: name}
+			s.AutoPending = &autoPending{ID: req.ID, Command: "start", Event: name, QueuedAt: time.Now().Unix()}
 			return true, nil
 		}
 	}
