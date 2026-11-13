@@ -26,6 +26,8 @@ func fakeArm64ELF(t *testing.T, path string, mode os.FileMode) {
 func writeMinimalModule(t *testing.T, root string) {
 	t.Helper()
 	paths := map[string]string{
+        "module/update.json": `{"version":"v0","versionCode":1,"updates_enabled":false,"zipUrl":"","changelog":""}`,
+        "module/META-INF/com/google/android/update-binary": "#!/sbin/sh\nexit 0\n",
 		"module/module.prop":          "id=XtremeBS\nname=Xtreme Battery Saver\nversion=v0\nversionCode=1\n",
 		"module/service.sh":           "#!/system/bin/sh\nexit 0\n",
 		"module/action.sh":            "#!/system/bin/sh\nexit 0\n",
@@ -40,7 +42,7 @@ func writeMinimalModule(t *testing.T, root string) {
 			t.Fatal(err)
 		}
 		mode := os.FileMode(0o644)
-		if strings.Contains(rel, ".sh") || strings.Contains(rel, "system/bin/") {
+		if strings.Contains(rel, ".sh") || strings.Contains(rel, "update-binary") || strings.Contains(rel, "system/bin/") {
 			mode = 0o755
 		}
 		if err := os.WriteFile(p, []byte(text), mode); err != nil {

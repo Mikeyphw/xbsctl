@@ -1,20 +1,17 @@
 #!/system/bin/sh
-# Do NOT assume where your module will be located.
-# ALWAYS use $MODDIR if you need to know where this script
-# and module is placed.
 MODDIR=${0%/*}
-
-# This script will be executed in late_start service mode.
+# Late start after Android's shared storage is available.
 until [ "$(getprop sys.boot_completed)" = "1" ] && [ -d "/sdcard/Android" ]; do
   sleep 3
 done
-
-# Initialize once shared Android storage is available. Existing configurations are preserved.
-# Refuse daemon startup if initialization or validation fails.
+# xbs init only creates defaults when config is absent; it must never remove
+# pre-existing user profiles/lists. Reject invalid config before any daemon.
 if ! XBS_MODULE_DIR="$MODDIR" "$MODDIR/system/bin/xbs" init; then
-  echo "XBS: configuration initialization failed; not starting XtremeBSd" >&2
+  echo 'XBS R04: first-boot initialization failed' >&2
   exit 1
 fi
-
-# XGO10: daemon is a Go-native runtime behind system/bin/XtremeBSd.
+if ! XBS_MODULE_DIR="$MODDIR" "$MODDIR/system/bin/xbs" validate; then
+  echo 'XBS R04: configuration validation refused daemon startup' >&2
+  exit 1
+fi
 XBS_MODULE_DIR="$MODDIR" "$MODDIR/system/bin/XtremeBSd" &

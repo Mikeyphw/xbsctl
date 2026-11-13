@@ -4,22 +4,26 @@ PROPFILE=false
 POSTFSDATA=false
 LATESTARTSERVICE=true
 
-MODDIR="${MODPATH:-${0%/*}}"
+# Refuse an unverified root-module payload before chmod or initialization.
+[ -n "${MODPATH:-}" ] || { ui_print '! Missing MODPATH'; abort 'Missing module staging path'; }
+[ -f "$MODPATH/runtime/arm64-v8a/runtime.sha256" ] || abort 'R04 checksum manifest absent'
+if command -v sha256sum >/dev/null 2>&1; then
+  SUM=sha256sum
+elif command -v busybox >/dev/null 2>&1; then
+  SUM='busybox sha256sum'
+else
+  abort 'R04 cannot verify runtime hashes: sha256sum unavailable'
+fi
+( cd "$MODPATH" && $SUM -c runtime/arm64-v8a/runtime.sha256 ) || abort 'R04 runtime checksum mismatch'
+for x in xbs XBSctl XtremeBSd; do
+  [ -f "$MODPATH/runtime/arm64-v8a/$x" ] || abort 'R04 missing Go runtime'
+done
+ui_print '- R04 runtime integrity verified (3 ARM64 binaries)'
 
-# The former bin/xbs-paths.sh helper is not present in the standalone module.
-# Initialization is handled by the bundled Go xbs CLI in service.sh after
-# shared storage is mounted, not silently skipped during installation.
-ui_print "- Go-native XBS config initialization is scheduled for first boot"
-
-ui_print "- Setting Go-native runtime permissions..."
+# The Go CLI performs non-destructive configuration initialization on first boot.
+ui_print '- Existing shared user configuration will be preserved'
 set_perm_recursive "$MODPATH" 0 0 0755 0644
-set_perm "$MODPATH/action.sh" 0 0 0755
-set_perm "$MODPATH/customize.sh" 0 0 0755
-set_perm "$MODPATH/service.sh" 0 0 0755
-[ -e "$MODPATH/system/bin/XBSctl" ] && set_perm "$MODPATH/system/bin/XBSctl" 0 0 0755
-[ -e "$MODPATH/system/bin/XtremeBSd" ] && set_perm "$MODPATH/system/bin/XtremeBSd" 0 0 0755
-[ -e "$MODPATH/system/bin/xbs" ] && set_perm "$MODPATH/system/bin/xbs" 0 0 0755
-[ -e "$MODPATH/runtime/arm64-v8a/xbs" ] && set_perm "$MODPATH/runtime/arm64-v8a/xbs" 0 0 0755
-[ -e "$MODPATH/runtime/arm64-v8a/XBSctl" ] && set_perm "$MODPATH/runtime/arm64-v8a/XBSctl" 0 0 0755
-[ -e "$MODPATH/runtime/arm64-v8a/XtremeBSd" ] && set_perm "$MODPATH/runtime/arm64-v8a/XtremeBSd" 0 0 0755
-ui_print "✔ Go-native XBS permissions applied"
+for rel in action.sh customize.sh service.sh system/bin/xbs system/bin/XBSctl system/bin/XtremeBSd runtime/arm64-v8a/xbs runtime/arm64-v8a/XBSctl runtime/arm64-v8a/XtremeBSd; do
+  [ -f "$MODPATH/$rel" ] && set_perm "$MODPATH/$rel" 0 0 0755
+done
+ui_print '- R04 verified module permissions applied'
