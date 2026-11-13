@@ -843,7 +843,9 @@
       "gate": "Boot/charging/screen/battery/manual transitions are observed, deterministic and idempotent on fake backend and qualified device.",
       "focus": "CODE-07; automatic battery-saver behavior",
       "status": "IN_PROGRESS",
-      "evidence": [],
+      "evidence": [
+        "R03D read-only chronological API36 sensor observation, strict offline hash-chain verification, missing-sample and time-gap reporting; source-pinned artifact, no physical root or automatic-transition acceptance"
+      ],
       "tasks": [
         {
           "id": "R03-01",
@@ -867,7 +869,8 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "evidence": [
-            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending",
+            "R03D timed observational read-only evidence harness; synthetic-only before actual device capture; does not qualify profile effects"
           ],
           "blockers": [],
           "test_refs": [],
@@ -881,7 +884,8 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "evidence": [
-            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending",
+            "R03D timed observational read-only evidence harness; synthetic-only before actual device capture; does not qualify profile effects"
           ],
           "blockers": [],
           "test_refs": [],
@@ -895,7 +899,8 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "evidence": [
-            "R03A source-pinned ZIP with synthetic tests; source qualification pending"
+            "R03A source-pinned ZIP with synthetic tests; source qualification pending",
+            "R03D timed observational read-only evidence harness; synthetic-only before actual device capture; does not qualify profile effects"
           ],
           "blockers": [],
           "test_refs": [],
@@ -3328,6 +3333,12 @@
       "phase": "R03",
       "change": "R03B opt-in per-boot guard, safe quit, charging policy, resource-lease-aware overlapping desires, separate durable observed/desire/pending data",
       "evidence": "bundled tests; source-pinned overlay; full Go and physical gates pending"
+    },
+    {
+      "date": "2026-11-12",
+      "phase": "R03",
+      "change": "R03D read-only event chronology captures API36 charging, wakefulness and threshold samples with monotonic intervals and no device-changing commands; event-gap and hash-chain audit harness",
+      "evidence": "Offline fixture and ZIP tests required; real sensor chronology, daemon transitions and root acceptance not qualified"
     }
   ],
   "change_log": [
@@ -3377,6 +3388,14 @@
       "overlay": "XBS_R03C_RELIABILITY_API36_DIAGNOSTICS_20261112.zip",
       "qualification": "OFFLINE_ISOLATED_PENDING_FULL_REPOSITORY_AND_DEVICE",
       "change": "No-follow read-only queue lifecycle inspection; bounded 10-minute watchdog retaining unknown evidence; R03B pending-time migration and explicit no-replay block; deterministic Go fault tests and read-only Android API36 diagnostic harness, not privileged device acceptance."
+    },
+    {
+      "date": "2026-11-12",
+      "actor": "R03D source-pinned read-only chronology implementation",
+      "source_pin": "dbc10c545cec22edf186b1cc1a03d2891b263238",
+      "overlay": "XBS_R03D_EVENT_CHRONOLOGY_20261112.zip",
+      "qualification": "OFFLINE_PENDING_HOSTED_AND_DEVICE_CHRONOLOGY",
+      "change": "Add bounded ADB sensor chronology collector and offline digest-chain replay verifier, no device mutation; tests inject wakefulness/charge/hysteresis transitions and unobserved gaps; no physical root acceptance."
     }
   ]
 }
