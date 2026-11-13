@@ -1446,7 +1446,7 @@
           "id": "R05-12",
           "title": "Test configuration transaction rollback, stale latest pointer and symlinks",
           "acceptance": "Actual managed files remain correct under failures and contention.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
           "evidence": [],
@@ -3423,6 +3423,13 @@
       "overlay": "XBS_R05A_CONSOLIDATED_COMPANION_TASKER_20261113.zip",
       "qualification": "OFFLINE_FIXTURE_PENDING_FULL_CHECKOUT_HOSTED_AND_DEVICE",
       "change": "Add exact daemon request receipt and observed-state guards, Tasker completion proof, dedup throttle, FGS prestart cancellation race fix, conservative transaction reload recovery, hosted JVM test job; no device/root or all-R05 acceptance."
+    },
+    {
+      "date": "2026-11-13",
+      "actor": "R05B configuration generation and recovery implementation",
+      "source_pin": "735ee457c9376a0887cfb8ef2a2a3123eb048bb6",
+      "qualification": "OFFLINE_FIXTURE_PENDING_FULL_CHECKOUT_HOSTED_AND_DEVICE",
+      "change": "SHA-256 of validated loaded config bytes, explicit exact-generation awaited controller reloads, crash-safe unresolved journal guard, confirmed manual rollback/recovery reload, no blind retries or physical acceptance."
     }
   ],
   "change_log": [

@@ -28,6 +28,7 @@ type options struct {
 	wait     bool
 	timeout  time.Duration
 	ttl      time.Duration
+	expectConfigSHA string
 }
 
 type StatusSnapshot struct {
@@ -36,6 +37,7 @@ type StatusSnapshot struct {
 	LogLevel       any            `json:"log_level,omitempty"`
 	Mode           string         `json:"mode"`
 	LastReloadTime string         `json:"last_reload_time,omitempty"`
+	ConfigSHA256   string         `json:"config_sha256,omitempty"`
 	ActiveEvents   []string       `json:"active_events"`
 	Detail         map[string]any `json:"detail,omitempty"`
 	Raw            map[string]any `json:"raw,omitempty"`
@@ -49,6 +51,9 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 	if len(clean) == 0 || clean[0] == "-h" || clean[0] == "--help" || clean[0] == "help" {
 		printHelp(stdout)
 		return 0
+	}
+	if opts.expectConfigSHA != "" && (!opts.wait || len(clean) != 1 || clean[0] != "reload") {
+		return emitError(stdout, opts, "--expect-config-sha256 requires reload --wait without additional arguments", ExitInvalidArgs)
 	}
 	switch clean[0] {
 	case "active":
@@ -129,6 +134,11 @@ func parse(args []string) (options, []string, error) {
 		switch a {
 		case "--json":
 			opts.jsonMode = true
+		case "--expect-config-sha256":
+			if i+1 >= len(args) { return opts, clean, errors.New("--expect-config-sha256 requires 64 lowercase hex characters") }
+			i++
+			if !r05bValidGeneration(args[i]) { return opts, clean, errors.New("invalid --expect-config-sha256") }
+			opts.expectConfigSHA = args[i]
 		case "--wait":
 			opts.wait = true
 		case "--ttl":
@@ -222,6 +232,12 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 				if !waitForObservedState(action, "", before, opts.timeout) {
 					return emitControl(stdout, opts, "unknown", "Daemon acknowledged but matching runtime state was not observed", "unknown", action, "", ExitRuntime, req.ID)
 				}
+				if opts.expectConfigSHA != "" {
+					observed, code, _ := readSnapshot()
+					if code != 0 || !r05bMatchingGeneration(opts.expectConfigSHA, observed.ConfigSHA256) {
+						return emitControl(stdout, opts, "unknown", "Reload generation does not match the validated loaded configuration", "unknown", action, "", ExitRuntime, req.ID)
+					}
+				}
 				return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0, req.ID)
 			}
 			if ack.State == "unknown" {
@@ -300,6 +316,7 @@ func snapshotFromRaw(raw map[string]any) StatusSnapshot {
 	s.Version = raw["version"]
 	s.LogLevel = raw["log_level"]
 	s.LastReloadTime = stringValue(raw["last_reload_time"])
+	s.ConfigSHA256 = stringValue(raw["config_sha256"])
 	if detail, ok := raw["detail"].(map[string]any); ok {
 		s.Detail = detail
 	} else {

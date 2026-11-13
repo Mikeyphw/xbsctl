@@ -36,6 +36,7 @@ type state struct {
 	LastError        string
 	LastErrorTime    string
 	LogLevel         any
+	ConfigSHA256     string
 	EffectResults    map[string]any
 	QuitRequested    bool
 	DryRun           bool
@@ -53,7 +54,7 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "XtremeBSd:", err)
 		return 2
 	}
-	cfg, err := config.Load()
+	cfg, loadedSHA, err := config.LoadWithSourceDigest()
 	if err != nil {
 		return finish(stdout, opts, false, "config load failed: "+err.Error(), 3)
 	}
@@ -63,7 +64,7 @@ func Main(args []string, stdout io.Writer, stderr io.Writer) int {
 	if configured, ok := get(cfg, "header.dry_run").(bool); ok && configured {
 		opts.dryRun = true
 	}
-	s := &state{Mode: "normal", Active: map[string]bool{}, AutoOwned: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), EffectResults: map[string]any{}, DryRun: opts.dryRun}
+	s := &state{Mode: "normal", Active: map[string]bool{}, AutoOwned: map[string]bool{}, LogLevel: get(cfg, "header.log_level"), ConfigSHA256: loadedSHA, EffectResults: map[string]any{}, DryRun: opts.dryRun}
 	// A second daemon must never race this instance on the .work queue.
 	lock, lockErr := acquireDaemonLock()
 	if lockErr != nil {
@@ -391,7 +392,7 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 		change["state"] = "inactive"
 		change["effects"] = tuning.MarshalResult(result)
 	case "reload":
-		fresh, err := config.Load()
+		fresh, freshSHA, err := config.LoadWithSourceDigest()
 		if err != nil {
 			return nil, fmt.Errorf("reload config: %w", err)
 		}
@@ -445,6 +446,7 @@ func processCtl(engine *tuning.Engine, cfg map[string]any, s *state, dryRun bool
 			}
 		}
 		s.LogLevel = get(cfg, "header.log_level")
+		s.ConfigSHA256 = freshSHA
 		s.LastReloadTime = now()
 		s.AutoPlanner = nil
 		s.AutoBlocked = false
@@ -764,7 +766,7 @@ func writeStatus(cfg map[string]any, s *state) error {
 	} else {
 		profiles = append(profiles, active...)
 	}
-	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults, "automatic": s.AutoReport, "automatic_owned": autoOwnedList(s), "automatic_desired": s.AutoDesired, "automatic_pending": s.AutoPending, "automatic_blocked": s.AutoBlocked}}
+	payload := map[string]any{"version": 2, "active_events": active, "active_profiles": profiles, "last_error": s.LastError, "last_error_time": s.LastErrorTime, "last_applied_event": s.LastAppliedEvent, "last_applied_time": s.LastAppliedTime, "last_reload_time": s.LastReloadTime, "config_sha256": s.ConfigSHA256, "log_level": s.LogLevel, "mode": s.Mode, "detail": map[string]any{"runtime": "go-native", "daemon": "XtremeBSd", "dry_run": dryRunState(s), "pid": os.Getpid(), "effects": s.EffectResults, "automatic": s.AutoReport, "automatic_owned": autoOwnedList(s), "automatic_desired": s.AutoDesired, "automatic_pending": s.AutoPending, "automatic_blocked": s.AutoBlocked}}
 	return atomicJSON(p.Status, payload, 0o644)
 }
 
