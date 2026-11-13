@@ -49,7 +49,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Guard Android SDK setup against obsolete tools package
+        run: python3 scripts/ci/test_r05a_hf01_sdk_setup.py
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
       - name: Install Android API 36 for hosted JVM tests
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
@@ -68,7 +72,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Guard Android SDK setup against obsolete tools package
+        run: python3 scripts/ci/test_r05a_hf01_sdk_setup.py
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
       - name: Install Android platform and build tools
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
