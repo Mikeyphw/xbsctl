@@ -57,6 +57,12 @@ jobs:
           java-version: '21'
       - name: Guard Android SDK setup against obsolete tools package
         run: python3 scripts/ci/test_r05a_hf01_sdk_setup.py
+      - name: R05C HF03/HF01 named-step SDK inventory and mutation regressions
+        run: python3 scripts/ci/test_r05c_hf03_sdk_inventory.py
+      - name: R05C HF04 complete repository Python CI suite
+        run: |
+          python3 scripts/ci/r05c_full_ci_precommit.py --self-test
+          python3 scripts/ci/r05c_full_ci_precommit.py --run
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools'

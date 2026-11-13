@@ -48,7 +48,13 @@ class R05aSourceContracts(unittest.TestCase):
         tx=(ANDROID/'XbsConfigTransaction.java').read_text()
         self.assertIn('RELOAD_STARTED=true;',tx)
         self.assertIn('write_status recovery_required',tx)
-        self.assertIn('xbsctl("--json reload --wait --timeout 12")',tx)
+        # R05B made daemon generation matching mandatory. Never regress to an
+        # unbound acknowledgement or accept a reload with an unknown digest.
+        self.assertIn('confirmedReload(plan.entries.get(0).newDigest)',tx)
+        self.assertIn('confirmedReload(originalConfigDigest(record))',tx)
+        self.assertIn('if (!isDigest(digest)) throw new IllegalArgumentException',tx)
+        self.assertIn('xbsctl("--json reload --wait --timeout 12 --expect-config-sha256 " + digest)',tx)
+        self.assertNotIn('xbsctl("--json reload --wait --timeout 12")',tx)
     def test_hosted_android_jvm_job_is_present(self):
         ci=self.text('.github/workflows/devtool-xbs-ci.yml')
         self.assertIn('android-companion-jvm:',ci)
