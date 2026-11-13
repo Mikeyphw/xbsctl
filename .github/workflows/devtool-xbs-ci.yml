@@ -86,6 +86,14 @@ jobs:
           gradle-version: '9.7.1'
       - name: R05C source and workflow contracts
         run: python3 scripts/ci/test_r05c_source_contract.py
+      - name: Enable KVM for API36 emulator
+        run: |
+          set -euo pipefail
+          test -c /dev/kvm
+          sudo chmod 0666 /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+      - name: Install Android API36 build-tools 36.0.0
+        run: sdkmanager 'build-tools;36.0.0'
       - name: Android API36 rootless instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -93,12 +101,11 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          build-tools: 36.0.0
           disable-animations: true
           emulator-boot-timeout: 600
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
-            set -euo pipefail
+            set -eu
             gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cBridgeReplayInstrumentedTest,io.github.mikeceead.xbscompanion.R05cTaskerBoundaryInstrumentedTest,io.github.mikeceead.xbscompanion.R05cLifecycleInstrumentedTest,io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditPendingCommandInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditRoomMainThreadInstrumentedTest' :app:connectedDebugAndroidTest
             python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected
             gradle -p android-app --no-daemon --console=plain :app:assembleDebug
