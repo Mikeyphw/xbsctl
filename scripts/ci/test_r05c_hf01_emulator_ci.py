@@ -33,7 +33,7 @@ class EmulatorHostedRegression(unittest.TestCase):
         self.assertIn('connectedDebugAndroidTest',contents)
         self.assertIn('r05c_verify_instrumentation.py',contents)
         self.assertIn('test -s "$APK"',contents)
-        self.assertIn('apksigner verify "$APK"',contents)
+        self.assertIn('"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"',contents)
         self.assertIn('SOURCE_SHA',contents)
 
     def test_kvm_acceleration_preflight_before_runner(self):

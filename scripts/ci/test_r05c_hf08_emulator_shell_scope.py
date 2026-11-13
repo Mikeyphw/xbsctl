@@ -47,7 +47,7 @@ def inspect(workflow:str)->str:
     tokens=[
         'APK='+TARGET_APK+'; HEAD_SHA=$(git rev-parse HEAD); test "$HEAD_SHA" = \'%s\''%HEAD_EXPRESSION,
         'test -s "$APK"',
-        'apksigner verify "$APK"',
+        '"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"',
         'mkdir -p android-evidence',
         'cp "$APK" '+EVIDENCE,
         '(cd android-evidence && sha256sum xbs-companion-r05c-api36-debug.apk > SHA256SUMS)',
@@ -75,7 +75,7 @@ class EmulatorShellScope(unittest.TestCase):
         self.assertIn('APK='+TARGET_APK+'; HEAD_SHA=$(git rev-parse HEAD)',self.package)
         self.assertIn('test "$HEAD_SHA" =',self.package)
         self.assertIn('test -s "$APK"',self.package)
-        self.assertIn('apksigner verify "$APK"',self.package)
+        self.assertIn('"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"',self.package)
         self.assertIn('SHA256SUMS',self.package)
         self.assertIn('SOURCE_SHA',self.package)
 
@@ -97,12 +97,12 @@ class EmulatorShellScope(unittest.TestCase):
         with self.assertRaises(Refused):inspect(self.workflow.replace("test \"$HEAD_SHA\" = '" + HEAD_EXPRESSION + "'", "test \"$HEAD_SHA\" = '" + "0" * 40 + "'", 1))
 
     def test_chained_exit_checks_cannot_be_silenced(self):
-        with self.assertRaises(Refused):inspect(self.workflow.replace(' && apksigner verify "$APK"','; apksigner verify "$APK"',1))
+        with self.assertRaises(Refused):inspect(self.workflow.replace(' && "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"','; "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"',1))
 
     def test_hosted_linux_race_is_immutable(self):
         with self.assertRaises(Refused):inspect(self.workflow.replace('go test -race ./internal/config', 'go test ./internal/config',1))
 
-    def _execute(self,*,exists=True,bad_sig=False,wrong_sha=False):
+    def _execute(self,*,exists=True,bad_sig=False,wrong_sha=False,sdk_missing=False):
         shell=shutil.which('sh')
         if not shell: self.fail('POSIX shell unavailable')
         with tempfile.TemporaryDirectory(prefix='xbs-r05c-hf08-') as tmp:
@@ -118,18 +118,21 @@ class EmulatorShellScope(unittest.TestCase):
             if exists:
                 apk.parent.mkdir(parents=True)
                 apk.write_bytes(b'PK\\x03\\x04fake-fixture-apk')
-            bin_dir=root/'bin';bin_dir.mkdir()
+            bin_dir=root/'fake-sdk'/'build-tools'/'36.0.0';bin_dir.mkdir(parents=True)
+            rogue_dir=root/'rogue-bin';rogue_dir.mkdir()
             signer=bin_dir/'apksigner'
             signer.write_text('#!'+shell+'\n[ "$1" = "verify" ] && [ -s "$2" ] && [ "${XBS_FAKE_SIGNATURE_FAILURE:-0}" != 1 ]\n')
             signer.chmod(0o755)
-            env={**os.environ,'PATH':str(bin_dir)+os.pathsep+os.environ.get('PATH',''), 'XBS_FAKE_SIGNATURE_FAILURE':'1' if bad_sig else '0'}
+            rogue=rogue_dir/'apksigner';rogue.write_bytes(signer.read_bytes());rogue.chmod(0o755)
+            if sdk_missing:signer.unlink()
+            env={**os.environ,'ANDROID_HOME':str(root/'fake-sdk'), 'PATH':str(rogue_dir)+os.pathsep+os.environ.get('PATH',''), 'XBS_FAKE_SIGNATURE_FAILURE':'1' if bad_sig else '0'}
             expected='0'*40 if wrong_sha else head
             command=self.package.replace(HEAD_EXPRESSION,expected)
             run=subprocess.run([shell,'-c',command],cwd=root,env=env,capture_output=True,text=True)
             dest=root/EVIDENCE
             source=root/'android-evidence/SOURCE_SHA'
             checksum=root/'android-evidence/SHA256SUMS'
-            if exists and not bad_sig and not wrong_sha:
+            if exists and not bad_sig and not wrong_sha and not sdk_missing:
                 self.assertEqual(run.returncode,0,run.stderr)
                 self.assertEqual(dest.read_bytes(),apk.read_bytes())
                 self.assertEqual(source.read_text(),head+'\n')
@@ -142,5 +145,6 @@ class EmulatorShellScope(unittest.TestCase):
     def test_actual_shell_missing_apk_fails_closed(self):self._execute(exists=False)
     def test_actual_shell_bad_apk_signature_fails_closed(self):self._execute(bad_sig=True)
     def test_actual_shell_wrong_git_sha_fails_closed(self):self._execute(wrong_sha=True)
+    def test_rogue_path_signer_cannot_replace_missing_sdk_signer(self):self._execute(sdk_missing=True)
 
 if __name__=='__main__':unittest.main(verbosity=2)
