@@ -2,7 +2,7 @@
 [project]
 root = "."
 python = "python3"
-runner = "command"
+runner = "go"
 platform = "cli"
 
 [execution]
@@ -25,14 +25,14 @@ root = "."
 command = ["go", "version"]
 
 [jobs.xbs-go-test]
-runner = "command"
+runner = "go"
 root = "."
-command = ["go", "test", "./..."]
+action = "test"
 
 [jobs.xbs-go-vet]
-runner = "command"
+runner = "go"
 root = "."
-command = ["go", "vet", "./..."]
+action = "lint"
 
 [jobs.xbs-contract-check]
 runner = "command"
@@ -52,7 +52,7 @@ outputs = ["dist/XtremeBS-go.zip"]
 
 [targets.xbs]
 root = "."
-runner = "command"
+runner = "go"
 platform = "cli"
 run_command = "go run ./cmd/xbs --help"
 inputs = ["cmd/**", "internal/**", "module/**", "go.mod", ".devtool.toml"]
@@ -60,9 +60,22 @@ outputs = [".tmp/**", "dist/**"]
 
 [targets.xbs.workflows]
 restore = ["job:xbs-go-mod-present", "job:xbs-go-version"]
-build = ["job:xbs-build-module"]
+build = [
+  { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
+  { id = "tests", ref = "job:xbs-go-test", depends_on = ["source"] },
+  { id = "vet", ref = "job:xbs-go-vet", depends_on = ["source"] },
+  { id = "contracts", ref = "job:xbs-contract-check", depends_on = ["tests", "vet"] },
+  { id = "seal", ref = "job:xbs-final-seal", depends_on = ["contracts"] },
+  { id = "module", ref = "job:xbs-build-module", depends_on = ["seal"] },
+]
 test = ["job:xbs-go-test", "job:xbs-contract-check"]
-validate = ["job:xbs-go-test", "job:xbs-go-vet", "job:xbs-contract-check"]
+validate = [
+  { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
+  { id = "tests", ref = "job:xbs-go-test", depends_on = ["source"] },
+  { id = "vet", ref = "job:xbs-go-vet", depends_on = ["source"] },
+  { id = "contracts", ref = "job:xbs-contract-check", depends_on = ["tests", "vet"] },
+  { id = "seal", ref = "job:xbs-final-seal", depends_on = ["contracts"] },
+]
 ci-preflight = [
   { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
   { id = "go", ref = "job:xbs-go-version", depends_on = ["source"] },
@@ -76,7 +89,10 @@ ci-local = [
 ci-module = [
   { id = "source", ref = "job:xbs-go-mod-present", depends_on = [] },
   { id = "tests", ref = "job:xbs-go-test", depends_on = ["source"] },
-  { id = "module", ref = "job:xbs-build-module", depends_on = ["tests"] },
+  { id = "vet", ref = "job:xbs-go-vet", depends_on = ["source"] },
+  { id = "contracts", ref = "job:xbs-contract-check", depends_on = ["tests", "vet"] },
+  { id = "seal", ref = "job:xbs-final-seal", depends_on = ["contracts"] },
+  { id = "module", ref = "job:xbs-build-module", depends_on = ["seal"] },
 ]
 
 [targets.xbs_android]
@@ -85,8 +101,8 @@ runner = "android"
 platform = "android"
 execution_environment = "auto"
 chroot_name = "androidos"
-inputs = ["android-app/**", ".devtool.toml"]
-outputs = ["android-app/**/build/**"]
+inputs = ["../.devtool.toml", "../go.mod", "../cmd/**", "../internal/**", "../module/**"]
+outputs = ["app/build/**", "build/**", "benchmark/build/**", "phase31-testkit/build/**", ".devtool/build-artifacts/**"]
 
 [targets.xbs_android.android]
 variant = "debug"
@@ -116,9 +132,9 @@ clean = ["clean"]
 [targets.xbs_android.artifacts]
 output_directory = ".devtool/build-artifacts/xbs-companion/debug"
 output_name = "xbs-companion-debug.apk"
-required = false
-verify = false
-paths = ["android-app/app/build/outputs/apk/debug/app-debug.apk"]
+required = true
+verify = true
+paths = ["app/build/outputs/apk/debug/app-debug.apk"]
 recursive = true
 
 [workspace]
@@ -142,6 +158,6 @@ workflow = "ci-local"
 target = "xbs"
 
 [wrapper.commands.ci-module]
-description = "Source-bound Android module candidate after tests"
+description = "Native Go tests, vet, contracts and final seal before module build"
 workflow = "ci-module"
 target = "xbs"
