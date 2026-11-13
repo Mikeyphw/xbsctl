@@ -155,7 +155,7 @@ final class XbsConfigTransaction {
         StringBuilder shell = new StringBuilder(20_000);
         shell.append("set -eu; umask 077; ")
             .append(commonVariables(plan.id, tx, stage, original, manifest, snapshots, status))
-            .append("LOCKED=false; TX_READY=false; PROMOTION_STARTED=false; COMMITTED=false; ALLOW_PENDING=true; ")
+            .append("LOCKED=false; TX_READY=false; PROMOTION_STARTED=false; RELOAD_STARTED=false; COMMITTED=false; ALLOW_PENDING=true; ")
             .append(managedDirectoryFunctions())
             .append(hashFunction())
             .append(lockFunctions())
@@ -163,12 +163,13 @@ final class XbsConfigTransaction {
             .append(restoreFunction(plan.entries, original))
             .append(verifyOriginalFunction(plan.entries, original))
             .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; ")
+            .append("if [ \"$RELOAD_STARTED\" = true ] && [ \"$COMMITTED\" != true ]; then write_status recovery_required 'Daemon reload outcome uncertain; preserve files and journal' >/dev/null 2>&1 || true; release_lock; exit \"$RC\"; fi; ")
             .append("if [ \"$TX_READY\" = true ] && [ \"$COMMITTED\" != true ]; then ")
             .append("ROLLBACK_OK=true; assert_managed_dirs >/dev/null 2>&1 || ROLLBACK_OK=false; ")
             .append("restore_original >/dev/null 2>&1 || ROLLBACK_OK=false; verify_original >/dev/null 2>&1 || ROLLBACK_OK=false; ");
         if (plan.reload) {
             shell.append("if [ \"$PROMOTION_STARTED\" = true ]; then ")
-                .append(xbsctl("--json reload")).append(" >/dev/null 2>&1 || ROLLBACK_OK=false; fi; ");
+                .append(xbsctl("--json reload --wait --timeout 12")).append(" >/dev/null 2>&1 || ROLLBACK_OK=false; fi; ");
         }
         shell.append("if [ \"$ROLLBACK_OK\" = true ]; then write_status rolled_back 'Automatic rollback restored the complete old file set' >/dev/null 2>&1 || true; ")
             .append("else write_status rollback_failed 'Automatic rollback could not verify the complete old file set' >/dev/null 2>&1 || true; fi; fi; ")
@@ -197,7 +198,8 @@ final class XbsConfigTransaction {
 
         shell.append("write_status promoted 'Files promoted; validating runtime configuration'; ")
             .append(xbs("--json validate")).append(" >/dev/null; ");
-        if (plan.reload) shell.append(xbsctl("--json reload")).append(" >/dev/null; ");
+        if (plan.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting matching daemon acknowledgement'; ")
+            .append(xbsctl("--json reload --wait --timeout 12")).append(" >/dev/null; ");
         for (int index = 0; index < plan.entries.size(); index++) {
             appendVerifyCommitted(shell, plan.entries.get(index), index, stage);
         }

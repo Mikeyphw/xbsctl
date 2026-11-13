@@ -39,7 +39,16 @@ public final class TaskerPluginReceiver extends BroadcastReceiver {
         TaskerConfigCodec.ParseResult parsed=TaskerConfigCodec.parseCliValues(config.getString(TaskerProtocol.KEY_CLI_VALUES,""),command);
         if(!parsed.valid){fail(pending,ordered,"Tasker fields rejected: "+parsed.code);ExternalEntryStore.record(context,"tasker_action",parsed.code,host,false,senderVerified);return;}
         final String shell;try{shell=command.build(parsed.values);}catch(IllegalArgumentException error){fail(pending,ordered,error.getMessage());ExternalEntryStore.record(context,"tasker_action","field_validation_failed",host,false,senderVerified);return;}
+        // A second delivery of the same signed action within 1.5 seconds is not
+        // another intentional command; prevent it from reaching the root queue.
+        String dedupKey=senderUid+":"+config.getString(TaskerRequestPolicy.KEY_SIGNATURE,"")+":"+command.id+":"+config.getString(TaskerProtocol.KEY_CLI_VALUES,"");
+        if (!R05aActionDedup.claim(dedupKey,System.nanoTime())) {
+            fail(pending,ordered,"Duplicate Tasker action suppressed");
+            ExternalEntryStore.record(context,"tasker_action","duplicate_suppressed",host,false,senderVerified);
+            return;
+        }
         CommandLaunchResult result=RootCommandRunner.runCommand(context,"tasker_"+command.id,command.title,command.description,shell,command.destructive,intent);
+        if (!result.started) R05aActionDedup.release(dedupKey);
         if(result.started){if(ordered)pending.setResultCode(TaskerProtocol.RESULT_PENDING);ExternalEntryStore.record(context,"tasker_action","accepted",host,true,senderVerified);}
         else{fail(pending,ordered,result.error);ExternalEntryStore.record(context,"tasker_action","launch_failed",host,false,senderVerified);}
     }

@@ -159,7 +159,11 @@ final class RootCommandRunner {
             Bundle variables = TaskerProtocol.variables(executionId, exitCode, stdout, stderr, error,
                 spec.action.module, spec.action.id);
             MachineResult machine = MachineResult.parse(stdout);
-            boolean ok = exitCode == 0 && error.trim().isEmpty() && (!machine.parsed || machine.ok);
+            boolean controller = R05aCommandPolicy.requiresAck(spec.command);
+            R05aDaemonReceipt receipt = R05aDaemonReceipt.inspect(spec.command, exitCode, stdout, error);
+            if (controller) receipt.taskerVariables(variables);
+            boolean ok = controller ? receipt.applied()
+                : exitCode == 0 && error.trim().isEmpty() && (machine.parsed ? machine.ok : !spec.action.destructive);
             TaskerProtocol.signalFinish(context, taskerIntent,
                 ok ? TaskerProtocol.RESULT_OK : TaskerProtocol.RESULT_FAILED, variables);
         }
@@ -193,6 +197,7 @@ final class RootCommandRunner {
     }
 
     private static String buildRootShell(String command) {
+        command = R05aCommandPolicy.forceWait(command);
         if (command.startsWith("XBSctl ") || command.equals("XBSctl")) {
             String suffix = command.length() > 6 ? command.substring(6) : "";
             return XbsRuntimeResolver.xbsCtlJsonError(suffix, "xbsctl.detect",

@@ -54,8 +54,15 @@ final class RunStore {
         record.finishedAt = System.currentTimeMillis();
         MachineResult machine = MachineResult.parse(stdout);
         boolean ok = exitCode == 0 && (error == null || error.trim().isEmpty()) && (!machine.parsed || machine.ok);
-        record.status = ok ? "ok" : "failed";
-        record.message = ResultFormatter.summary(exitCode, stdout, stderr, error, ok ? "Completed" : "Failed");
+        if (R05aCommandPolicy.requiresAck(record.command) && exitCode != -1) {
+            R05aDaemonReceipt receipt=R05aDaemonReceipt.inspect(record.command,exitCode,stdout,error);
+            record.status=receipt.historyStatus();
+            record.message=receipt.applied() ? "Daemon applied and observed · "+receipt.requestId
+                : "Daemon outcome not confirmed · "+receipt.code;
+        } else {
+            record.status=exitCode==130 ? "cancelled" : exitCode==124||exitCode==125 ? "recovery_required" : ok ? "ok" : "failed";
+            record.message=ResultFormatter.summary(exitCode,stdout,stderr,error,ok?"Completed":"Failed");
+        }
         upsert(context, record);
     }
 
