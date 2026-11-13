@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -63,6 +64,11 @@ func run(args []string) int {
 		if fs.Parse(args[1:]) != nil {
 			return 2
 		}
+		// R04: never build or stage a candidate as part of an implicit root install request.
+		if *install {
+			fmt.Fprintln(os.Stderr, "R04 refuses --install; use install-command for an independently verified candidate")
+			return 2
+		}
 		runtimePath := *runtime
 		if runtimePath == "" {
 			runtimeDir := filepath.Join(root, ".tmp", "xbs-android-arm64-set")
@@ -93,7 +99,53 @@ func run(args []string) int {
 			}
 		}
 		return 0
-	case "install-module":
+	case "verify-module-zip":
+        fs := flag.NewFlagSet("verify-module-zip",flag.ContinueOnError)
+        zipPath := fs.String("zip","","module ZIP path")
+        sha := fs.String("sha256","","expected exact ZIP SHA256")
+        if fs.Parse(args[1:])!=nil{return 2}
+        if *zipPath=="" || *sha=="" {fmt.Fprintln(os.Stderr,"R04 requires exact --zip and --sha256");return 2}
+        if err:=xbsmodule.VerifyModuleZip(*zipPath);err!=nil{fmt.Fprintln(os.Stderr,"R04 verify:",err);return 1}
+        if err:=xbsmodule.VerifyR04ZipHash(*zipPath,*sha);err!=nil{fmt.Fprintln(os.Stderr,"R04 digest:",err);return 1}
+        fmt.Println("R04 module ZIP validated; digest agrees (NOT a CI/device acceptance)")
+        return 0
+    case "install-command":
+        fs:=flag.NewFlagSet("install-command",flag.ContinueOnError)
+        zipPath:=fs.String("zip","","absolute module ZIP")
+        sha:=fs.String("sha256","","exact ZIP hash")
+        commit:=fs.String("commit","","exact source SHA")
+        run:=fs.Int64("run-id",0,"hosted run identifier")
+        attempt:=fs.Int("run-attempt",0,"hosted run attempt")
+        artifact:=fs.String("artifact","","hosted artifact name")
+        manager:=fs.String("manager","","explicit kernelsu or magisk installer selection")
+        if fs.Parse(args[1:])!=nil{return 2}
+        candidate:=xbsmodule.R04InstallCandidate{Repository:"Mikeyphw/xbsctl",Commit:*commit,RunID:*run,RunAttempt:*attempt,Artifact:*artifact,SHA256:*sha,ZipPath:*zipPath,Manager:*manager}
+        cmd,err:=xbsmodule.QualifiedInstallCommand(candidate)
+        if err!=nil{fmt.Fprintln(os.Stderr,"R04 install candidate refused:",err);return 1}
+        fmt.Println("R04 operator-reviewed candidate only; verify actual hosted job and artifact association independently:")
+        fmt.Println(cmd)
+        return 0
+    case "rollback-stage":
+        fs:=flag.NewFlagSet("rollback-stage",flag.ContinueOnError)
+        stage:=fs.String("stage",filepath.Join(root,".tmp","module-stage"),"offline stage directory")
+        if fs.Parse(args[1:])!=nil{return 2}
+        if err:=xbsmodule.RollbackR04Stage(*stage);err!=nil{fmt.Fprintln(os.Stderr,"R04 rollback refused:",err);return 1}
+        fmt.Println("R04 staged rollback recorded (installed Android module unchanged)");return 0
+    case "finalize-stage":
+        fs:=flag.NewFlagSet("finalize-stage",flag.ContinueOnError)
+        stage:=fs.String("stage",filepath.Join(root,".tmp","module-stage"),"offline stage directory")
+        ack:=fs.String("ack","","explicit acceptance acknowledgement")
+        if fs.Parse(args[1:])!=nil{return 2}
+        if err:=xbsmodule.FinalizeR04Stage(*stage,*ack);err!=nil{fmt.Fprintln(os.Stderr,"R04 finalize refused:",err);return 1}
+        fmt.Println("R04 previous staged backup explicitly finalized");return 0
+    case "uninstall-plan":
+        fs:=flag.NewFlagSet("uninstall-plan",flag.ContinueOnError)
+        stage:=fs.String("stage",filepath.Join(root,".tmp","module-stage"),"offline stage directory")
+        if fs.Parse(args[1:])!=nil{return 2}
+        receipt,err:=xbsmodule.PlanR04Uninstall(*stage)
+        if err!=nil{fmt.Fprintln(os.Stderr,"R04 uninstall plan refused:",err);return 1}
+        json.NewEncoder(os.Stdout).Encode(receipt);return 0
+    case "install-module":
 		fs := flag.NewFlagSet("install-module", flag.ContinueOnError)
 		zipPath := fs.String("zip", filepath.Join(root, "dist", "XtremeBS-go.zip"), "module zip to install")
 		if fs.Parse(args[1:]) != nil {
@@ -138,5 +190,10 @@ Usage:
   xbsrepo build-module [--runtime PATH] [--out ZIP] [--stage DIR] [--install]
   xbsrepo install-module [--zip ZIP]
   xbsrepo validate [--stage DIR]
-  xbsrepo final-seal`)
+  xbsrepo final-seal
+  xbsrepo verify-module-zip --zip ZIP --sha256 HASH
+  xbsrepo install-command --zip ZIP --sha256 HASH --commit SHA --run-id ID --run-attempt N --artifact NAME --manager kernelsu|magisk
+  xbsrepo rollback-stage [--stage DIR]
+  xbsrepo finalize-stage [--stage DIR] --ack I_ACCEPT_VERIFIED_STAGE
+  xbsrepo uninstall-plan [--stage DIR]`)
 }

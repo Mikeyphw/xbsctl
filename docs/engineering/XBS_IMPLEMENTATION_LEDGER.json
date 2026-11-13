@@ -1068,7 +1068,9 @@
       "gate": "Fresh install/upgrade/rollback staging and reproducible module ZIPs verified without installing on user hardware.",
       "focus": "CODE-05/12/16; module lifecycle",
       "status": "IN_PROGRESS",
-      "evidence": [],
+      "evidence": [
+        "R04 consolidated overlay source + local Go fixture regression evidence; hosted checkout and device not qualified"
+      ],
       "tasks": [
         {
           "id": "R04-01",
@@ -1077,9 +1079,11 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
           "blockers": [
-            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
@@ -1092,9 +1096,11 @@
           "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
           "blockers": [
-            "Await overlay application and actual Go/hosted CI acceptance at resulting commit; no test PASS yet"
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
@@ -1104,11 +1110,15 @@
           "id": "R04-03",
           "title": "Preserve user configuration during upgrade",
           "acceptance": "Existing profile/list files remain intact and are migratable.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1117,11 +1127,15 @@
           "id": "R04-04",
           "title": "Verify all three ARM64 Go executables and manifest",
           "acceptance": "ELF machine, mode, hashes and declared package identity match.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1130,11 +1144,15 @@
           "id": "R04-05",
           "title": "Implement safe replacement of staged module",
           "acceptance": "Failed rename/validation cannot destroy the previously good stage.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1143,11 +1161,15 @@
           "id": "R04-06",
           "title": "Check module ZIP path safety and reproducibility",
           "acceptance": "No traversal/symlink/duplicate unsafe members; two independent outputs hash-equal.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1156,11 +1178,15 @@
           "id": "R04-07",
           "title": "Repair module.prop vs update.json mismatch",
           "acceptance": "Version/name/source/release links agree or updates are disabled safely.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1169,11 +1195,15 @@
           "id": "R04-08",
           "title": "Verify KernelSU/Magisk installation layout under disposable fixtures",
           "acceptance": "Correct script permissions, environment and entrypoints verified.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1182,11 +1212,15 @@
           "id": "R04-09",
           "title": "Add upgrade/uninstall/rollback receipts",
           "acceptance": "Evidence documents backup/restoration and no unrequested installation.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1195,11 +1229,15 @@
           "id": "R04-10",
           "title": "Add validated installer command generation",
           "acceptance": "The latest successful qualified module ZIP is resolved by exact run/artifact and verified hash.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "Source-pinned R04 module safety Go code, negative regression tests and offline staging fixtures"
+          ],
+          "blockers": [
+            "Exact post-commit SHA and hosted CI pending; offline fixture tests cannot qualify an Android installation"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R04",
           "phase_test_suite_count": 4
@@ -1212,7 +1250,9 @@
         "CI-012"
       ],
       "notes": [
-        "First source-pinned patch prepared. No hosted Go/Android/device evidence yet; no acceptance claimed."
+        "All R04-01 through R04-10 source work provided. Installer only emits verified candidate commands; remote CI/artifact authenticity and physical root installation require independent acceptance.",
+        "Existing legacy Go-native stages accepted for backup only after all three runtime-manifest hashes verify; no automatic deletion of user configuration.",
+        "Source code implementation staged for all 10 R04 tasks; ledger must not mark implemented without an observed resulting commit SHA"
       ]
     },
     {
@@ -3339,6 +3379,12 @@
       "phase": "R03",
       "change": "R03D read-only event chronology captures API36 charging, wakefulness and threshold samples with monotonic intervals and no device-changing commands; event-gap and hash-chain audit harness",
       "evidence": "Offline fixture and ZIP tests required; real sensor chronology, daemon transitions and root acceptance not qualified"
+    },
+    {
+      "date": "2026-11-12",
+      "phase": "R04",
+      "change": "Consolidated offline module staging + legacy upgrade/rollback safety, runtime SHA integrity, update metadata disablement, root installer fail-closed, checksum/source-bound hosted artifact resolver, transactional receipts and disposable fixtures",
+      "evidence": "Fixture Go tests + Python resolver tests performed; full repository/hosted/device qualification still pending"
     }
   ],
   "change_log": [
