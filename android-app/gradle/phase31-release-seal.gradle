@@ -142,6 +142,7 @@ ext.phase31GraphSnapshot = phase31GraphSnapshot
 // Gradle 9.x cannot safely resolve TaskDependency objects during TestKit lifecycle
 // transitions, so this script records declarations when it makes them instead of
 // re-entering dependency resolution from projectsEvaluated or doLast.
+if (!project.hasProperty('xbsR05cEmulator')) {
 gradle.projectsEvaluated {
     def cleanTask = tasks.named('clean')
     [
@@ -163,6 +164,7 @@ gradle.projectsEvaluated {
         mustRunAfter project(':app').tasks.named('generateReleaseBaselineProfile')
     }
     (phase31GraphSnapshot['assembleReleaseOrder'] as Set).add(':app:generateReleaseBaselineProfile')
+}
 }
 
 // Executes only inside the clean nested candidate build. Every dependency has
