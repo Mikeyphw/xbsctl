@@ -92,8 +92,16 @@ jobs:
           test -c /dev/kvm
           sudo chmod 0666 /dev/kvm
           test -r /dev/kvm && test -w /dev/kvm
+      - name: Initialize Android SDK command-line tools for API36
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
       - name: Install Android API36 build-tools 36.0.0
-        run: sdkmanager 'build-tools;36.0.0'
+        run: |
+          set -euo pipefail
+          command -v sdkmanager
+          sdkmanager 'build-tools;36.0.0'
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
       - name: Android API36 rootless instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
