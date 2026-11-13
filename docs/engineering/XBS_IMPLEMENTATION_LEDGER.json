@@ -1268,7 +1268,8 @@
       "focus": "CODE-03/06; Android reliability and Tasker",
       "status": "IN_PROGRESS",
       "evidence": [
-        "R05A source-pinned Go and Android acknowledgement, Tasker completion, FGS and recovery guard changes; offline fixture tests only, hosted Gradle/API36/device unverified"
+        "R05A source-pinned Go and Android acknowledgement, Tasker completion, FGS and recovery guard changes; offline fixture tests only, hosted Gradle/API36/device unverified",
+        "R05C rootless API36 instrumented PR gate, persistent replay cursor, Tasker ingress exception containment, FGS duplicate ownership, SHA-bound debug candidate; hosted/physical pending"
       ],
       "tasks": [
         {
@@ -1309,11 +1310,15 @@
           "id": "R05-03",
           "title": "Propagate eventbridge publication errors",
           "acceptance": "Diagnostics show failed authentication/publication distinctly from unavailable data.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1322,11 +1327,15 @@
           "id": "R05-04",
           "title": "Preserve HMAC verification and anti-replay",
           "acceptance": "Forged, stale, reordered or wrong-key envelopes cannot enter authenticated state.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1339,10 +1348,12 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified",
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
           ],
           "blockers": [
-            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification",
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
@@ -1356,10 +1367,12 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified",
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
           ],
           "blockers": [
-            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification",
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
@@ -1369,11 +1382,15 @@
           "id": "R05-07",
           "title": "Keep Room and root reads off main thread",
           "acceptance": "StrictMode and responsiveness tests detect accidental UI-thread disk/root work.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1382,11 +1399,15 @@
           "id": "R05-08",
           "title": "Preserve signed Tasker action and condition contracts",
           "acceptance": "Keystore, signer, sender UID and host-pin checks are exercised across APIs.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1416,10 +1437,12 @@
           "owner": null,
           "implementation_sha": null,
           "evidence": [
-            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified",
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
           ],
           "blockers": [
-            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification",
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
           ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
@@ -1459,11 +1482,15 @@
           "id": "R05-13",
           "title": "Test public intent and permission boundaries",
           "acceptance": "Exported Tasker components reject unauthorized or malformed callers.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1472,11 +1499,15 @@
           "id": "R05-14",
           "title": "Keep clear support reports with bounded redaction",
           "acceptance": "Logs, tokens, filenames and device state are not leaked to hosted artifacts.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05C source implementation and rootless instrumented test cases; not yet hosted-verified"
+          ],
+          "blockers": [
+            "Await exact-SHA hosted API36 emulator instrumentation; physical root/Tasker acceptance remains open"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -3430,6 +3461,13 @@
       "source_pin": "735ee457c9376a0887cfb8ef2a2a3123eb048bb6",
       "qualification": "OFFLINE_FIXTURE_PENDING_FULL_CHECKOUT_HOSTED_AND_DEVICE",
       "change": "SHA-256 of validated loaded config bytes, explicit exact-generation awaited controller reloads, crash-safe unresolved journal guard, confirmed manual rollback/recovery reload, no blind retries or physical acceptance."
+    },
+    {
+      "date": "2026-11-13",
+      "actor": "R05C Android API36 integration hardening",
+      "source_pin": "4bc0a9e94183a29a53b2a89b7b1af4f06ce9f4f5",
+      "qualification": "OFFLINE_SELFTEST_ONLY_PENDING_HOSTED_API36_AND_PHYSICAL",
+      "change": "Mandatory API36 rootless instrumentation lane with strict counted test receipts, Tasker exported malformed-intent guards, persistent bridge anti-replay cursor CAS, root command duplicate intent ownership guard, debug APK SHA-bound output; no root install or physical acceptance."
     }
   ],
   "change_log": [
