@@ -13,7 +13,13 @@ public final class TaskerConditionReceiver extends BroadcastReceiver {
         if(intent==null||!TaskerConditionProtocol.ACTION_QUERY_CONDITION.equals(intent.getAction()))return;
         String sender=TaskerConfigCodec.sentFromPackage(this);int senderUid=TaskerConfigCodec.sentFromUid(this);PendingResult pending=goAsync();Intent request=new Intent(intent);Context app=context.getApplicationContext();
         try {
-            EXECUTOR.execute(()->{try{query(app,request,pending,sender,senderUid);}finally{pending.finish();}});
+            EXECUTOR.execute(()->{
+                try { query(app,request,pending,sender,senderUid); }
+                catch(RuntimeException malformed) {
+                    pending.setResultCode(TaskerConditionProtocol.UNKNOWN);
+                    ExternalEntryStore.record(app,"tasker_condition","malformed_input_rejected","",false,false);
+                } finally { pending.finish(); }
+            });
         } catch (RuntimeException rejected) {
             pending.setResultCode(TaskerConditionProtocol.UNKNOWN);
             ExternalEntryStore.record(app,"tasker_condition","queue_rejected","",false,!sender.isEmpty());

@@ -17,12 +17,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
           cache: false
       - name: Go unit tests
         run: go test ./...
+      - name: Go race detector
+        run: go test -race ./internal/config ./internal/control ./internal/daemon
       - name: Go vet
         run: go vet ./...
       - name: XBS contracts
@@ -45,12 +49,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
       - name: Guard Android SDK setup against obsolete tools package
         run: python3 scripts/ci/test_r05a_hf01_sdk_setup.py
+      - name: R05C HF03/HF01 named-step SDK inventory and mutation regressions
+        run: python3 scripts/ci/test_r05c_hf03_sdk_inventory.py
+      - name: R05C HF04 complete repository Python CI suite
+        run: |
+          python3 scripts/ci/r05c_full_ci_precommit.py --self-test
+          python3 scripts/ci/r05c_full_ci_precommit.py --run
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools'
@@ -62,12 +74,74 @@ jobs:
       - name: Android JVM unit suite
         working-directory: android-app
         run: gradle --no-daemon --console=plain :app:testDebugUnitTest
+  android-companion-api36:
+    # Required PR gate; never mark root/physical acceptance from this rootless emulator.
+    needs: [go-contract, android-companion-jvm]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.1'
+      - name: R05C source and workflow contracts
+        run: python3 scripts/ci/test_r05c_source_contract.py
+      - name: Enable KVM for API36 emulator
+        run: |
+          set -euo pipefail
+          test -c /dev/kvm
+          sudo chmod 0666 /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+      - name: Initialize Android SDK command-line tools for API36
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Install Android API36 build-tools 36.0.0
+        run: |
+          set -euo pipefail
+          command -v sdkmanager
+          sdkmanager 'build-tools;36.0.0'
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
+      - name: Android API36 rootless instrumentation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -eu
+            gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cBridgeReplayInstrumentedTest,io.github.mikeceead.xbscompanion.R05cTaskerBoundaryInstrumentedTest,io.github.mikeceead.xbscompanion.R05cLifecycleInstrumentedTest,io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditPendingCommandInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditRoomMainThreadInstrumentedTest' :app:connectedDebugAndroidTest
+            python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected
+            gradle -p android-app --no-daemon --console=plain :app:assembleDebug
+            APK=android-app/app/build/outputs/apk/debug/app-debug.apk; HEAD_SHA=$(git rev-parse HEAD); test "$HEAD_SHA" = '${{ github.event.pull_request.head.sha || github.sha }}' && test -s "$APK" && "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK" && mkdir -p android-evidence && cp "$APK" android-evidence/xbs-companion-r05c-api36-debug.apk && (cd android-evidence && sha256sum xbs-companion-r05c-api36-debug.apk > SHA256SUMS) && printf '%s\n' "$HEAD_SHA" > android-evidence/SOURCE_SHA
+      - name: Publish SHA-bound debug candidate, no logs or private device state
+        uses: actions/upload-artifact@v4
+        with:
+          name: xbs-companion-r05c-api36-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            android-evidence/xbs-companion-r05c-api36-debug.apk
+            android-evidence/SHA256SUMS
+            android-evidence/SOURCE_SHA
+          if-no-files-found: error
+          retention-days: 14
   android-companion-debug:
     if: github.event_name == 'workflow_dispatch' && inputs.android_debug == true
     needs: go-contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -90,7 +164,7 @@ jobs:
           set -euo pipefail
           APK=android-app/app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
-          apksigner verify "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"
           mkdir -p android-evidence
           cp "$APK" android-evidence/xbs-companion-debug.apk
           (cd android-evidence && sha256sum xbs-companion-debug.apk > SHA256SUMS)

@@ -15,7 +15,13 @@ public final class TaskerPluginReceiver extends BroadcastReceiver {
         if(intent==null||!TaskerProtocol.ACTION_FIRE_SETTING.equals(intent.getAction()))return;
         final boolean ordered=isOrderedBroadcast();final String sender=TaskerConfigCodec.sentFromPackage(this);final int senderUid=TaskerConfigCodec.sentFromUid(this);final PendingResult pending=goAsync();final Context app=context.getApplicationContext();final Intent request=new Intent(intent);
         try {
-            EXECUTOR.execute(()->{try{handle(app,request,pending,ordered,sender,senderUid);}finally{pending.finish();}});
+            EXECUTOR.execute(()->{
+                try { handle(app,request,pending,ordered,sender,senderUid); }
+                catch(RuntimeException malformed) {
+                    fail(pending,ordered,"Tasker action rejected: malformed input");
+                    ExternalEntryStore.record(app,"tasker_action","malformed_input_rejected","",false,false);
+                } finally { pending.finish(); }
+            });
         } catch (RuntimeException rejected) {
             fail(pending,ordered,"Tasker action queue is busy");
             ExternalEntryStore.record(app,"tasker_action","queue_rejected","",false,!sender.isEmpty());

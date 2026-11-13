@@ -28,6 +28,8 @@ public final class RootCommandService extends Service {
     private volatile boolean foregroundStarted;
 
     static boolean isServiceActive() { return SERVICE_ACTIVE.get(); }
+    /** Duplicate service intents must not terminate or replay an already owned command. */
+    static boolean isDuplicateRunForTest(String runId) { return runId != null && ACTIVE.containsKey(runId); }
     static void clearInMemoryForTest() { PENDING.clear(); ACTIVE.clear(); }
 
     static ForegroundServiceLaunchResult start(Context context, String runId, int executionId, XbsCommandSpec spec, Intent taskerIntent) {
@@ -80,6 +82,10 @@ public final class RootCommandService extends Service {
             return START_NOT_STICKY;
         }
 
+        if (isDuplicateRunForTest(runId)) {
+            RuntimeNotificationStore.recordAction(this, "duplicate_run_ignored", "root_command");
+            return START_NOT_STICKY;
+        }
         PendingCommand command = PENDING.remove(runId);
         if (command == null) {
             PendingCommandStore.Recovered recovered = PendingCommandStore.load(this, runId);
