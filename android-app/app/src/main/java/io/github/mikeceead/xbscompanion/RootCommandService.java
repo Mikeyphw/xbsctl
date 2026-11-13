@@ -134,6 +134,8 @@ public final class RootCommandService extends Service {
         final PendingCommand ownedCommand = command;
         try {
             executor.execute(() -> {
+                // The timeout/abort path owns accounting if it won the state race.
+                // A rejected claim MUST NOT decrement activeRuns again.
                 if (!ownedCommand.state.compareAndSet(0, 1)) return;
                 try {
                     RootCommandRunner.execute(this, ownedCommand.runId, ownedCommand.executionId, ownedCommand.spec, ownedCommand.taskerIntent);

@@ -13,6 +13,8 @@ final class RunRetryPolicy {
     static Decision evaluate(RunRecord record) {
         if (record == null) return Decision.blocked("Run record is missing");
         if (RunFilter.isActive(record)) return Decision.blocked("Active commands cannot be retried");
+        if ("pending".equals(record.status) || "recovery_required".equals(record.status)
+                || record.exitCode==125) return Decision.blocked("Uncertain outcome requires manual reconciliation; no automatic replay");
         String command = safe(record.command);
         if (command.isEmpty()) return Decision.blocked("Run has no stored command");
         boolean destructive = "destructive".equals(safe(record.mutationClass));

@@ -175,6 +175,7 @@ func queueEvent(stdout io.Writer, opts options, clean []string) int {
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitParseError)
 	}
+	before, _, _ := readSnapshot()
 	req, err := QueueRequestWithDeadline(ctl, action, event, opts.ttl)
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
@@ -182,16 +183,19 @@ func queueEvent(stdout io.Writer, opts options, clean []string) int {
 	if opts.wait {
 		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
 			if ack.State == "applied" {
-				return emitControl(stdout, opts, "ok", "Applied: "+action+" "+event, "applied", action, event, 0)
+				if !waitForObservedState(action, event, before, opts.timeout) {
+					return emitControl(stdout, opts, "unknown", "Daemon acknowledged but matching runtime state was not observed", "unknown", action, event, ExitRuntime, req.ID)
+				}
+				return emitControl(stdout, opts, "ok", "Applied: "+action+" "+event, "applied", action, event, 0, req.ID)
 			}
 			if ack.State == "unknown" {
-				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, event, ExitRuntime)
+				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, event, ExitRuntime, req.ID)
 			}
-			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, event, ExitRuntime)
+			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, event, ExitRuntime, req.ID)
 		}
-		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action+" "+event, "timeout", action, event, ExitRuntime)
+		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action+" "+event, "timeout", action, event, ExitRuntime, req.ID)
 	}
-	return emitControl(stdout, opts, "pending", "Queued: "+action+" "+event, "queued", action, event, 0)
+	return emitControl(stdout, opts, "pending", "Queued: "+action+" "+event, "queued", action, event, 0, req.ID)
 }
 
 func queueMode(stdout io.Writer, opts options, clean []string) int {
@@ -207,6 +211,7 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitParseError)
 	}
+	before, _, _ := readSnapshot()
 	req, err := QueueRequestWithDeadline(ctl, action, "", opts.ttl)
 	if err != nil {
 		return emitError(stdout, opts, err.Error(), ExitRuntime)
@@ -214,16 +219,19 @@ func queueMode(stdout io.Writer, opts options, clean []string) int {
 	if opts.wait {
 		if ack, found := waitForRequest(ctl, req.ID, opts.timeout); found {
 			if ack.State == "applied" {
-				return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0)
+				if !waitForObservedState(action, "", before, opts.timeout) {
+					return emitControl(stdout, opts, "unknown", "Daemon acknowledged but matching runtime state was not observed", "unknown", action, "", ExitRuntime, req.ID)
+				}
+				return emitControl(stdout, opts, "ok", "Applied: "+action, "applied", action, "", 0, req.ID)
 			}
 			if ack.State == "unknown" {
-				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, "", ExitRuntime)
+				return emitControl(stdout, opts, "unknown", "Outcome unknown: "+ack.Error, "unknown", action, "", ExitRuntime, req.ID)
 			}
-			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, "", ExitRuntime)
+			return emitControl(stdout, opts, "failed", "Daemon refused: "+ack.Error, "failed", action, "", ExitRuntime, req.ID)
 		}
-		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action, "timeout", action, "", ExitRuntime)
+		return emitControl(stdout, opts, "timeout", "Timed out waiting for "+action, "timeout", action, "", ExitRuntime, req.ID)
 	}
-	return emitControl(stdout, opts, "pending", "Queued: "+action, "queued", action, "", 0)
+	return emitControl(stdout, opts, "pending", "Queued: "+action, "queued", action, "", 0, req.ID)
 }
 
 func loadConfigRequireExists() (map[string]any, int, string) {
@@ -406,10 +414,11 @@ func emit(stdout io.Writer, opts options, status, message string, data any, data
 	return 0
 }
 
-func emitControl(stdout io.Writer, opts options, status, message, completion, action, event string, exit int) int {
+func emitControl(stdout io.Writer, opts options, status, message, completion, action, event string, exit int, requestIDs ...string) int {
 	snap, _, _ := readSnapshot()
 	if opts.jsonMode {
 		obj := map[string]any{"status": status, "message": message, "completion": completion, "requested_action": action, "event": event, "observed": snap}
+		if len(requestIDs)>0 { obj["request_id"]=requestIDs[0] }
 		encoded, _ := json.Marshal(obj)
 		fmt.Fprintln(stdout, string(encoded))
 	} else {

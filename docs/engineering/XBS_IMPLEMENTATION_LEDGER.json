@@ -1266,18 +1266,24 @@
       "gate_id": "G-R05",
       "gate": "Android application acknowledges daemon outcomes, survives lifecycle interruptions, protects credentials and never confuses queued with committed.",
       "focus": "CODE-03/06; Android reliability and Tasker",
-      "status": "NOT_STARTED",
-      "evidence": [],
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "R05A source-pinned Go and Android acknowledgement, Tasker completion, FGS and recovery guard changes; offline fixture tests only, hosted Gradle/API36/device unverified"
+      ],
       "tasks": [
         {
           "id": "R05-01",
           "title": "Wait for daemon-confirmed configuration reload",
           "acceptance": "Transactions cannot claim applied until matching request ack and observed config state.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1286,11 +1292,15 @@
           "id": "R05-02",
           "title": "Retain pending/recovery state on timeout",
           "acceptance": "Unknown outcome is not rolled back blindly or labelled committed.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1325,11 +1335,15 @@
           "id": "R05-05",
           "title": "Verify root runner cancellation and descendants",
           "acceptance": "Timeout/cancel/process death leaves verified process termination or explicit recovery requirement.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1338,11 +1352,15 @@
           "id": "R05-06",
           "title": "Verify foreground service lifecycle semantics",
           "acceptance": "Android FGS denial/timeout/restart is reported and cannot lose owned commands.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1377,11 +1395,15 @@
           "id": "R05-09",
           "title": "Require exact command completion before Tasker success",
           "acceptance": "Tasker never reports success for queued, failed, timed-out or unverified effects.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1390,11 +1412,15 @@
           "id": "R05-10",
           "title": "Deduplicate user actions and background refresh",
           "acceptance": "One tap produces at most one intended command, with bounded worker and refresh behavior.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -1403,11 +1429,15 @@
           "id": "R05-11",
           "title": "Improve status/feedback for all commands",
           "acceptance": "UI shows pending, running, applied, cancelled, failed, offline and recovery-required.",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "owner": null,
           "implementation_sha": null,
-          "evidence": [],
-          "blockers": [],
+          "evidence": [
+            "R05A source implementation + synthetic regressions, not yet hosted or API36 verified"
+          ],
+          "blockers": [
+            "Hosted Android JVM, API36 service/Tasker and physical daemon receipt evidence pending; R05B completes transaction-digest verification"
+          ],
           "test_refs": [],
           "acceptance_gate": "G-R05",
           "phase_test_suite_count": 40
@@ -3385,6 +3415,14 @@
       "phase": "R04",
       "change": "Consolidated offline module staging + legacy upgrade/rollback safety, runtime SHA integrity, update metadata disablement, root installer fail-closed, checksum/source-bound hosted artifact resolver, transactional receipts and disposable fixtures",
       "evidence": "Fixture Go tests + Python resolver tests performed; full repository/hosted/device qualification still pending"
+    },
+    {
+      "date": "2026-11-13",
+      "actor": "R05A source-pinned Android/Tasker implementation",
+      "source_pin": "b94cc91ddd716b83c03834031ea536699e6b3f3e",
+      "overlay": "XBS_R05A_CONSOLIDATED_COMPANION_TASKER_20261113.zip",
+      "qualification": "OFFLINE_FIXTURE_PENDING_FULL_CHECKOUT_HOSTED_AND_DEVICE",
+      "change": "Add exact daemon request receipt and observed-state guards, Tasker completion proof, dedup throttle, FGS prestart cancellation race fix, conservative transaction reload recovery, hosted JVM test job; no device/root or all-R05 acceptance."
     }
   ],
   "change_log": [
