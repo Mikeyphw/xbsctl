@@ -186,30 +186,8 @@ func safeMkdirAll(path string) error {
 }
 
 func Load() (map[string]any, error) {
-	if err := EnsureDirs(); err != nil {
-		return nil, err
-	}
-	cfg := Default()
-	p := ResolvePaths()
-	data, err := os.ReadFile(p.Config)
-	if errors.Is(err, os.ErrNotExist) {
-		return cfg, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	if len(strings.TrimSpace(string(data))) == 0 {
-		return nil, fmt.Errorf("config is empty: %s", p.Config)
-	}
-	var raw map[string]any
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return nil, fmt.Errorf("config is invalid JSON: %w", err)
-	}
-	deepUpdate(cfg, raw)
-	if errs := Validate(cfg); len(errs) > 0 {
-		return nil, fmt.Errorf("config validation failed: %s", strings.Join(errs, "; "))
-	}
-	return cfg, nil
+	cfg, _, err := LoadWithSourceDigest()
+	return cfg, err
 }
 
 func Save(cfg map[string]any) (map[string]any, error) {

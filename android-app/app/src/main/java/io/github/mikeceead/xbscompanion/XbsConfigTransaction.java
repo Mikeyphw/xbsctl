@@ -105,14 +105,16 @@ final class XbsConfigTransaction {
         if (record == null || !record.canRollback()) {
             return new XbsRootApi.CommandOutput(2, "", "Latest configuration transaction is not rollback-ready");
         }
-        return withTimeoutState(XbsRootApi.runRootLarge(buildRollbackShell(record), 75));
+        try { return withTimeoutState(XbsRootApi.runRootLarge(buildRollbackShell(record), 75)); }
+        catch (IllegalArgumentException invalid) { return new XbsRootApi.CommandOutput(2, "", invalid.getMessage()); }
     }
 
     static XbsRootApi.CommandOutput recoverLatest(Record record) {
         if (record == null || !record.needsRecovery()) {
             return new XbsRootApi.CommandOutput(2, "", "Latest configuration transaction does not require recovery");
         }
-        return withTimeoutState(XbsRootApi.runRootLarge(buildRecoveryShell(record), 75));
+        try { return withTimeoutState(XbsRootApi.runRootLarge(buildRecoveryShell(record), 75)); }
+        catch (IllegalArgumentException invalid) { return new XbsRootApi.CommandOutput(2, "", invalid.getMessage()); }
     }
 
     private static XbsRootApi.CommandOutput withTimeoutState(XbsRootApi.CommandOutput output) {
@@ -159,6 +161,7 @@ final class XbsConfigTransaction {
             .append(managedDirectoryFunctions())
             .append(hashFunction())
             .append(lockFunctions())
+            .append(previousGuardFunction())
             .append(statusFunction(plan.createdAt, plan.reload, plan.entries.size()))
             .append(restoreFunction(plan.entries, original))
             .append(verifyOriginalFunction(plan.entries, original))
@@ -167,15 +170,13 @@ final class XbsConfigTransaction {
             .append("if [ \"$TX_READY\" = true ] && [ \"$COMMITTED\" != true ]; then ")
             .append("ROLLBACK_OK=true; assert_managed_dirs >/dev/null 2>&1 || ROLLBACK_OK=false; ")
             .append("restore_original >/dev/null 2>&1 || ROLLBACK_OK=false; verify_original >/dev/null 2>&1 || ROLLBACK_OK=false; ");
-        if (plan.reload) {
-            shell.append("if [ \"$PROMOTION_STARTED\" = true ]; then ")
-                .append(xbsctl("--json reload --wait --timeout 12")).append(" >/dev/null 2>&1 || ROLLBACK_OK=false; fi; ");
-        }
+        // No daemon reload is attempted from automatic rollback. Once a reload
+        // starts, the uncertain journal is preserved for deliberate recovery.
         shell.append("if [ \"$ROLLBACK_OK\" = true ]; then write_status rolled_back 'Automatic rollback restored the complete old file set' >/dev/null 2>&1 || true; ")
             .append("else write_status rollback_failed 'Automatic rollback could not verify the complete old file set' >/dev/null 2>&1 || true; fi; fi; ")
             .append("release_lock; exit \"$RC\"; }; ")
             .append("trap 'on_exit $?' EXIT; trap 'exit 130' HUP INT TERM; ")
-            .append("assert_managed_dirs; acquire_lock; ")
+            .append("assert_managed_dirs; acquire_lock; guard_previous; ")
             .append("if [ -e \"$TX\" ] || [ -L \"$TX\" ]; then printf 'Configuration transaction identifier already exists\\n' >&2; exit 74; fi; ")
             .append("mkdir -p \"$STAGE\" \"$ORIGINAL\"; TX_READY=true; : > \"$MANIFEST\"; : > \"$SNAPSHOTS\"; sync >/dev/null 2>&1 || true; ");
 
@@ -198,8 +199,8 @@ final class XbsConfigTransaction {
 
         shell.append("write_status promoted 'Files promoted; validating runtime configuration'; ")
             .append(xbs("--json validate")).append(" >/dev/null; ");
-        if (plan.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting matching daemon acknowledgement'; ")
-            .append(xbsctl("--json reload --wait --timeout 12")).append(" >/dev/null; ");
+        if (plan.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting exact configuration generation acknowledgement'; ")
+            .append(confirmedReload(plan.entries.get(0).newDigest)).append(" >/dev/null; ");
         for (int index = 0; index < plan.entries.size(); index++) {
             appendVerifyCommitted(shell, plan.entries.get(index), index, stage);
         }
@@ -249,6 +250,24 @@ final class XbsConfigTransaction {
             + "rm -f \"$LOCK/pid\" \"$LOCK/id\"; rmdir \"$LOCK\" 2>/dev/null || { printf 'Could not reclaim stale configuration transaction lock\n' >&2; return 75; }; "
             + "mkdir \"$LOCK\" 2>/dev/null || { printf 'Could not reclaim stale configuration transaction lock\n' >&2; return 75; }; fi; "
             + "LOCKED=true; printf '%s\n' \"$ID\" > \"$LOCK/id\"; printf '%s\n' \"$$\" > \"$LOCK/pid\"; sync >/dev/null 2>&1 || true; }; ";
+    }
+
+    private static String previousGuardFunction() {
+        return "guard_previous(){ POINTER=" + XbsConfigApi.q(LATEST_FILE) + "; "
+            + "if [ -L \"$POINTER\" ]; then printf 'Previous transaction pointer is unsafe\\n' >&2; return 73; fi; "
+            + "if [ ! -e \"$POINTER\" ]; then return 0; fi; "
+            + "if [ ! -f \"$POINTER\" ]; then printf 'Previous transaction pointer is not regular\\n' >&2; return 73; fi; "
+            + "OLD_SIZE=$(wc -c < \"$POINTER\" 2>/dev/null || printf 999999); "
+            + "case \"$OLD_SIZE\" in ''|*[!0-9]*) return 73;; esac; if [ \"$OLD_SIZE\" -gt 128 ]; then printf 'Previous transaction pointer is oversized\\n' >&2; return 73; fi; "
+            + "OLD_ID=$(cat \"$POINTER\" 2>/dev/null || true); "
+            + "case \"$OLD_ID\" in ''|*[!A-Za-z0-9_-]*) printf 'Unresolved prior transaction identifier\\n' >&2; return 76;; esac; "
+            + "OLD_DIR=" + XbsConfigApi.q(TRANSACTION_DIR) + "/$OLD_ID; "
+            + "if [ -L \"$OLD_DIR\" ] || [ ! -d \"$OLD_DIR\" ] || [ -L \"$OLD_DIR/status\" ] || [ ! -f \"$OLD_DIR/status\" ]; then printf 'Unresolved prior transaction journal\\n' >&2; return 76; fi; "
+            + "OLD_STATUS_SIZE=$(wc -c < \"$OLD_DIR/status\" 2>/dev/null || printf 999999); "
+            + "case \"$OLD_STATUS_SIZE\" in ''|*[!0-9]*) return 73;; esac; if [ \"$OLD_STATUS_SIZE\" -gt 2048 ]; then printf 'Prior transaction status is oversized\\n' >&2; return 73; fi; "
+            + "OLD_STATE=$(sed -n 's/^status=//p' \"$OLD_DIR/status\" | head -n1); "
+            + "case \"$OLD_STATE\" in committed|rolled_back|recovered) return 0;; "
+            + "*) printf 'Unresolved prior transaction: %s\\n' \"$OLD_STATE\" >&2; return 76;; esac; }; ";
     }
 
     private static String statusFunction(long createdAt, boolean reload, int entries) {
@@ -357,7 +376,7 @@ final class XbsConfigTransaction {
             + "if [ ! -f " + XbsConfigApi.q(LATEST_FILE) + " ]; then printf 'status=invalid\nmessage=Latest transaction pointer is not a regular file\n'; exit 0; fi; "
             + "LATEST_SIZE=$(wc -c < " + XbsConfigApi.q(LATEST_FILE) + " 2>/dev/null || printf 0); case \"$LATEST_SIZE\" in ''|*[!0-9]*) LATEST_SIZE=0;; esac; "
             + "if [ \"$LATEST_SIZE\" -gt " + MAX_LATEST_POINTER_BYTES + " ]; then printf 'status=invalid\nmessage=Latest transaction pointer exceeds bounded journal size\n'; exit 0; fi; "
-            + "ID=$(cat " + XbsConfigApi.q(LATEST_FILE) + "); case \"$ID\" in ''|*[!A-Za-z0-9._-]*) printf 'status=invalid\nmessage=Invalid latest transaction identifier\n'; exit 0;; esac; "
+            + "ID=$(cat " + XbsConfigApi.q(LATEST_FILE) + "); case \"$ID\" in ''|*[!A-Za-z0-9_-]*) printf 'status=invalid\nmessage=Invalid latest transaction identifier\n'; exit 0;; esac; "
             + "TX=" + XbsConfigApi.q(TRANSACTION_DIR) + "/$ID; if [ -L \"$TX\" ]; then printf 'id=%s\nstatus=invalid\nmessage=Transaction directory is a symbolic link\n' \"$ID\"; exit 0; fi; "
             + "if [ ! -d \"$TX\" ]; then printf 'id=%s\nstatus=missing\nmessage=Latest transaction directory is missing\n' \"$ID\"; exit 0; fi; "
             + "safe_cat \"$TX/status\" 'Transaction status' " + MAX_STATUS_LINE_BYTES + " || printf 'id=%s\nstatus=unknown\nmessage=Transaction status is missing\n' \"$ID\"; "
@@ -466,7 +485,7 @@ final class XbsConfigTransaction {
         StringBuilder shell = new StringBuilder(14_000);
         shell.append("set -eu; umask 077; ")
             .append(commonVariables(record.id, tx, stage, original, manifest, snapshots, status))
-            .append("LOCKED=false; ROLLBACK_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
+            .append("LOCKED=false; ROLLBACK_STARTED=false; RELOAD_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
             .append(managedDirectoryFunctions()).append(hashFunction()).append(lockFunctions())
             .append(statusFunction(record.createdAt, record.reload, record.entries.size()))
             .append(latestGuardFunction(record.id))
@@ -474,9 +493,11 @@ final class XbsConfigTransaction {
             .append(verifyOriginalFunction(record.entries, original))
             .append(reapplyCommittedFunction(record.entries, stage))
             .append(verifyCommittedFunction(record.entries, stage))
-            .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; if [ \"$ROLLBACK_STARTED\" = true ] && [ \"$DONE\" != true ]; then ")
+            .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; "
+                + "if [ \"$RELOAD_STARTED\" = true ] && [ \"$DONE\" != true ]; then write_status recovery_required 'Rollback reload outcome unknown; preserve both file sets' >/dev/null 2>&1 || true; release_lock; exit \"$RC\"; fi; "
+                + "if [ \"$ROLLBACK_STARTED\" = true ] && [ \"$DONE\" != true ]; then ")
             .append("RESTORE_OK=true; reapply_committed >/dev/null 2>&1 || RESTORE_OK=false; verify_committed >/dev/null 2>&1 || RESTORE_OK=false; ");
-        if (record.reload) shell.append(xbsctl("--json reload")).append(" >/dev/null 2>&1 || RESTORE_OK=false; ");
+        // File-restoration failure is recorded; no unaudited daemon reload is queued by the trap.
         shell.append("if [ \"$RESTORE_OK\" = true ]; then write_status rollback_failed 'Rollback failed; committed files were restored' >/dev/null 2>&1 || true; ")
             .append("else write_status rollback_failed 'Rollback failed and committed-state restoration could not be verified' >/dev/null 2>&1 || true; fi; fi; ")
             .append("release_lock; exit \"$RC\"; }; trap 'on_exit $?' EXIT; trap 'exit 130' HUP INT TERM; ")
@@ -484,7 +505,8 @@ final class XbsConfigTransaction {
             .append("if [ \"$ACTUAL_STATUS\" != committed ]; then printf 'Latest transaction is no longer committed\\n' >&2; exit 76; fi; ")
             .append("verify_committed || { printf 'Managed files changed after commit; refusing stale rollback\\n' >&2; exit 77; }; ")
             .append("ROLLBACK_STARTED=true; write_status rolling_back 'Restoring pre-transaction files'; restore_original; verify_original; ");
-        if (record.reload) shell.append(xbsctl("--json reload")).append(" >/dev/null; ");
+        if (record.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting original daemon generation'; ")
+            .append(confirmedReload(originalConfigDigest(record))).append(" >/dev/null; ");
         shell.append("write_status rolled_back 'Latest configuration transaction rolled back by user'; DONE=true; release_lock; ")
             .append("trap - EXIT HUP INT TERM; printf 'transaction_id=%s\\nstatus=rolled_back\\n' \"$ID\";");
         return shell.toString();
@@ -500,21 +522,24 @@ final class XbsConfigTransaction {
         StringBuilder shell = new StringBuilder(10_000);
         shell.append("set -eu; umask 077; ")
             .append(commonVariables(record.id, tx, stage, original, manifest, snapshots, status))
-            .append("LOCKED=false; RECOVERY_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
+            .append("LOCKED=false; RECOVERY_STARTED=false; RELOAD_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
             .append(managedDirectoryFunctions()).append(lockFunctions())
             .append(statusFunction(record.createdAt, record.reload, record.entries.size()))
             .append(latestGuardFunction(record.id))
             .append(restoreFunction(record.entries, original))
             .append(verifyOriginalFunction(record.entries, original))
-            .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; if [ \"$RECOVERY_STARTED\" = true ] && [ \"$DONE\" != true ]; then ")
+            .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; "
+                + "if [ \"$RELOAD_STARTED\" = true ] && [ \"$DONE\" != true ]; then write_status recovery_required 'Recovery reload outcome unknown; manual reconciliation required' >/dev/null 2>&1 || true; release_lock; exit \"$RC\"; fi; "
+                + "if [ \"$RECOVERY_STARTED\" = true ] && [ \"$DONE\" != true ]; then ")
             .append("write_status recovery_failed 'Recovery did not verify the complete old file set; retry is safe' >/dev/null 2>&1 || true; fi; ")
             .append("release_lock; exit \"$RC\"; }; trap 'on_exit $?' EXIT; trap 'exit 130' HUP INT TERM; ")
             .append("assert_managed_dirs; acquire_lock; guard_latest; ACTUAL_STATUS=$(sed -n 's/^status=//p' \"$STATUS\" | head -n1); ")
-            .append("case \"$ACTUAL_STATUS\" in preparing|prepared|promoting|promoted|rolling_back|recovering|rollback_failed|recovery_failed) ;; ")
+            .append("case \"$ACTUAL_STATUS\" in preparing|prepared|promoting|promoted|reload_pending|recovery_required|rolling_back|recovering|rollback_failed|recovery_failed) ;; ")
             .append("*) printf 'Latest transaction no longer requires recovery\\n' >&2; exit 76;; esac; ")
             .append("if [ -f \"$SNAPSHOTS.complete\" ]; then ALLOW_PENDING=false; else case \"$ACTUAL_STATUS\" in preparing|recovering|recovery_failed) ALLOW_PENDING=true;; *) printf 'Completed transaction is missing its snapshot-complete marker\\n' >&2; exit 78;; esac; fi; ")
             .append("RECOVERY_STARTED=true; write_status recovering 'Recovering interrupted configuration transaction'; restore_original; verify_original; ");
-        if (record.reload) shell.append(xbsctl("--json reload")).append(" >/dev/null; ");
+        if (record.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting recovered daemon generation'; ")
+            .append(confirmedReload(originalConfigDigest(record))).append(" >/dev/null; ");
         shell.append("write_status recovered 'Interrupted configuration transaction recovered'; DONE=true; release_lock; ")
             .append("trap - EXIT HUP INT TERM; printf 'transaction_id=%s\\nstatus=recovered\\n' \"$ID\";");
         return shell.toString();
@@ -532,6 +557,8 @@ final class XbsConfigTransaction {
             case "prepared":
             case "promoting":
             case "promoted":
+            case "reload_pending":
+            case "recovery_required":
             case "committed":
             case "rolling_back":
             case "rolled_back":
@@ -597,6 +624,20 @@ final class XbsConfigTransaction {
 
     private static String xbsctl(String args) {
         return XbsRuntimeResolver.xbsCtl(args);
+    }
+
+    private static String confirmedReload(String digest) {
+        if (!isDigest(digest)) throw new IllegalArgumentException("Verified configuration generation is missing");
+        return xbsctl("--json reload --wait --timeout 12 --expect-config-sha256 " + digest);
+    }
+
+    private static String originalConfigDigest(Record record) {
+        if (record == null || record.entries.isEmpty()) throw new IllegalArgumentException("Original configuration generation is missing");
+        Entry config = record.entries.get(0);
+        if (!XbsConfigApi.CONFIG.equals(config.path) || !"present".equals(config.oldState) || !isDigest(config.oldDigest)) {
+            throw new IllegalArgumentException("Original configuration generation is unavailable; manual reconciliation required");
+        }
+        return config.oldDigest;
     }
 
     private static String parent(String path) {
@@ -736,7 +777,8 @@ final class XbsConfigTransaction {
         boolean needsRecovery() {
             if (!exists() || !error.isEmpty() || entries.size() != entryCount || entries.isEmpty() || !allEntriesPlanned()) return false;
             boolean recoverable = "preparing".equals(status) || "prepared".equals(status) || "promoting".equals(status)
-                || "promoted".equals(status) || "rolling_back".equals(status) || "recovering".equals(status)
+                || "promoted".equals(status) || "reload_pending".equals(status) || "recovery_required".equals(status)
+                || "rolling_back".equals(status) || "recovering".equals(status)
                 || "rollback_failed".equals(status) || "recovery_failed".equals(status);
             if (!recoverable) return false;
             if (snapshotsComplete) return allEntriesJournaled();
