@@ -123,15 +123,7 @@ jobs:
             gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cBridgeReplayInstrumentedTest,io.github.mikeceead.xbscompanion.R05cTaskerBoundaryInstrumentedTest,io.github.mikeceead.xbscompanion.R05cLifecycleInstrumentedTest,io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditPendingCommandInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditRoomMainThreadInstrumentedTest' :app:connectedDebugAndroidTest
             python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected
             gradle -p android-app --no-daemon --console=plain :app:assembleDebug
-            APK=android-app/app/build/outputs/apk/debug/app-debug.apk
-            test -s "$APK"
-            apksigner verify "$APK"
-            mkdir -p android-evidence
-            cp "$APK" android-evidence/xbs-companion-r05c-api36-debug.apk
-            (cd android-evidence && sha256sum xbs-companion-r05c-api36-debug.apk > SHA256SUMS)
-            HEAD_SHA=$(git rev-parse HEAD)
-            test "$HEAD_SHA" = '${{ github.event.pull_request.head.sha || github.sha }}'
-            printf '%s\n' "$HEAD_SHA" > android-evidence/SOURCE_SHA
+            APK=android-app/app/build/outputs/apk/debug/app-debug.apk; HEAD_SHA=$(git rev-parse HEAD); test "$HEAD_SHA" = '${{ github.event.pull_request.head.sha || github.sha }}' && test -s "$APK" && apksigner verify "$APK" && mkdir -p android-evidence && cp "$APK" android-evidence/xbs-companion-r05c-api36-debug.apk && (cd android-evidence && sha256sum xbs-companion-r05c-api36-debug.apk > SHA256SUMS) && printf '%s\n' "$HEAD_SHA" > android-evidence/SOURCE_SHA
       - name: Publish SHA-bound debug candidate, no logs or private device state
         uses: actions/upload-artifact@v4
         with:
