@@ -467,7 +467,29 @@ func VerifyRepositoryHandoff(root string) error {
 			strings.Contains(text, "\"job:xbs-go-test\"") &&
 			strings.Contains(text, "[jobs.xbs-go-test]") &&
 			strings.Contains(text, "command = [\"go\", \"test\", \"./...\"]")
-		if !hasCommandTarget || (!hasLegacyGoTest && !hasWorkflowGoTest) {
+		hasNativeGoTarget := strings.Contains(text, `[targets.xbs]
+root = "."
+runner = "go"`)
+		hasNativeGoTest := strings.Contains(text, `[jobs.xbs-go-test]
+runner = "go"
+root = "."
+action = "test"`)
+		hasNativeGoVet := strings.Contains(text, `[jobs.xbs-go-vet]
+runner = "go"
+root = "."
+action = "lint"`)
+		hasNativeGoSeal := strings.Contains(text, `[jobs.xbs-final-seal]
+runner = "command"
+root = "."
+command = ["go", "run", "./cmd/xbsrepo", "final-seal"]`)
+		hasNativeGoWorkflows := strings.Contains(text, "[targets.xbs.workflows]") &&
+			strings.Contains(text, "job:xbs-go-test") &&
+			strings.Contains(text, "job:xbs-go-vet") &&
+			strings.Contains(text, "job:xbs-final-seal") &&
+			strings.Contains(text, "job:xbs-build-module")
+		legacyHandoff := hasCommandTarget && (hasLegacyGoTest || hasWorkflowGoTest)
+		nativeHandoff := hasNativeGoTarget && hasNativeGoTest && hasNativeGoVet && hasNativeGoSeal && hasNativeGoWorkflows
+		if !legacyHandoff && !nativeHandoff {
 			return fmt.Errorf("Devtool xbs target is not sealed as a Go execution target")
 		}
 	}
