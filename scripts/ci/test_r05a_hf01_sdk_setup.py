@@ -11,7 +11,7 @@ WORKFLOW = Path(__file__).resolve().parents[2] / '.github/workflows/devtool-xbs-
 ACTIONS = ('android-companion-jvm', 'android-companion-debug')
 EMULATOR = 'android-companion-api36'
 SDK_JOBS = ACTIONS + (EMULATOR,)
-ACTION = 'android-actions/setup-android@v3'
+ACTION = 'android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407'
 
 
 def job_blocks(text):
@@ -55,7 +55,7 @@ class AndroidSdkBootstrapTest(unittest.TestCase):
             with self.subTest(job=name):
                 job = self.jobs[name]
                 self.assertIn("sdkmanager 'platforms;android-36' 'build-tools;36.0.0'", job)
-                self.assertIn('gradle/actions/setup-gradle@v4', job)
+                self.assertIn('gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a', job)
                 self.assertIn('java-version: \'21\'', job)
                 self.assertIn('run: python3 scripts/ci/test_r05a_hf01_sdk_setup.py', job)
         self.assertIn('gradle --no-daemon --console=plain :app:testDebugUnitTest', self.jobs['android-companion-jvm'])
@@ -84,7 +84,7 @@ class AndroidSdkBootstrapTest(unittest.TestCase):
         self.assertIn("sdkmanager 'build-tools;36.0.0'", job)
         self.assertIn('command -v sdkmanager', job)
         self.assertIn('test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"', job)
-        self.assertIn('reactivecircus/android-emulator-runner@v2', job)
+        self.assertIn('reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d', job)
         self.assertIn('connectedDebugAndroidTest', job)
         self.assertIn('r05c_verify_instrumentation.py', job)
         self.assertIn('needs: [go-contract, android-companion-jvm]', job)

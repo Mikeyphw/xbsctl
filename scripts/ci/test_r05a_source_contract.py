@@ -59,6 +59,6 @@ class R05aSourceContracts(unittest.TestCase):
         ci=self.text('.github/workflows/devtool-xbs-ci.yml')
         self.assertIn('android-companion-jvm:',ci)
         self.assertIn(':app:testDebugUnitTest',ci)
-        self.assertIn('gradle/actions/setup-gradle@v4',ci)
+        self.assertIn('gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a',ci)
 
 if __name__=='__main__':unittest.main()

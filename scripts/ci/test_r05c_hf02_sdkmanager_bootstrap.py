@@ -29,18 +29,18 @@ class SdkmanagerBootstrapRegression(unittest.TestCase):
 
     def test_sdkmanager_installed_before_first_invocation(self):
         start = self.job.index('      - name: Initialize Android SDK command-line tools for API36\n')
-        setup = self.job.index('        uses: android-actions/setup-android@v3\n', start)
+        setup = self.job.index('        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n', start)
         install = self.job.index('      - name: Install Android API36 build-tools 36.0.0\n')
         first_sdk = self.job.index('          sdkmanager \'build-tools;36.0.0\'')
         self.assertLess(start, setup)
         self.assertLess(setup, install)
         self.assertLess(install, first_sdk)
-        self.assertEqual(self.job.count('uses: android-actions/setup-android@v3'), 1)
+        self.assertEqual(self.job.count('uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407'), 1)
         self.assertEqual(self.job.count("sdkmanager 'build-tools;36.0.0'"), 1)
         self.assertNotRegex(self.job[:setup], r'(?m)^\s+(?:run: )?sdkmanager\b')
 
     def test_legacy_tools_package_never_requested(self):
-        setup = self.job.split('uses: android-actions/setup-android@v3', 1)[1]
+        setup = self.job.split('uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407', 1)[1]
         self.assertTrue(setup.startswith("\n        with:\n          packages: 'platform-tools'\n"))
         self.assertNotRegex(setup.split('      - name:', 1)[0], r'(?m)^\s*packages:\s*[\'\"]?tools(?:\s|[\'\"]|$)')
 
@@ -53,7 +53,7 @@ class SdkmanagerBootstrapRegression(unittest.TestCase):
 
     def test_emulator_and_receipt_verification_still_required(self):
         self.assertIn('needs: [go-contract, android-companion-jvm]',self.job)
-        self.assertIn('reactivecircus/android-emulator-runner@v2',self.job)
+        self.assertIn('reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d',self.job)
         self.assertIn('connectedDebugAndroidTest',self.job)
         self.assertIn('r05c_verify_instrumentation.py',self.job)
         self.assertIn('test "$HEAD_SHA" =',self.job)

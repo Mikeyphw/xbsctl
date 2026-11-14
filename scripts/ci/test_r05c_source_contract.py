@@ -14,7 +14,7 @@ class R05cSourceContract(unittest.TestCase):
         section=text.split('  android-companion-api36:',1)[1].split('\n  android-companion-debug:',1)[0]
         self.assertIn('runs-on: ubuntu-latest',section)
         self.assertIn('needs: [go-contract, android-companion-jvm]',section)
-        self.assertIn('reactivecircus/android-emulator-runner@v2',section)
+        self.assertIn('reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d',section)
         self.assertIn('api-level: 36',section)
         self.assertIn('arch: x86_64',section)
         self.assertIn('target: google_apis',section)

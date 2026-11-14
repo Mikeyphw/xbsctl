@@ -14,12 +14,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github/workflows/devtool-xbs-ci.yml'
 GUARD = ROOT / 'scripts/ci/test_r05a_hf01_sdk_setup.py'
-ACTION = 'android-actions/setup-android@v3'
+ACTION = 'android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407'
 NAMED_STEP = ("      - name: Initialize Android SDK command-line tools for API36\n"
-              "        uses: android-actions/setup-android@v3\n"
+              "        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n"
               "        with:\n"
               "          packages: 'platform-tools'\n")
-UNNAMED_STEP = ("      - uses: android-actions/setup-android@v3\n"
+UNNAMED_STEP = ("      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n"
                 "        with:\n"
                 "          packages: 'platform-tools'\n")
 
@@ -70,7 +70,7 @@ class R05cHf03NamedSdkStepRegression(unittest.TestCase):
 
     def test_positive_real_named_step_three_job_contract(self):
         self.assertEqual(self.job.count(NAMED_STEP), 1)
-        self.assertNotIn('      - uses: android-actions/setup-android@v3\n', self.job)
+        self.assertNotIn('      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n', self.job)
         result = result_for(self.workflow)
         self.assertEqual(result.testsRun, 4)
         self.assertTrue(result.wasSuccessful(), str(result.failures + result.errors))
@@ -111,8 +111,8 @@ class R05cHf03NamedSdkStepRegression(unittest.TestCase):
 
     def test_badly_indented_named_uses_rejected(self):
         self.assert_rejected(self.prefix + self.job.replace(
-            "        uses: android-actions/setup-android@v3\n",
-            "      uses: android-actions/setup-android@v3\n", 1) + self.suffix)
+            "        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n",
+            "      uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407\n", 1) + self.suffix)
 
     def test_guard_counts_named_and_unnamed_use_sites(self):
         source = GUARD.read_text(encoding='utf-8')
