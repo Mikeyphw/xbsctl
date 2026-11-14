@@ -38,7 +38,8 @@ def valid():
   'race_packages':2,'full_go_suite':{'total_root_test_pass_events':25,
   'risk_package_root_cases':{p:2 for p in M.RISK},'total_passed_internal_packages':8,
   'allowed_hosted_skip_tests':sorted(p+'::'+t for p,t in M.EXPECTED_HOSTED_SKIPS),
-  'allowed_hosted_skips':2,'unexpected_skipped_cases':0,'failed_cases':0},
+  'allowed_hosted_skips':2,'unexpected_skipped_cases':0,'failed_cases':0,
+  'no_test_package_results':{'machine':'pass','version':'skip'},'no_test_package_skip_count':1},
   'coverage_profile_sha256':hashlib.sha256(profile).hexdigest(),**M.parse_coverprofile(profile),
   'root_executed':False,'device_mutated':False,'physical_root_qualified':False,'release_qualified':False})
  return data,profile
@@ -81,7 +82,9 @@ class CoverageTests(unittest.TestCase):
    {'unqualified_risk_targets':['wrong']},{'all_internal_coverage_pct':0},
    {'full_go_suite':{'risk_package_root_cases':{}}},
    {'full_go_suite':{**data['full_go_suite'],'allowed_hosted_skips':0}},
-   {'full_go_suite':{**data['full_go_suite'],'unexpected_skipped_cases':1}}):
+   {'full_go_suite':{**data['full_go_suite'],'unexpected_skipped_cases':1}},
+   {'full_go_suite':{**data['full_go_suite'],'no_test_package_skip_count':0}},
+   {'full_go_suite':{**data['full_go_suite'],'no_test_package_results':{'version':'pass'}}}):
    with self.subTest(patch=patch),self.assertRaises(M.Refused):M.validate_receipt({**data,**patch},SHA,123,2,profile)
  def test_real_go_sources_nonroot_and_unique_case_inventory(self):
   tests={'tuning':ROOT/'internal/tuning/r09d_crash_recovery_test.go',
@@ -102,6 +105,10 @@ class CoverageTests(unittest.TestCase):
   for (pkg,case),reason in M.EXPECTED_HOSTED_SKIPS.items():
    items.insert(0,{'Action':'output','Package':pkg,'Test':case,'Output':reason+'\n'})
    items.insert(1,{'Action':'skip','Package':pkg,'Test':case})
+  items.extend([{'Action':'pass','Package':M.PREFIX+'machine'},
+                {'Action':'output','Package':M.PREFIX+'version',
+                 'Output':'?   \t'+M.PREFIX+'version\t[no test files]\n'},
+                {'Action':'skip','Package':M.PREFIX+'version'}])
   raw='\n'.join(map(json.dumps,items))+'\n'
   got=M.parse_full_suite(raw)
   self.assertEqual(got['allowed_hosted_skips'],2)
@@ -117,6 +124,10 @@ class CoverageTests(unittest.TestCase):
   for (pkg,case),reason in M.EXPECTED_HOSTED_SKIPS.items():
    base.extend([{'Action':'output','Package':pkg,'Test':case,'Output':reason+'\n'},
                 {'Action':'skip','Package':pkg,'Test':case}])
+  base.extend([{'Action':'pass','Package':M.PREFIX+'machine'},
+               {'Action':'output','Package':M.PREFIX+'version',
+                'Output':'?   \t'+M.PREFIX+'version\t[no test files]\n'},
+               {'Action':'skip','Package':M.PREFIX+'version'}])
   for extra in (
    {'Action':'skip','Package':M.PREFIX+'cli','Test':'TestExamplecli'},
    {'Action':'fail','Package':M.PREFIX+'control','Test':'TestUnexpected'},
@@ -128,9 +139,48 @@ class CoverageTests(unittest.TestCase):
   # guarded skip all refuse even when all root tests otherwise pass.
   for variant in (base[:-1], base+[base[-1]],
     [{**v,'Output':'not a recognized environmental reason'} if v.get('Action')=='output' else v for v in base],
-    base+[{'Action':'skip','Package':M.PREFIX+'daemon'}]):
+    base+[{'Action':'skip','Package':M.PREFIX+'daemon'}],
+    base+[{'Action':'skip','Package':M.PREFIX+'version'}],
+    [x for x in base if x.get('Package')!=M.PREFIX+'version'],
+    [{**x,'Output':'?  \t'+M.PREFIX+'version\tpermission denied\n'}
+     if x.get('Action')=='output' and x.get('Package')==M.PREFIX+'version' else x for x in base]):
    with self.subTest(variant=str(variant[-1])[:60]),self.assertRaises(M.Refused):
     M.parse_full_suite('\n'.join(map(json.dumps,variant))+'\n')
+ def test_no_test_package_skip_is_not_a_skipped_test(self):
+  base=[]
+  for p in M.RISK:
+   pkg=M.PREFIX+p
+   base.extend([{'Action':'pass','Package':pkg,'Test':'TestExample'+p},
+                {'Action':'pass','Package':pkg}])
+  for (pkg,case),reason in M.EXPECTED_HOSTED_SKIPS.items():
+   base.extend([{'Action':'output','Package':pkg,'Test':case,'Output':reason+'\n'},
+                {'Action':'skip','Package':pkg,'Test':case}])
+  def decode(rows):return '\n'.join(map(json.dumps,rows))+'\n'
+  for machine_skip,version_skip in [(False,False),(False,True),(True,False),(True,True)]:
+   rows=list(base)
+   for pkg,skip in [('machine',machine_skip),('version',version_skip)]:
+    identifier=M.PREFIX+pkg
+    if skip:
+     rows.extend([{'Action':'output','Package':identifier,
+                   'Output':'?  \t'+identifier+'\t[no test files]\n'},
+                  {'Action':'skip','Package':identifier}])
+    else:rows.append({'Action':'pass','Package':identifier})
+   got=M.parse_full_suite(decode(rows))
+   self.assertEqual(got['no_test_package_skip_count'],int(machine_skip)+int(version_skip))
+   self.assertEqual(got['no_test_package_results']['machine'],'skip' if machine_skip else 'pass')
+   for mutant in (
+    rows+[{'Action':'skip','Package':M.PREFIX+'module'}],
+    rows+[{'Action':'skip','Package':M.PREFIX+'machine','Test':'TestFake'}],
+    rows+[{'Action':'fail','Package':M.PREFIX+'version'}],
+    rows+[{'Action':'pass','Package':M.PREFIX+'version','Test':'TestUnexpected'}]):
+    with self.assertRaises(M.Refused):M.parse_full_suite(decode(mutant))
+ def test_no_test_source_inventory_is_exact(self):
+  self.assertEqual(M.NO_TEST_PACKAGES,{M.PREFIX+'machine',M.PREFIX+'version'})
+  for name in ('machine','version'):
+   folder=ROOT/'internal'/name
+   self.assertTrue(folder.is_dir())
+   self.assertTrue(list(folder.glob('*.go')))
+   self.assertFalse(list(folder.glob('*_test.go')))
  def test_hosted_skip_guards_still_exist_in_real_go_sources(self):
   cases=[(ROOT/'internal/control/spool_ownership_test.go',
           'TestR02AuditedSpoolRejectsForeignOwnerWhenSupported',

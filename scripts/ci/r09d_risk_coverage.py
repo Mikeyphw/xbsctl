@@ -35,6 +35,11 @@ EXPECTED_HOSTED_SKIPS={
  (PREFIX+'tuning','TestRootIntegrationEffectFamilies'):
   'set XBS_ROOT_IT_ACK=effects-are-reversible on a disposable rooted Android test device',
 }
+# Go -json may emit a *package-only* skip for a package containing no test
+# files. This is not an individual skipped test, and coverage instrumentation
+# can instead emit package pass for the same no-test packages. Only these two
+# observed internal packages are eligible; real test skips remain strict.
+NO_TEST_PACKAGES={PREFIX+'machine', PREFIX+'version'}
 class Refused(RuntimeError):pass
 def need(ok,why):
  if not ok:raise Refused(why)
@@ -69,14 +74,15 @@ def parse_events(raw, repetitions=1, required=GO_TESTS):
          'passed_packages':len(packages)}
 
 def parse_full_suite(raw):
- """Require full non-root test coverage, preserving the *exact* two intentional hosted skips.
+ """Verify every real test while distinguishing Go no-test package terminals.
 
- No unexpected skip, failed test, empty package, duplicate required skip, or
- renamed/missing environmental guard is accepted. Go event `output` must
- contain each expected skip's actual t.Skip diagnostic; synthetic skip events
- with the same name but a different reason are refused.
+ Go 1.23 -json emits `skip` with no Test for packages with no test files.
+ Those are only allowed for machine/version and only when Go's exact
+ `[no test files]` output is present; coverage instrumentation may emit pass.
+ Individual skipped tests require the two explicit environment-gated guards.
+ Any other skip, failure, duplicate, missing package or fake reason refuses.
  """
- roots={};packages={};fail=[];observed_skips={};outputs={}
+ roots={};packages={};fail=[];observed_skips={};outputs={};no_test_output={};no_test_terminals={}
  for i,line in enumerate(raw.splitlines(),1):
   if not line.strip():continue
   try:x=json.loads(line)
@@ -84,35 +90,56 @@ def parse_full_suite(raw):
   need(isinstance(x,dict),'FULL_GO_NONOBJECT')
   act=x.get('Action');pkg=x.get('Package');case=x.get('Test')
   key=(pkg,case)
-  if act=='output' and key in EXPECTED_HOSTED_SKIPS:
-   outputs[key]=outputs.get(key,'')+str(x.get('Output',''))
+  if act=='output':
+   if key in EXPECTED_HOSTED_SKIPS:
+    outputs[key]=outputs.get(key,'')+str(x.get('Output',''))
+   if pkg in NO_TEST_PACKAGES and case is None:
+    no_test_output[pkg]=no_test_output.get(pkg,'')+str(x.get('Output',''))
   if act=='fail':fail.append((pkg,case,'fail'))
   if act=='skip':
-   if key not in EXPECTED_HOSTED_SKIPS:
-    fail.append((pkg,case,'unexpected-skip'))
-   else:
+   if key in EXPECTED_HOSTED_SKIPS:
     observed_skips[key]=observed_skips.get(key,0)+1
+   elif pkg in NO_TEST_PACKAGES and case is None:
+    # Only an actual no-test package may have this terminal; never count
+    # as an executed root test or a physical root-device skip.
+    no_test_terminals[pkg]=no_test_terminals.get(pkg,0)+1
+   else:fail.append((pkg,case,'unexpected-skip'))
   if not isinstance(pkg,str) or not pkg.startswith(PREFIX):continue
   if act=='pass':
    if isinstance(case,str) and '/' not in case and case:
     roots[pkg]=roots.get(pkg,0)+1
-   elif not case:packages[pkg]=packages.get(pkg,0)+1
+   elif not case:
+    packages[pkg]=packages.get(pkg,0)+1
+    if pkg in NO_TEST_PACKAGES:
+     no_test_terminals[pkg]=no_test_terminals.get(pkg,0)+1
  need(not fail,'FULL_GO_FAILURE_OR_UNEXPECTED_SKIP '+repr(fail[:10]))
  need(set(observed_skips)==set(EXPECTED_HOSTED_SKIPS),'HOSTED_SKIP_INVENTORY_DRIFT '+
       repr(sorted(set(observed_skips)^set(EXPECTED_HOSTED_SKIPS))))
  need(all(n==1 for n in observed_skips.values()),'HOSTED_SKIP_DUPLICATE '+repr(observed_skips))
  for key,reason in EXPECTED_HOSTED_SKIPS.items():
   need(reason in outputs.get(key,''),'HOSTED_SKIP_REASON_MISSING '+repr(key))
+ need(set(no_test_terminals)==NO_TEST_PACKAGES,'NO_TEST_PACKAGE_INVENTORY_DRIFT '+
+      repr(sorted(NO_TEST_PACKAGES-set(no_test_terminals))))
+ need(all(n==1 for n in no_test_terminals.values()),'NO_TEST_PACKAGE_DUPLICATE_TERMINAL')
+ for pkg in NO_TEST_PACKAGES:
+  need(roots.get(pkg,0)==0,'NO_TEST_PACKAGE_HAS_TEST_CASES '+pkg)
+  if pkg not in packages:
+   # Matching exact Go -json package text, not a generic skip or a
+   # textual claim hidden in an unrelated test output.
+   pat=r'(?m)^\?\s+'+re.escape(pkg)+r'\s+\[no test files\]\s*$'
+   need(re.search(pat,no_test_output.get(pkg,'')) is not None,'NO_TEST_SKIP_REASON_MISSING '+pkg)
  required={PREFIX+p for p in RISK}
  need(required<=set(packages),'FULL_GO_PACKAGE_MISSING '+repr(sorted(required-set(packages))))
  need(all(roots.get(pkg,0)>0 for pkg in required),'FULL_GO_UNTESTED_RISK_PACKAGE '+repr(roots))
+ results={pkg[len(PREFIX):]:('pass' if pkg in packages else 'skip') for pkg in sorted(NO_TEST_PACKAGES)}
  return {'total_root_test_pass_events':sum(roots.values()),
          'risk_package_root_cases':{p:roots[PREFIX+p] for p in RISK},
          'total_passed_internal_packages':len(packages),
          'allowed_hosted_skip_tests':sorted(pkg+'::'+case for pkg,case in observed_skips),
          'allowed_hosted_skips':len(observed_skips),
-         'unexpected_skipped_cases':0,
-         'failed_cases':0}
+         'no_test_package_results':results,
+         'no_test_package_skip_count':sum(v=='skip' for v in results.values()),
+         'unexpected_skipped_cases':0,'failed_cases':0}
 
 def parse_coverprofile(raw:bytes):
  try:text=raw.decode('utf-8')
@@ -174,10 +201,17 @@ def validate_receipt(data,sha,run_id,attempt,profile_bytes):
  need(type(counts.get('unexpected_skipped_cases')) is int and counts['unexpected_skipped_cases']==0 and
       type(counts.get('failed_cases')) is int and counts['failed_cases']==0,
       'R09D_FULL_SUITE_FAILED_OR_UNEXPECTED_SKIPS')
+ results=counts.get('no_test_package_results')
+ need(isinstance(results,dict) and set(results)=={'machine','version'} and
+      all(v in ('pass','skip') for v in results.values()),'R09D_NO_TEST_PACKAGE_TERMINALS_DRIFT')
+ need(type(counts.get('no_test_package_skip_count')) is int and
+      counts['no_test_package_skip_count']==sum(v=='skip' for v in results.values()),
+      'R09D_NO_TEST_PACKAGE_SKIP_COUNT_DRIFT')
  need(all(data.get(k) is False for k in ('root_executed','device_mutated','physical_root_qualified','release_qualified')),'R09D_UNSAFE_QUALIFICATION_CLAIM')
  return {'named_tests':len(expected),'repeat':3*len(expected),'race':len(expected),
          'coverage_pct':actual['all_internal_coverage_pct'],
          'gap_packages':actual['unqualified_risk_targets'],'allowed_hosted_skips':counts['allowed_hosted_skips'],
+  'no_test_package_results':counts['no_test_package_results'],
   'r09_full_coverage_gate_qualified':actual['r09_full_coverage_gate_qualified']}
 
 def hosted(repo:Path):
@@ -188,6 +222,15 @@ def hosted(repo:Path):
  need(re.fullmatch('[a-f0-9]{40}',sha) is not None and sha==os.environ.get('XBS_EXPECTED_HEAD_SHA'),'CHECKOUT_SHA_MISMATCH')
  run=os.environ.get('GITHUB_RUN_ID','');attempt=os.environ.get('GITHUB_RUN_ATTEMPT','')
  need(run.isdecimal() and attempt.isdecimal() and int(run)>0 and int(attempt)>0,'RUN_ATTEMPT_MISSING')
+ # Guard the exact permitted no-test inventory against source drift. A new
+ # *_test.go in either package must cause a policy revision, not silently
+ # expand the hosted exception.
+ for pkg in sorted(NO_TEST_PACKAGES):
+  local=repo/'internal'/pkg[len(PREFIX):]
+  need(local.is_dir() and not local.is_symlink() and
+       any(p.is_file() and p.suffix=='.go' for p in local.iterdir()) and
+       not any(p.name.endswith('_test.go') for p in local.iterdir()),
+       'NO_TEST_PACKAGE_SOURCE_INVENTORY_CHANGED '+pkg)
  folder=repo/'dist'
  need(not folder.is_symlink(),'DIST_SYMLINK_REFUSED');folder.mkdir(parents=True,exist_ok=True)
  receipt=folder/'r09d-risk-coverage.json';cover=folder/'r09d-risk.coverprofile'
@@ -210,7 +253,9 @@ def hosted(repo:Path):
   ' repeat='+str(repeat['passed_root_events'])+' race='+str(raced['passed_root_events'])+
   ' risk_packages='+str(len(RISK))+' total_coverage_pct='+str(data['all_internal_coverage_pct'])+
   ' below_target='+str(len(data['unqualified_risk_targets']))+
-  ' hosted_skips='+str(full['allowed_hosted_skips']),flush=True)
+  ' hosted_skips='+str(full['allowed_hosted_skips'])+
+  ' no_test_packages='+str(len(full['no_test_package_results']))+
+  ' package_only_skips='+str(full['no_test_package_skip_count']),flush=True)
  print('XBS_R09D_COVERAGE_LEDGER_SHA256 '+data['coverage_profile_sha256'],flush=True)
 
 def main():

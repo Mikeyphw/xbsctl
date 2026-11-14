@@ -51,13 +51,14 @@ def check_jobs(jobs):
  return found
 
 def check_log(text,receipt):
- matches=re.findall(r'XBS_R09D_REAL_BACKEND_PASS tests=(\d+) repeat=(\d+) race=(\d+) risk_packages=(\d+) total_coverage_pct=([\d.]+) below_target=(\d+) hosted_skips=(\d+)',text)
+ matches=re.findall(r'XBS_R09D_REAL_BACKEND_PASS tests=(\d+) repeat=(\d+) race=(\d+) risk_packages=(\d+) total_coverage_pct=([\d.]+) below_target=(\d+) hosted_skips=(\d+) no_test_packages=(\d+) package_only_skips=(\d+)',text)
  need(len(matches)==1,'R09D_LOG_MARKER_NOT_UNIQUE')
- tests,repeat,race,pkgs,pct,below,skips=matches[0]
- need((int(tests),int(repeat),int(race),int(pkgs),float(pct),int(below),int(skips))==(
+ tests,repeat,race,pkgs,pct,below,skips,no_test,package_skips=matches[0]
+ need((int(tests),int(repeat),int(race),int(pkgs),float(pct),int(below),int(skips),int(no_test),int(package_skips))==(
    receipt['required_root_tests'],receipt['repeat_root_events'],receipt['race_root_events'],len(M.RISK),
    receipt['all_internal_coverage_pct'],len(receipt['unqualified_risk_targets']),
-   len(M.EXPECTED_HOSTED_SKIPS)),
+   len(M.EXPECTED_HOSTED_SKIPS),len(M.NO_TEST_PACKAGES),
+   receipt['full_go_suite']['no_test_package_skip_count']),
    'R09D_LOG_AND_RECEIPT_DISAGREE')
 
 def audit(repo,sha,pr):

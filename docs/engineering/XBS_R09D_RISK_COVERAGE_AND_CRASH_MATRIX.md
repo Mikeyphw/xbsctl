@@ -38,3 +38,20 @@ zero failed tests; the hosted log marker records the count separately. They
 qualification. The R09D statement-coverage gaps remain independently visible.
 
 HF01 updates the existing R09D PR only, preserving R09A–C CI contracts.
+
+## HF02 — Package-level no-test terminals are not skipped tests
+
+GitHub run `43643065801` failed because Go 1.23's `-json` full-suite output
+contained a package-level `skip` for `internal/version` with no `Test` field.
+This can legitimately mean `[no test files]`, unlike a skipped *test*.
+
+HF02 separates these outcomes without weakening the real-test gate:
+
+- `internal/machine` and `internal/version` are the only permitted packages with no `*_test.go` source; hosted validation confirms both directories have Go source and no test files.
+- Either package may emit a single `pass` or a single `skip`; a skipped package must include Go's exact `[no test files]` diagnostic for that package.
+- All required seven risk packages must still have actual passing root tests, and the two environment-gated root-only test skips retain exact identity and reason validation.
+- A skipped package is **not** counted as an executed test or permission to ignore arbitrary skips. Missing, duplicated, inconsistent and forged no-test outcomes refuse acceptance.
+- The source-bound coverage receipt records each no-test package's terminal status, and the CI log includes the number of package-only skips independently of the two root-only test skips. This is not physical root or release qualification.
+
+HF02 updates PR #24 by a normal fast-forward commit, preserving all prior
+R07A–R09D security and Android gates.
