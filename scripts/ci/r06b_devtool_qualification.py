@@ -107,26 +107,53 @@ def check_hosted_source(repo:Path)->str:
     return actual
 
 def count_go_events(output:str)->dict:
-    tests=set();packages=set();failed=[];skipped=[]
+    """Measure real go test -json case outcomes; only two reviewed host skips.
+
+    Neither skipped test is counted as passed. Every other test skip refuses,
+    including changes in the reason or package, with safe bounded diagnostics.
+    """
+    allowed={
+        ('github.com/Mikeyphw/xbsctl/internal/tuning',
+         'TestRootIntegrationEffectFamilies'):
+            'set XBS_ROOT_IT_ACK=effects-are-reversible',
+        ('github.com/Mikeyphw/xbsctl/internal/control',
+         'TestR02AuditedSpoolRejectsForeignOwnerWhenSupported'):
+            'test requires ability to create a foreign-owned directory',
+    }
+    passed=set();skipped=set();packages=set();failed=[];details={}
     for index,line in enumerate(output.splitlines(),1):
         if not line.strip():continue
         try:row=json.loads(line)
         except ValueError as e:raise Refused('GO_TEST_JSON_INVALID_LINE_'+str(index)) from e
         need(isinstance(row,dict),'GO_TEST_JSON_NONOBJECT_LINE_'+str(index))
         event=row.get('Action');pkg=row.get('Package');test=row.get('Test')
-        if event=='fail':failed.append(str(pkg or 'unknown'))
-        if event=='skip' and test:skipped.append(str(test))
+        key=(pkg,test)
+        if event=='output' and pkg and test:
+            details.setdefault(key,[]).append(str(row.get('Output') or '')[:500])
+        if event=='fail':failed.append(str(pkg or 'unknown')+'/'+str(test or 'package'))
         if event=='pass' and pkg and not test:packages.add(pkg)
         if event=='pass' and pkg and test:
-            key=(pkg,test)
-            need(key not in tests,'GO_TEST_DUPLICATE_CASE')
-            tests.add(key)
-    need(not failed,'GO_TEST_FAILURES '+str(len(failed)))
-    need(not skipped,'GO_TEST_SKIPPED '+str(len(skipped)))
-    need(bool(tests) and bool(packages),'GO_TEST_NO_ACTUAL_CASE_RECEIPTS')
-    need({p for p,_ in tests}.issubset(packages),'GO_TEST_PACKAGE_NOT_PASSED')
-    return {'test_cases':len(tests),'passed_packages':len(packages),
-            'skipped_cases':0,'failed_cases':0}
+            need(key not in passed and key not in skipped,'GO_TEST_DUPLICATE_OR_CONFLICTING_CASE '+str(key))
+            passed.add(key)
+        if event=='skip' and test:
+            need(key not in skipped and key not in passed,'GO_TEST_DUPLICATE_OR_CONFLICTING_SKIP '+str(key))
+            skipped.add(key)
+    need(not failed,'GO_TEST_FAILURES '+repr(failed[:5]))
+    approved=[]
+    for key in sorted(skipped):
+        reason=allowed.get(key)
+        need(reason is not None,'GO_TEST_UNEXPECTED_SKIP package='+str(key[0])+' test='+str(key[1]))
+        outputs=''.join(details.get(key,()))
+        need(reason in outputs,'GO_TEST_SKIP_REASON_DRIFT package='+str(key[0])+
+             ' test='+str(key[1])+' expected='+reason)
+        approved.append({'package':key[0],'test':key[1],
+                         'reason_contract':reason})
+    need(len(approved)<=2,'GO_TEST_SKIP_BUDGET_EXCEEDED')
+    need(bool(passed) and bool(packages),'GO_TEST_NO_ACTUAL_CASE_RECEIPTS')
+    need({p for p,_ in passed}.issubset(packages),'GO_TEST_PACKAGE_NOT_PASSED')
+    return {'test_cases':len(passed),'passed_packages':len(packages),
+            'skipped_cases':len(approved),'approved_skips':approved,
+            'unexpected_skipped_cases':0,'failed_cases':0}
 
 def count_jvm_results(directory:Path)->dict:
     import xml.etree.ElementTree as ET
@@ -171,11 +198,41 @@ def count_go_hosted(repo:Path)->None:
     output=invoke(['go','test','-json','-count=1','./...'],cwd=repo,timeout=240)
     write_count_receipt(repo,'dist/r06b-go-test-counts.json',sha,count_go_events(output))
 
+def select_jvm_result_variant(repo:Path)->dict:
+    """Require actual Gradle JUnit XML from debug or release unit test task.
+
+    The baseline-profile setup can make testReleaseUnitTest execute alongside
+    testDebugUnitTest; do not assume only the debug result directory exists.
+    """
+    base=repo/'android-app/app/build/test-results'
+    choices=(('debug',base/'testDebugUnitTest'),
+             ('release',base/'testReleaseUnitTest'))
+    observed=[]
+    for variant,path in choices:
+        need(not path.is_symlink(),'JVM_RESULTS_SYMLINK_VARIANT '+variant)
+        if path.is_dir():
+            files=sorted(path.rglob('TEST-*.xml'))
+            if files:
+                measured=count_jvm_results(path)
+                observed.append((variant,measured))
+    if not observed:
+        state=' '.join(variant+'='+('directory-no-xml' if path.is_dir() else 'missing')
+                       for variant,path in choices)
+        raise Refused('JVM_NO_EXECUTED_JUNIT_CASES '+state+
+                      ' checked=testDebugUnitTest,testReleaseUnitTest')
+    selected=next(((v,c) for v,c in observed if v=='debug'),observed[0])
+    variant,counts=selected
+    result={**counts,'selected_variant':variant,
+            'available_variants':[v for v,_ in observed]}
+    need(result['test_cases']>0,'JVM_SELECTED_VARIANT_ZERO_CASES')
+    return result
+
 def count_jvm_hosted(repo:Path)->None:
     sha=check_hosted_source(repo)
-    path=repo/'android-app/app/build/test-results/testDebugUnitTest'
-    write_count_receipt(repo,'android-evidence/r06b-jvm-test-counts.json',sha,
-                        count_jvm_results(path))
+    result=select_jvm_result_variant(repo)
+    print('XBS_R06B_HF04_JVM_XML_VARIANT '+result['selected_variant']+
+          ' available='+','.join(result['available_variants']),flush=True)
+    write_count_receipt(repo,'android-evidence/r06b-jvm-test-counts.json',sha,result)
 
 def validate_manifest(text: str) -> None:
     cfg = tomllib.loads(text)
@@ -338,7 +395,10 @@ def hosted(repo:Path)->None:
          counts.get('github_run_attempt')==str(os.environ.get('GITHUB_RUN_ATTEMPT') or '') and
          type(counts.get('test_cases')) is int and counts['test_cases']>0 and
          type(counts.get('passed_packages')) is int and counts['passed_packages']>0 and
-         counts.get('failed_cases')==0 and counts.get('skipped_cases')==0,
+         counts.get('failed_cases')==0 and counts.get('unexpected_skipped_cases')==0 and
+         type(counts.get('skipped_cases')) is int and 0<=counts['skipped_cases']<=2 and
+         isinstance(counts.get('approved_skips'),list) and
+         counts['skipped_cases']==len(counts['approved_skips']),
          'GO_CASE_COUNT_RECEIPT_UNQUALIFIED')
     manifest=(repo/'.devtool.toml').read_text()
     validate_manifest(manifest)
@@ -370,7 +430,8 @@ def hosted(repo:Path)->None:
              'github_run_attempt':str(os.environ.get('GITHUB_RUN_ATTEMPT') or ''),
              **provenance,'native':report,
              'go_test_counts':{'cases':counts['test_cases'],'packages':counts['passed_packages'],
-                               'sha256':hashlib.sha256(counts_raw).hexdigest()},
+                               'sha256':hashlib.sha256(counts_raw).hexdigest(),
+                               'approved_skips':counts['skipped_cases']},
              'android_gradle_ran':False,
              'device_mutated':False,'physical_root_qualified':False,'release_qualified':False}
     output=repo/'dist/r06b-devtool-qualification.json'
