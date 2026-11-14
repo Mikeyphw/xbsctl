@@ -89,6 +89,35 @@ class CoverageTests(unittest.TestCase):
   self.assertEqual(plain['all_internal_covered_statements'],duplicate['all_internal_covered_statements'])
   self.assertEqual(duplicate['coverage_repeated_observations'],7)
   self.assertEqual(plain['coverage_repeated_observations'],0)
+ def test_real_go_empty_switch_case_zero_width_zero_statement_blocks(self):
+  # Observed in real go1.23 -coverpkg profiles. Go uses zero-width spans
+  # with NumStmt=0, even when the generated counter is > 0.
+  raw=cov()+(
+   f'{PREFIX}cli/cli.go:6.19,6.19 0 0\n'
+   f'{PREFIX}cli/cli.go:6.27,6.27 0 0\n'
+   f'{PREFIX}cli/cli.go:6.36,6.36 0 1\n'
+   f'{PREFIX}cli/cli.go:6.36,6.36 0 0\n'
+  ).encode()
+  original=M.parse_coverprofile(cov())
+  result=M.parse_coverprofile(raw)
+  self.assertEqual(result['all_internal_statements'],original['all_internal_statements'])
+  self.assertEqual(result['all_internal_covered_statements'],original['all_internal_covered_statements'])
+  self.assertEqual(result['coverage_unique_blocks'],original['coverage_unique_blocks']+3)
+  self.assertEqual(result['coverage_repeated_observations'],original['coverage_repeated_observations']+1)
+ def test_zero_width_nonzero_statement_block_and_reversed_zero_block_refuse(self):
+  for invalid in (
+   f'{PREFIX}cli/cli.go:6.19,6.19 1 0\n',
+   f'{PREFIX}cli/cli.go:6.19,6.19 7 1\n',
+   f'{PREFIX}cli/cli.go:6.19,6.18 0 0\n',
+   f'{PREFIX}cli/cli.go:6.19,5.19 0 1\n',
+   f'{PREFIX}cli/cli.go:0.19,0.19 0 1\n',
+  ):
+   with self.subTest(invalid=invalid),self.assertRaisesRegex(M.Refused,'COVERPROFILE_INVALID_SPAN'):
+    M.parse_coverprofile(cov()+invalid.encode())
+ def test_same_position_different_statement_metadata_fails_even_if_zero(self):
+  raw=cov()+f'{PREFIX}cli/cli.go:6.19,6.19 0 0\n{PREFIX}cli/cli.go:6.19,6.19 1 0\n'.encode()
+  with self.assertRaisesRegex(M.Refused,'COVERPROFILE_INVALID_SPAN'):
+   M.parse_coverprofile(raw)
  def test_coverprofile_invalid_coordinate_and_foreign_module_refuse(self):
   for raw in (cov()+f'{PREFIX}cli/cli.go:2.1,1.1 1 1\n'.encode(),
     cov()+b'other.com/fake/internal/cli/a.go:1.1,2.1 1 1\n'):

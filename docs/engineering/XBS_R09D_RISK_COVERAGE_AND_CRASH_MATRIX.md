@@ -80,3 +80,20 @@ instrumentation. Below-target packages remain explicitly unqualified.
 
 The repair changes no Go production code, Android operations, workflow trigger
 or release policy. Hosted Go/JVM/API36 acceptance is still mandatory.
+
+## HF04 — Go's zero-width, zero-statement coverage regions
+
+PR #24 run `43646123427` at source `75ce28fa7e05cd92eadfa3e9a62491ce27a70a3b`
+failed `COVERPROFILE_INVALID_SPAN 1634` despite earlier R09A/B/C lanes passing.
+The root cause is the Go cover instrumenter legitimately emitting entries such
+as `file.go:6.19,6.19 0 0` or `file.go:6.36,6.36 0 1` for empty switch/select
+branches. These are valid **only when** the start/end coordinates match and the
+block contains **zero statements**. Real Go 1.23.2 `-coverpkg` output was
+reproduced locally to establish the format.
+
+The R09D collector permits exactly equal coordinate spans when the statement
+count is zero. It continues rejecting reversed spans, non-positive source
+coordinates, and equal-span nonzero-statement entries. Repeated valid blocks
+remain deduplicated with an OR of hit counts and contribute **zero** to the
+statement denominator. This changes only coverage-parser policy, tests, and
+documentation; it introduces no device/root operations or release qualification.

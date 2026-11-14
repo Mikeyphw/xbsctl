@@ -160,9 +160,15 @@ def parse_coverprofile(raw:bytes):
   path=m.group('file')
   need(path.startswith(PREFIX),'COVERPROFILE_UNEXPECTED_PACKAGE '+path)
   pos=tuple(int(m.group(f)) for f in ('sl','sc','el','ec'))
-  need(pos[0]>0 and pos[1]>0 and pos[2]>0 and pos[3]>0 and
-       (pos[2],pos[3])>(pos[0],pos[1]),'COVERPROFILE_INVALID_SPAN '+str(i))
   n=int(m.group('statements'));count=int(m.group('count'))
+  start,end=(pos[0],pos[1]),(pos[2],pos[3])
+  # Go's cover instrumenter emits zero-width, ZERO-statement regions for
+  # empty switch/select cases. In -coverpkg across multiple binaries these
+  # may appear repeatedly with either zero or nonzero hit counters. They
+  # are real profile entries, but contribute zero to coverage denominators.
+  # Strictly reject reversed spans and zero-width NONZERO-statement blocks.
+  need(all(x>0 for x in pos) and (end>start or (end==start and n==0)),
+       'COVERPROFILE_INVALID_SPAN '+str(i)+' '+line[:180])
   key=(path,*pos)
   if key in blocks:
    original,hit=blocks[key]
