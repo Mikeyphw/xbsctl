@@ -60,6 +60,123 @@ def parse_json(text: str, kind: str) -> dict:
     need(isinstance(data,dict),'NONOBJECT_'+kind)
     return data
 
+def unwrap_native_response(raw: str, *, kind: str, command: str,
+                           schema: int, action: str | None = None) -> tuple[dict,dict]:
+    """Require the pinned upstream Devtool JSON envelope AND native response.
+
+    Devtool 1.1.0 emits universal schema-1 envelope. Native plan/preflight are
+    schema 2, while affected selection is schema 1. No envelope-only success.
+    """
+    outer=parse_json(raw,kind)
+    native=outer.get('data')
+    identity={
+        'outer_schema':outer.get('schema_version'),
+        'native_schema':native.get('schema_version') if isinstance(native,dict) else None,
+        'outer_command':outer.get('command'),
+        'native_action':native.get('action') if isinstance(native,dict) else None,
+        'outer_ok':outer.get('ok'),
+        'outer_exit_code':outer.get('exit_code'),
+    }
+    diagnostic=' '.join(k+'='+repr(v) for k,v in identity.items())
+    prefix='DEVTOOL_JSON_CONTRACT_DRIFT kind='+kind+' '+diagnostic+' '
+    need(type(outer.get('schema_version')) is int and outer['schema_version']==1,
+         prefix+'OUTER_SCHEMA')
+    need(outer.get('command')==command,prefix+'OUTER_COMMAND')
+    need(outer.get('ok') is True and type(outer.get('exit_code')) is int and
+         outer['exit_code']==0,prefix+'OUTER_SUCCESS')
+    need(isinstance(native,dict),prefix+'NATIVE_DATA_MISSING')
+    need(type(native.get('schema_version')) is int and native['schema_version']==schema,
+         prefix+'NATIVE_SCHEMA')
+    if action is not None:
+        need(native.get('action')==action,prefix+'NATIVE_ACTION')
+    return native,{
+        'kind':kind,'outer_schema':1,'native_schema':schema,
+        'outer_command':command,
+        'native_action':native.get('action') if isinstance(native.get('action'),str) else None,
+        'envelope_sha256':hashlib.sha256(raw.encode('utf-8')).hexdigest(),
+    }
+
+def check_hosted_source(repo:Path)->str:
+    need(os.environ.get('GITHUB_ACTIONS')=='true' and sys.platform.startswith('linux'),
+         'HOSTED_LINUX_GITHUB_ACTIONS_REQUIRED')
+    need((repo/'.git').exists(),'REPO_GIT_MISSING')
+    actual=git(repo,'rev-parse','HEAD')
+    expected=os.environ.get('XBS_EXPECTED_HEAD_SHA','')
+    need(re.fullmatch(r'[a-f0-9]{40}',expected) and expected==actual,
+         'HOSTED_CHECKOUT_HEAD_SHA_MISMATCH')
+    return actual
+
+def count_go_events(output:str)->dict:
+    tests=set();packages=set();failed=[];skipped=[]
+    for index,line in enumerate(output.splitlines(),1):
+        if not line.strip():continue
+        try:row=json.loads(line)
+        except ValueError as e:raise Refused('GO_TEST_JSON_INVALID_LINE_'+str(index)) from e
+        need(isinstance(row,dict),'GO_TEST_JSON_NONOBJECT_LINE_'+str(index))
+        event=row.get('Action');pkg=row.get('Package');test=row.get('Test')
+        if event=='fail':failed.append(str(pkg or 'unknown'))
+        if event=='skip' and test:skipped.append(str(test))
+        if event=='pass' and pkg and not test:packages.add(pkg)
+        if event=='pass' and pkg and test:
+            key=(pkg,test)
+            need(key not in tests,'GO_TEST_DUPLICATE_CASE')
+            tests.add(key)
+    need(not failed,'GO_TEST_FAILURES '+str(len(failed)))
+    need(not skipped,'GO_TEST_SKIPPED '+str(len(skipped)))
+    need(bool(tests) and bool(packages),'GO_TEST_NO_ACTUAL_CASE_RECEIPTS')
+    need({p for p,_ in tests}.issubset(packages),'GO_TEST_PACKAGE_NOT_PASSED')
+    return {'test_cases':len(tests),'passed_packages':len(packages),
+            'skipped_cases':0,'failed_cases':0}
+
+def count_jvm_results(directory:Path)->dict:
+    import xml.etree.ElementTree as ET
+    need(directory.is_dir() and not directory.is_symlink(),'JVM_RESULTS_DIRECTORY_MISSING')
+    files=sorted(directory.rglob('TEST-*.xml'))
+    need(bool(files),'JVM_TEST_XML_MISSING')
+    cases=set();failed=0;skipped=0
+    for file in files:
+        need(file.is_file() and not file.is_symlink(),'JVM_TEST_XML_UNSAFE')
+        try:root=ET.parse(file).getroot()
+        except (ET.ParseError,OSError) as e:raise Refused('JVM_TEST_XML_INVALID') from e
+        need(root.tag in {'testsuite','testsuites'},'JVM_TEST_SUITE_INVALID')
+        for case in root.iter('testcase'):
+            key=(case.get('classname'),case.get('name'))
+            need(all(key),'JVM_TEST_UNNAMED')
+            need(key not in cases,'JVM_TEST_DUPLICATE_CASE')
+            cases.add(key)
+            if case.find('failure') is not None or case.find('error') is not None:failed+=1
+            if case.find('skipped') is not None:skipped+=1
+    need(not failed,'JVM_TEST_FAILURES '+str(failed))
+    need(not skipped,'JVM_TEST_SKIPPED '+str(skipped))
+    need(bool(cases),'JVM_TEST_ZERO_CASES')
+    return {'test_cases':len(cases),'xml_files':len(files),
+            'skipped_cases':0,'failed_cases':0}
+
+def write_count_receipt(repo:Path,relative:str,sha:str,counts:dict)->None:
+    output=repo/relative
+    output.parent.mkdir(parents=True,exist_ok=True)
+    need(not output.exists(),'STALE_COUNT_RECEIPT '+relative)
+    payload={'schema':'xbs-r06b-hf03-test-counts/v1','xbs_source_sha':sha,
+             'github_run_id':str(os.environ.get('GITHUB_RUN_ID') or ''),
+             'github_run_attempt':str(os.environ.get('GITHUB_RUN_ATTEMPT') or ''),
+             **counts}
+    need(payload['github_run_id'].isdigit() and payload['github_run_attempt'].isdigit(),
+         'GITHUB_RUN_IDENTITY_MISSING')
+    output.write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+    print('XBS_R06B_HF03_ACTUAL_CASE_COUNTS_PASS '+relative+
+          ' cases='+str(counts['test_cases']),flush=True)
+
+def count_go_hosted(repo:Path)->None:
+    sha=check_hosted_source(repo)
+    output=invoke(['go','test','-json','-count=1','./...'],cwd=repo,timeout=240)
+    write_count_receipt(repo,'dist/r06b-go-test-counts.json',sha,count_go_events(output))
+
+def count_jvm_hosted(repo:Path)->None:
+    sha=check_hosted_source(repo)
+    path=repo/'android-app/app/build/test-results/testDebugUnitTest'
+    write_count_receipt(repo,'android-evidence/r06b-jvm-test-counts.json',sha,
+                        count_jvm_results(path))
+
 def validate_manifest(text: str) -> None:
     cfg = tomllib.loads(text)
     go = cfg['targets']['xbs']; android = cfg['targets']['xbs_android']
@@ -164,16 +281,19 @@ def fixture(root:Path,manifest:str,changed:str)->tuple[str,str]:
 
 def run_native(py:Path,root:Path,manifest:str,tmp:Path)->dict:
     exe=[str(py),'-m','devtool','--repo',str(root)]
-    plan=parse_json(invoke([*exe,'plan','ci-module','--target','xbs','--json'],cwd=root,timeout=150), 'PLAN')
+    raw=invoke([*exe,'plan','ci-module','--target','xbs','--json'],cwd=root,timeout=150)
+    plan,plan_env=unwrap_native_response(raw,kind='PLAN',command='plan',
+                                          schema=2,action='ci-module')
     info=validate_plan(plan)
-    pre=parse_json(invoke([*exe,'preflight','--target','xbs','--workflow','ci-module','--json'],
-                          cwd=root,timeout=150),'PREFLIGHT')
+    raw=invoke([*exe,'preflight','--target','xbs','--workflow','ci-module','--json'],
+               cwd=root,timeout=150)
+    pre,pre_env=unwrap_native_response(raw,kind='PREFLIGHT',command='preflight',schema=2)
     info.update(validate_preflight(pre))
     explanation=invoke([*exe,'plan','ci-module','--target','xbs','--explain'],cwd=root,timeout=150)
     need('module' in explanation.lower() and 'seal' in explanation.lower(),
          'HUMAN_PLAN_MISSING_DEPENDENCIES')
     info['plan_explain_sha256']=hashlib.sha256(explanation.encode()).hexdigest()
-    affected=[]
+    affected=[];envelopes=[plan_env,pre_env]
     for scenario,(changed,wanted,unknown) in enumerate([
         ('cmd/r06b-fixture.go',{'xbs','xbs_android'},False),
         ('android-app/app/r06b-fixture.txt',{'xbs_android'},False),
@@ -181,10 +301,14 @@ def run_native(py:Path,root:Path,manifest:str,tmp:Path)->dict:
     ]):
         dest=tmp/('affected-'+str(scenario))
         base,head=fixture(dest,manifest,changed)
-        data=parse_json(invoke([str(py),'-m','devtool','--repo',str(dest),'affected',
-                                '--base',base,'--head',head,'--json'],cwd=dest,timeout=100), 'AFFECTED')
-        affected.append(validate_affected(data,changed=changed,expected=wanted,require_uncertain=unknown))
+        raw=invoke([str(py),'-m','devtool','--repo',str(dest),'affected',
+                    '--base',base,'--head',head,'--json'],cwd=dest,timeout=100)
+        data,evidence=unwrap_native_response(raw,kind='AFFECTED',command='affected',schema=1)
+        affected.append(validate_affected(data,changed=changed,expected=wanted,
+                                          require_uncertain=unknown))
+        envelopes.append(evidence)
     info['affected']=affected
+    info['native_json_envelopes']=envelopes
     return info
 
 def verify_provenance(py:Path,wheel:Path,devtool_source:Path,expected_repo:Path)->dict:
@@ -202,12 +326,20 @@ def verify_provenance(py:Path,wheel:Path,devtool_source:Path,expected_repo:Path)
             'wheel_sha256':sha256,'installed_module_location':v['file']}
 
 def hosted(repo:Path)->None:
-    need(os.environ.get('GITHUB_ACTIONS')=='true' and sys.platform.startswith('linux'),
-         'HOSTED_LINUX_GITHUB_ACTIONS_REQUIRED')
-    need((repo/'.git').exists(),'REPO_GIT_MISSING')
-    actual=git(repo,'rev-parse','HEAD')
-    head=os.environ.get('XBS_EXPECTED_HEAD_SHA','')
-    need(re.fullmatch(r'[a-f0-9]{40}',head) and head==actual,'HOSTED_CHECKOUT_HEAD_SHA_MISMATCH')
+    actual=check_hosted_source(repo)
+    counts_file=repo/'dist/r06b-go-test-counts.json'
+    need(counts_file.is_file() and not counts_file.is_symlink(),
+         'GO_CASE_COUNT_RECEIPT_MISSING')
+    counts_raw=counts_file.read_bytes()
+    counts=parse_json(counts_raw.decode('utf-8'),'GO_COUNTS')
+    need(counts.get('schema')=='xbs-r06b-hf03-test-counts/v1' and
+         counts.get('xbs_source_sha')==actual and
+         counts.get('github_run_id')==str(os.environ.get('GITHUB_RUN_ID') or '') and
+         counts.get('github_run_attempt')==str(os.environ.get('GITHUB_RUN_ATTEMPT') or '') and
+         type(counts.get('test_cases')) is int and counts['test_cases']>0 and
+         type(counts.get('passed_packages')) is int and counts['passed_packages']>0 and
+         counts.get('failed_cases')==0 and counts.get('skipped_cases')==0,
+         'GO_CASE_COUNT_RECEIPT_UNQUALIFIED')
     manifest=(repo/'.devtool.toml').read_text()
     validate_manifest(manifest)
     with tempfile.TemporaryDirectory(prefix='xbs-r06b-devtool-',dir=os.environ.get('RUNNER_TEMP') or None) as folder:
@@ -236,7 +368,10 @@ def hosted(repo:Path)->None:
     receipt={'schema':'xbs-r06b-devtool-runtime/v1','xbs_source_sha':actual,
              'github_run_id':str(os.environ.get('GITHUB_RUN_ID') or ''),
              'github_run_attempt':str(os.environ.get('GITHUB_RUN_ATTEMPT') or ''),
-             **provenance,'native':report,'android_gradle_ran':False,
+             **provenance,'native':report,
+             'go_test_counts':{'cases':counts['test_cases'],'packages':counts['passed_packages'],
+                               'sha256':hashlib.sha256(counts_raw).hexdigest()},
+             'android_gradle_ran':False,
              'device_mutated':False,'physical_root_qualified':False,'release_qualified':False}
     output=repo/'dist/r06b-devtool-qualification.json'
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -249,11 +384,13 @@ def hosted(repo:Path)->None:
 
 def main():
     a=argparse.ArgumentParser()
-    a.add_argument('mode',choices=['hosted','validate'])
+    a.add_argument('mode',choices=['hosted','validate','count-go','count-jvm'])
     a.add_argument('--repo',type=Path,default=Path.cwd())
     v=a.parse_args()
     try:
         if v.mode=='hosted':hosted(v.repo.resolve())
+        elif v.mode=='count-go':count_go_hosted(v.repo.resolve())
+        elif v.mode=='count-jvm':count_jvm_hosted(v.repo.resolve())
         else:
             validate_manifest((v.repo/'.devtool.toml').read_text())
             print('XBS_R06B_MANIFEST_POLICY_PASS')

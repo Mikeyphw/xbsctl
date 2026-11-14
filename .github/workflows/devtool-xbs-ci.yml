@@ -29,6 +29,10 @@ jobs:
         run: go test -race ./internal/config ./internal/control ./internal/daemon
       - name: Go vet
         run: go vet ./...
+      - name: R06B HF03 actual Go test case counts
+        env:
+          XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 -B scripts/ci/r06b_devtool_qualification.py count-go --repo .
       - name: R06B source-pinned Devtool runtime qualification
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -48,6 +52,7 @@ jobs:
             dist/XtremeBS-go.zip
             dist/SHA256SUMS
             dist/r06b-devtool-qualification.json
+            dist/r06b-go-test-counts.json
           if-no-files-found: error
           retention-days: 14
   android-companion-jvm:
@@ -79,6 +84,17 @@ jobs:
       - name: Android JVM unit suite
         working-directory: android-app
         run: gradle --no-daemon --console=plain :app:testDebugUnitTest
+      - name: R06B HF03 actual Android JVM case counts
+        env:
+          XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 -B scripts/ci/r06b_devtool_qualification.py count-jvm --repo .
+      - name: Publish SHA-bound Android JVM counts
+        uses: actions/upload-artifact@v4
+        with:
+          name: xbs-android-jvm-counts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: android-evidence/r06b-jvm-test-counts.json
+          if-no-files-found: error
+          retention-days: 14
   android-companion-api36:
     # Required PR gate; never mark root/physical acceptance from this rootless emulator.
     needs: [go-contract, android-companion-jvm]
