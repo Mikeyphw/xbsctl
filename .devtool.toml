@@ -54,6 +54,7 @@ outputs = ["dist/XtremeBS-go.zip"]
 root = "."
 runner = "go"
 platform = "cli"
+affected_ownership = "inputs-only"
 run_command = "go run ./cmd/xbs --help"
 inputs = ["cmd/**", "internal/**", "module/**", "go.mod", ".devtool.toml"]
 outputs = [".tmp/**", "dist/**"]
