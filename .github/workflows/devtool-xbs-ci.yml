@@ -41,6 +41,10 @@ jobs:
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 -B scripts/ci/r09b_backend_matrix.py --hosted --repo .
+      - name: R09C fake Android backend and CLI golden contracts
+        env:
+          XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 -B scripts/ci/r09c_backend_model.py --hosted --repo .
       - name: R06B HF03 actual Go test case counts
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -68,6 +72,8 @@ jobs:
             dist/r09a-backend-qualification.json
             dist/r09a-backend.coverprofile
             dist/r09b-backend-matrix.json
+            dist/r09c-backend-model.json
+            dist/r09c-backend.coverprofile
           if-no-files-found: error
           retention-days: 14
   android-companion-jvm:
