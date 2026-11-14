@@ -18,3 +18,23 @@ The existing `go-contract` required job runs `R09D crash recovery and complete r
 ## Still open
 
 R09's final comprehensive gate requires review and improvements of any below-target coverage package, more randomized crash/fault patterns, fuzz target expansion, cross-process daemon lifecycle tests, and separate opt-in hardware root qualification under R11. R07 policy optimization remains dependent on completed R09. No published module is installed or released as part of this overlay.
+
+## HF01 — Hosted skip classification (2026-11-14)
+
+The original R09D full Go event parser rejected **all** skip events, blocking
+GitHub run `43641941925` despite the existing code intentionally requiring
+separate permission/approval for two tests. HF01 preserves the complete
+full-suite test execution and strictly allowlists exactly these root-level,
+source-documented exceptions **on non-root hosted Linux only**:
+
+- `internal/control::TestR02AuditedSpoolRejectsForeignOwnerWhenSupported` — cannot create a foreign-owned directory without root.
+- `internal/tuning::TestRootIntegrationEffectFamilies` — disabled without the deliberate disposable-root-device acknowledgement.
+
+Every other skipped test, missing expected skip, changed skip reason, duplicate
+skip, failed test or missing risk-package execution refuses qualification. The
+receipt records both skipped IDs, a count of two, zero unexpected skips and
+zero failed tests; the hosted log marker records the count separately. They
+**do not count as executed test cases** and do not imply physical root/device
+qualification. The R09D statement-coverage gaps remain independently visible.
+
+HF01 updates the existing R09D PR only, preserving R09A–C CI contracts.

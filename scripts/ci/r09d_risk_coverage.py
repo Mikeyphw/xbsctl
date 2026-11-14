@@ -26,6 +26,15 @@ RISK=('cli','config','control','daemon','eventbridge','module','tuning')
 # Aspirational R09 FINAL coverage targets; this slice reports gaps but DOES
 # NOT label the whole phase complete or conflate 19.9% selected coverage.
 TARGET_PCT=50.0
+# These are *only* the two known environment-gated skips on unprivileged
+# hosted Linux. Their diagnostic reasons must appear in actual go test -json
+# output; neither is counted as an executed test or physical-root evidence.
+EXPECTED_HOSTED_SKIPS={
+ (PREFIX+'control','TestR02AuditedSpoolRejectsForeignOwnerWhenSupported'):
+  'test requires ability to create a foreign-owned directory',
+ (PREFIX+'tuning','TestRootIntegrationEffectFamilies'):
+  'set XBS_ROOT_IT_ACK=effects-are-reversible on a disposable rooted Android test device',
+}
 class Refused(RuntimeError):pass
 def need(ok,why):
  if not ok:raise Refused(why)
@@ -60,27 +69,50 @@ def parse_events(raw, repetitions=1, required=GO_TESTS):
          'passed_packages':len(packages)}
 
 def parse_full_suite(raw):
- roots={};packages={};fail=[]
+ """Require full non-root test coverage, preserving the *exact* two intentional hosted skips.
+
+ No unexpected skip, failed test, empty package, duplicate required skip, or
+ renamed/missing environmental guard is accepted. Go event `output` must
+ contain each expected skip's actual t.Skip diagnostic; synthetic skip events
+ with the same name but a different reason are refused.
+ """
+ roots={};packages={};fail=[];observed_skips={};outputs={}
  for i,line in enumerate(raw.splitlines(),1):
   if not line.strip():continue
   try:x=json.loads(line)
   except ValueError as e:raise Refused('FULL_GO_BAD_JSON_LINE '+str(i)) from e
   need(isinstance(x,dict),'FULL_GO_NONOBJECT')
   act=x.get('Action');pkg=x.get('Package');case=x.get('Test')
-  if act=='fail' or (act=='skip' and (case or pkg in {PREFIX+p for p in RISK})):
-   fail.append((pkg,case,act))
+  key=(pkg,case)
+  if act=='output' and key in EXPECTED_HOSTED_SKIPS:
+   outputs[key]=outputs.get(key,'')+str(x.get('Output',''))
+  if act=='fail':fail.append((pkg,case,'fail'))
+  if act=='skip':
+   if key not in EXPECTED_HOSTED_SKIPS:
+    fail.append((pkg,case,'unexpected-skip'))
+   else:
+    observed_skips[key]=observed_skips.get(key,0)+1
   if not isinstance(pkg,str) or not pkg.startswith(PREFIX):continue
   if act=='pass':
    if isinstance(case,str) and '/' not in case and case:
     roots[pkg]=roots.get(pkg,0)+1
    elif not case:packages[pkg]=packages.get(pkg,0)+1
- need(not fail,'FULL_GO_FAILURE_OR_SKIP '+repr(fail[:10]))
+ need(not fail,'FULL_GO_FAILURE_OR_UNEXPECTED_SKIP '+repr(fail[:10]))
+ need(set(observed_skips)==set(EXPECTED_HOSTED_SKIPS),'HOSTED_SKIP_INVENTORY_DRIFT '+
+      repr(sorted(set(observed_skips)^set(EXPECTED_HOSTED_SKIPS))))
+ need(all(n==1 for n in observed_skips.values()),'HOSTED_SKIP_DUPLICATE '+repr(observed_skips))
+ for key,reason in EXPECTED_HOSTED_SKIPS.items():
+  need(reason in outputs.get(key,''),'HOSTED_SKIP_REASON_MISSING '+repr(key))
  required={PREFIX+p for p in RISK}
  need(required<=set(packages),'FULL_GO_PACKAGE_MISSING '+repr(sorted(required-set(packages))))
  need(all(roots.get(pkg,0)>0 for pkg in required),'FULL_GO_UNTESTED_RISK_PACKAGE '+repr(roots))
  return {'total_root_test_pass_events':sum(roots.values()),
          'risk_package_root_cases':{p:roots[PREFIX+p] for p in RISK},
-         'total_passed_internal_packages':len(packages)}
+         'total_passed_internal_packages':len(packages),
+         'allowed_hosted_skip_tests':sorted(pkg+'::'+case for pkg,case in observed_skips),
+         'allowed_hosted_skips':len(observed_skips),
+         'unexpected_skipped_cases':0,
+         'failed_cases':0}
 
 def parse_coverprofile(raw:bytes):
  try:text=raw.decode('utf-8')
@@ -135,10 +167,18 @@ def validate_receipt(data,sha,run_id,attempt,profile_bytes):
  need(set(counts.get('risk_package_root_cases',{}))==set(RISK) and
       all(type(v) is int and v>0 for v in counts['risk_package_root_cases'].values()),'R09D_RISK_CASE_COUNTS_INVALID')
  need(type(counts.get('total_root_test_pass_events')) is int and counts['total_root_test_pass_events']>=sum(counts['risk_package_root_cases'].values()),'R09D_TOTAL_TEST_COUNT_INVALID')
+ expected_skips=sorted(pkg+'::'+case for pkg,case in EXPECTED_HOSTED_SKIPS)
+ need(counts.get('allowed_hosted_skip_tests')==expected_skips and
+      type(counts.get('allowed_hosted_skips')) is int and counts['allowed_hosted_skips']==len(expected_skips),
+      'R09D_EXPECTED_HOSTED_SKIP_RECEIPT_DRIFT')
+ need(type(counts.get('unexpected_skipped_cases')) is int and counts['unexpected_skipped_cases']==0 and
+      type(counts.get('failed_cases')) is int and counts['failed_cases']==0,
+      'R09D_FULL_SUITE_FAILED_OR_UNEXPECTED_SKIPS')
  need(all(data.get(k) is False for k in ('root_executed','device_mutated','physical_root_qualified','release_qualified')),'R09D_UNSAFE_QUALIFICATION_CLAIM')
  return {'named_tests':len(expected),'repeat':3*len(expected),'race':len(expected),
          'coverage_pct':actual['all_internal_coverage_pct'],
-         'gap_packages':actual['unqualified_risk_targets'],'r09_full_coverage_gate_qualified':actual['r09_full_coverage_gate_qualified']}
+         'gap_packages':actual['unqualified_risk_targets'],'allowed_hosted_skips':counts['allowed_hosted_skips'],
+  'r09_full_coverage_gate_qualified':actual['r09_full_coverage_gate_qualified']}
 
 def hosted(repo:Path):
  need(os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('GITHUB_EVENT_NAME') in ('pull_request','push','workflow_dispatch'),'NOT_HOSTED_GITHUB')
@@ -169,7 +209,8 @@ def hosted(repo:Path):
  print('XBS_R09D_REAL_BACKEND_PASS tests='+str(len(first['required_test_ids']))+
   ' repeat='+str(repeat['passed_root_events'])+' race='+str(raced['passed_root_events'])+
   ' risk_packages='+str(len(RISK))+' total_coverage_pct='+str(data['all_internal_coverage_pct'])+
-  ' below_target='+str(len(data['unqualified_risk_targets'])),flush=True)
+  ' below_target='+str(len(data['unqualified_risk_targets']))+
+  ' hosted_skips='+str(full['allowed_hosted_skips']),flush=True)
  print('XBS_R09D_COVERAGE_LEDGER_SHA256 '+data['coverage_profile_sha256'],flush=True)
 
 def main():

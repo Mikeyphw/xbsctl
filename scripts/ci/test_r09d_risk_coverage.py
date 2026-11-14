@@ -36,7 +36,9 @@ def valid():
  data.update({'schema':M.SCHEMA,'xbs_source_sha':SHA,'github_run_id':'123','github_run_attempt':'2',
   'repeat_root_events':3*data['required_root_tests'],'race_root_events':data['required_root_tests'],
   'race_packages':2,'full_go_suite':{'total_root_test_pass_events':25,
-  'risk_package_root_cases':{p:2 for p in M.RISK},'total_passed_internal_packages':8},
+  'risk_package_root_cases':{p:2 for p in M.RISK},'total_passed_internal_packages':8,
+  'allowed_hosted_skip_tests':sorted(p+'::'+t for p,t in M.EXPECTED_HOSTED_SKIPS),
+  'allowed_hosted_skips':2,'unexpected_skipped_cases':0,'failed_cases':0},
   'coverage_profile_sha256':hashlib.sha256(profile).hexdigest(),**M.parse_coverprofile(profile),
   'root_executed':False,'device_mutated':False,'physical_root_qualified':False,'release_qualified':False})
  return data,profile
@@ -77,7 +79,9 @@ class CoverageTests(unittest.TestCase):
    {'required_test_ids':[]},{'repeat_root_events':3},{'race_root_events':0},
    {'coverage_profile_sha256':'b'*64},{'root_executed':True},
    {'unqualified_risk_targets':['wrong']},{'all_internal_coverage_pct':0},
-   {'full_go_suite':{'risk_package_root_cases':{}}}):
+   {'full_go_suite':{'risk_package_root_cases':{}}},
+   {'full_go_suite':{**data['full_go_suite'],'allowed_hosted_skips':0}},
+   {'full_go_suite':{**data['full_go_suite'],'unexpected_skipped_cases':1}}):
    with self.subTest(patch=patch),self.assertRaises(M.Refused):M.validate_receipt({**data,**patch},SHA,123,2,profile)
  def test_real_go_sources_nonroot_and_unique_case_inventory(self):
   tests={'tuning':ROOT/'internal/tuning/r09d_crash_recovery_test.go',
@@ -89,6 +93,56 @@ class CoverageTests(unittest.TestCase):
    for name in M.GO_TESTS[p]:self.assertEqual(content.count('func '+name+'('),1)
    for prohibited in ('os/exec','exec.Command(', 'SystemRunner{}','su -c ','adb shell','ksud module install'):
     self.assertNotIn(prohibited,content)
+ def test_real_full_go_parser_accepts_only_two_expected_hosted_skips(self):
+  items=[]
+  for p in M.RISK:
+   package=M.PREFIX+p
+   items.append({'Action':'pass','Package':package,'Test':'TestExample'+p})
+   items.append({'Action':'pass','Package':package})
+  for (pkg,case),reason in M.EXPECTED_HOSTED_SKIPS.items():
+   items.insert(0,{'Action':'output','Package':pkg,'Test':case,'Output':reason+'\n'})
+   items.insert(1,{'Action':'skip','Package':pkg,'Test':case})
+  raw='\n'.join(map(json.dumps,items))+'\n'
+  got=M.parse_full_suite(raw)
+  self.assertEqual(got['allowed_hosted_skips'],2)
+  self.assertEqual(got['unexpected_skipped_cases'],0)
+  self.assertEqual(len(got['allowed_hosted_skip_tests']),2)
+  self.assertEqual(got['total_root_test_pass_events'],7)
+ def test_real_full_go_parser_refuses_malformed_or_unexpected_skips(self):
+  base=[]
+  for p in M.RISK:
+   pkg=M.PREFIX+p
+   base.extend([{'Action':'pass','Package':pkg,'Test':'TestExample'+p},
+                {'Action':'pass','Package':pkg}])
+  for (pkg,case),reason in M.EXPECTED_HOSTED_SKIPS.items():
+   base.extend([{'Action':'output','Package':pkg,'Test':case,'Output':reason+'\n'},
+                {'Action':'skip','Package':pkg,'Test':case}])
+  for extra in (
+   {'Action':'skip','Package':M.PREFIX+'cli','Test':'TestExamplecli'},
+   {'Action':'fail','Package':M.PREFIX+'control','Test':'TestUnexpected'},
+   {'Action':'skip','Package':M.PREFIX+'control','Test':'TestR09DQueueClaimAckCrashMatrix'},
+  ):
+   with self.subTest(extra=extra),self.assertRaises(M.Refused):
+    M.parse_full_suite('\n'.join(map(json.dumps,base+[extra]))+'\n')
+  # Wrong environment explanation, a missing expected skip, and a duplicate
+  # guarded skip all refuse even when all root tests otherwise pass.
+  for variant in (base[:-1], base+[base[-1]],
+    [{**v,'Output':'not a recognized environmental reason'} if v.get('Action')=='output' else v for v in base],
+    base+[{'Action':'skip','Package':M.PREFIX+'daemon'}]):
+   with self.subTest(variant=str(variant[-1])[:60]),self.assertRaises(M.Refused):
+    M.parse_full_suite('\n'.join(map(json.dumps,variant))+'\n')
+ def test_hosted_skip_guards_still_exist_in_real_go_sources(self):
+  cases=[(ROOT/'internal/control/spool_ownership_test.go',
+          'TestR02AuditedSpoolRejectsForeignOwnerWhenSupported',
+          'test requires ability to create a foreign-owned directory'),
+         (ROOT/'internal/tuning/root_integration_test.go',
+          'TestRootIntegrationEffectFamilies',
+          'set XBS_ROOT_IT_ACK=effects-are-reversible on a disposable rooted Android test device')]
+  for source,test,reason in cases:
+   s=source.read_text()
+   self.assertEqual(s.count('func '+test+'('),1)
+   self.assertIn(reason,s)
+  self.assertNotIn('XBS_ROOT_IT_ACK=',(ROOT/'.github/workflows/devtool-xbs-ci.yml').read_text())
  def test_workflow_real_required_lane(self):
   w=(ROOT/'.github/workflows/devtool-xbs-ci.yml').read_text()
   for needed in ('R09D crash recovery and complete risk coverage inventory',
