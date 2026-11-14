@@ -100,6 +100,26 @@ func TestR09CCLIGoldenConfigValidation(t *testing.T) {
 		t.Fatalf("missing specific validation errors: %s", raw)
 	}
 }
+
+// r09cQueuedStartReceipt validates the *controller's* asynchronous receipt.
+// The controller intentionally does not return the machine.Envelope used by
+// local read-only CLI calls. Queued is NOT applied or device-qualified.
+func r09cQueuedStartReceipt(code int, payload map[string]any, event string) bool {
+	if code != 0 || payload["status"] != "pending" || payload["completion"] != "queued" ||
+		payload["requested_action"] != "start" || payload["event"] != event {
+		return false
+	}
+	requestID, ok := payload["request_id"].(string)
+	if !ok || len(requestID) < 3 {
+		return false
+	}
+	if _, exists := payload["ok"]; exists {
+		return false // never recast a pending receipt as a generic "ok" result
+	}
+	_, observed := payload["observed"].(map[string]any)
+	return observed
+}
+
 func TestR09CCLIGoldenCustomEventAuthorization(t *testing.T) {
 	root := isolatedEnv(t)
 	cfg := config.Default()
@@ -115,11 +135,41 @@ func TestR09CCLIGoldenCustomEventAuthorization(t *testing.T) {
 		t.Fatalf("invalid event published: %q err=%v", path, err)
 	}
 	code, data, raw, err := r09cCLI("event", "run", "custom_event")
-	if err != nil || code != 0 || data["ok"] != true {
-		t.Fatalf("configured event refused %d %s %v", code, raw, err)
+	if err != nil || !r09cQueuedStartReceipt(code, data, "custom_event") {
+		t.Fatalf("configured event lacked its real pending receipt: code=%d raw=%s err=%v", code, raw, err)
+	}
+	// Negative mutation checks run against the actual observed receipt. A
+	// pending command must never be mislabelled as an applied root effect.
+	for _, tc := range []struct {
+		name  string
+		field string
+		value any
+	}{
+		{"claimed-applied", "status", "applied"},
+		{"claimed-complete", "completion", "applied"},
+		{"wrong-action", "requested_action", "stop"},
+		{"wrong-event", "event", "manual"},
+		{"missing-id", "request_id", ""},
+		{"non-string-id", "request_id", 7},
+		{"missing-observation", "observed", nil},
+		{"false-generic-success", "ok", true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			mutated := make(map[string]any, len(data)+1)
+			for key, value := range data {
+				mutated[key] = value
+			}
+			mutated[tc.field] = tc.value
+			if r09cQueuedStartReceipt(code, mutated, "custom_event") {
+				t.Fatalf("unsafe queue receipt accepted: %s", tc.name)
+			}
+		})
+	}
+	if r09cQueuedStartReceipt(1, data, "custom_event") {
+		t.Fatal("nonzero exit masqueraded as queued success")
 	}
 	req, _, qerr := control.NextRequest(ctl)
-	if qerr != nil || req.Command != "start" || req.Event != "custom_event" {
-		t.Fatalf("wrong durable event: %+v %v", req, qerr)
+	if qerr != nil || req.Command != "start" || req.Event != "custom_event" || data["request_id"] != req.ID {
+		t.Fatalf("pending receipt not bound to durable queue: %+v %v raw=%s", req, qerr, raw)
 	}
 }
