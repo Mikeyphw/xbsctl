@@ -307,6 +307,21 @@ def validate_preflight(data:dict)->dict:
              'PREFLIGHT_UNSAFE_CHECK')
     return {'healthy':True,'runners':data['runners']}
 
+def validate_affected_scope(data:dict)->dict:
+    """Prevent default-target fallback in the real upstream affected CLI.
+
+    The native affected selection has schema 1. Its `candidates` field is
+    produced by pinned Devtool 1.1.0, not inferred from a synthetic plan.
+    """
+    candidates=data.get('candidates')
+    expected={'xbs','xbs_android'}
+    need(isinstance(candidates,list) and len(candidates)==2 and
+         all(isinstance(item,str) for item in candidates) and
+         set(candidates)==expected,
+         'AFFECTED_CANDIDATE_SCOPE_WRONG actual='+repr(candidates)+
+         ' expected='+repr(sorted(expected)))
+    return {'candidate_targets':sorted(candidates)}
+
 def validate_affected(data: dict, *, changed: str, expected: set[str], require_uncertain=False)->dict:
     need(data.get('schema_version')==1,'AFFECTED_SCHEMA_CHANGED')
     actual=data.get('targets');need(isinstance(actual,list) and set(actual)==expected,
@@ -358,11 +373,14 @@ def run_native(py:Path,root:Path,manifest:str,tmp:Path)->dict:
     ]):
         dest=tmp/('affected-'+str(scenario))
         base,head=fixture(dest,manifest,changed)
-        raw=invoke([str(py),'-m','devtool','--repo',str(dest),'affected',
+        raw=invoke([str(py),'-m','devtool','--repo',str(dest),'affected','--all-targets',
                     '--base',base,'--head',head,'--json'],cwd=dest,timeout=100)
         data,evidence=unwrap_native_response(raw,kind='AFFECTED',command='affected',schema=1)
-        affected.append(validate_affected(data,changed=changed,expected=wanted,
-                                          require_uncertain=unknown))
+        scope=validate_affected_scope(data)
+        verified=validate_affected(data,changed=changed,expected=wanted,
+                                   require_uncertain=unknown)
+        verified.update(scope)
+        affected.append(verified)
         envelopes.append(evidence)
     info['affected']=affected
     info['native_json_envelopes']=envelopes

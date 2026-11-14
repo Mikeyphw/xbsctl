@@ -34,3 +34,21 @@ Failed real hosted run `43551437208`:
 - `android-companion-jvm`: `JVM_RESULTS_DIRECTORY_MISSING` despite successful Gradle tasks. Android baseline profile configuration uses `testBuildType (... ? 'debug' : 'release')` and the log showed `testReleaseUnitTest` as well as `testDebugUnitTest`. The reader now inspects both named task output directories, **requires actual JUnit TEST-*.xml and positive case counts**, validates failed/skipped/duplicates for each present variant, prefers debug only when XML exists, otherwise records the real release variant; still refuses absent or zero-case evidence. No fake XML or Gradle success substitution.
 - The existing R06B schema-1 SHA/run/attempt count receipts remain mandatory. New fields expose `approved_skips`, `unexpected_skipped_cases`, `selected_variant` and `available_variants`; the host verifier accepts only the two reviewed exemptions and still refuses unapproved skipped Go/JVM cases. API36 remains a mandatory dependent GitHub Actions gate and requires at least 16 real instrumentation cases.
 - `scripts/ci/test_r06b_hf04_count_gates.py` adds focused regression/negative tests and is automatically discovered by the complete repository Python test suite. No local Gradle/adb/root or physical qualification.
+
+## R06B HF05 — complete-workspace affected selection
+
+Observed real hosted run [43552624925](https://github.com/Mikeyphw/xbsctl/actions/runs/43552624925)
+on source `d544f91029ce632fc4e7e1f68bed307043149dc0`: 292 Go cases
+and successful Android JVM job, but native Devtool qualification refused with
+`AFFECTED_TARGET_SELECTION_WRONG ['xbs'] expected {'xbs','xbs_android'}`.
+Pinned Devtool v1.1.0 selects `workspace.default_target = 'xbs'` when no explicit
+workspace scope is supplied to `affected`; this is **not** full workspace
+selection. The source-pinned native command now explicitly passes
+`affected --all-targets --base <SHA> --head <SHA> --json` for each disposable
+Git scenario. The native schema-1 `candidates` list must contain exactly
+`xbs` and `xbs_android`; it is checked before validating target ownership.
+The existing shared Go -> both, Android-only -> Android and unknown -> both
+assertions and unknown fallback proof remain unchanged, alongside all Go,
+JVM, API36, receipt and source-bound Devtool gates. This does not claim that
+hosted CI or physical rooted-device acceptance passed; only a successful
+new SHA-bound GitHub Actions run can provide that evidence.
