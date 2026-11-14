@@ -25,7 +25,7 @@ class EmulatorHostedRegression(unittest.TestCase):
         cls.job=block(cls.raw)
 
     def test_posix_script_is_not_silently_executed_by_bash(self):
-        self.assertEqual(self.job.count('uses: reactivecircus/android-emulator-runner@v2'),1)
+        self.assertEqual(self.job.count('uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d'),1)
         self.assertEqual(self.job.count('          script: |\n'),1)
         contents=self.job.split('          script: |\n',1)[1].split('\n      - name:',1)[0]
         self.assertTrue(contents.startswith('            set -eu\n'))
@@ -45,7 +45,7 @@ class EmulatorHostedRegression(unittest.TestCase):
         self.assertNotIn('|| true',pre)
 
     def test_supported_sdk_configuration_no_silently_ignored_inputs(self):
-        section=self.job.split('uses: reactivecircus/android-emulator-runner@v2',1)[1].split('          script: |',1)[0]
+        section=self.job.split('uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d',1)[1].split('          script: |',1)[0]
         self.assertNotRegex(section,r'(?m)^\s+build-tools:')
         self.assertIn("sdkmanager 'build-tools;36.0.0'",self.job)
         self.assertIn('api-level: 36',section)

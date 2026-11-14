@@ -50,7 +50,7 @@ def validate(source, app, workflow):
             'r05c_verify_instrumentation.py' not in workflow:
         raise AssertionError('Real API36 debug instrumentation acceptance not retained')
     if 'needs: [go-contract, android-companion-jvm]' not in workflow or \
-            'reactivecircus/android-emulator-runner@v2' not in workflow:
+            'reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d' not in workflow:
         raise AssertionError('API36 test gate is no longer mandatory')
     if 'continue-on-error: true' in workflow or 'go test -race ./internal/config ./internal/control ./internal/daemon' not in workflow:
         raise AssertionError('Hosted race/CI gate weakened')
