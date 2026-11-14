@@ -55,3 +55,28 @@ HF02 separates these outcomes without weakening the real-test gate:
 
 HF02 updates PR #24 by a normal fast-forward commit, preserving all prior
 R07A–R09D security and Android gates.
+
+## HF03 — Cross-package Go coverage is a union, not concatenated lines
+
+Run `43645197959` on PR #24 at `810d1484d0ff130da0e36d68ec79c2bf677b70bb`
+reached the R09D collector but refused `COVERPROFILE_DUPLICATE_BLOCK`. The
+command `go test -covermode=atomic -coverpkg=./internal/... -coverprofile=... ./internal/...`
+builds separate per-package test binaries with overlapping instrumented
+sources. Go legitimately writes the same file/coordinate block repeatedly,
+including with different hit counts.
+
+HF03 indexes each profile block by **source path and exact start/end
+coordinates**, requires every observation of that block to report the same
+statement count, and computes covered state as a boolean union of the observed
+hit counts. Each unique block contributes exactly once to the denominator.
+Contradictory counts, invalid spans, foreign-source blocks, missing risk
+packages, and zero-coverage risk packages remain hard refusals.
+
+The source-bound coverage receipt includes `coverage_unique_blocks` and
+`coverage_repeated_observations`; the independent GitHub log auditor binds the
+reported merged observation count to those actual archived profile bytes.
+This prevents false inflation of tested-statement denominators from repeated
+instrumentation. Below-target packages remain explicitly unqualified.
+
+The repair changes no Go production code, Android operations, workflow trigger
+or release policy. Hosted Go/JVM/API36 acceptance is still mandatory.

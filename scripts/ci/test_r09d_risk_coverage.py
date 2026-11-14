@@ -61,6 +61,38 @@ class CoverageTests(unittest.TestCase):
  def test_coverage_accepts_real_signed_internal_blocks(self):
   self.assertEqual(M.parse_coverprofile(cov())['all_internal_coverage_pct'],100.0)
   self.assertFalse(M.parse_coverprofile(cov())['unqualified_risk_targets'])
+ def test_real_go_style_multi_package_profile_merges_union_not_sum(self):
+  # Go -coverpkg emits the same blocks for each tested package's binary.
+  # One binary may hit a block which a different binary leaves untouched.
+  raw=['mode: atomic']
+  for pkg in M.RISK:
+   name=f'{PREFIX}{pkg}/shared.go'
+   raw += [f'{name}:1.1,2.1 3 1',f'{name}:3.1,4.1 1 0']
+  for pkg in M.RISK:
+   name=f'{PREFIX}{pkg}/shared.go'
+   raw += [f'{name}:1.1,2.1 3 0',f'{name}:3.1,4.1 1 2']
+  record=M.parse_coverprofile(('\n'.join(raw)+'\n').encode())
+  self.assertEqual(record['coverage_unique_blocks'],14)
+  self.assertEqual(record['coverage_repeated_observations'],14)
+  self.assertEqual(record['all_internal_statements'],28)
+  self.assertEqual(record['all_internal_covered_statements'],28)
+  self.assertEqual(record['all_internal_coverage_pct'],100.0)
+  self.assertEqual(record['unqualified_risk_targets'],[])
+ def test_coverprofile_inconsistent_duplicate_statement_count_refuses(self):
+  raw=cov()+f'{PREFIX}cli/cli.go:1.1,2.1 5 0\n'.encode()
+  with self.assertRaisesRegex(M.Refused,'INCONSISTENT_STATEMENT_COUNT'):
+   M.parse_coverprofile(raw)
+ def test_coverprofile_repeated_counter_does_not_change_denominator(self):
+  plain=M.parse_coverprofile(cov())
+  duplicate=M.parse_coverprofile(cov()+cov().split(b'\n',1)[1])
+  self.assertEqual(plain['all_internal_statements'],duplicate['all_internal_statements'])
+  self.assertEqual(plain['all_internal_covered_statements'],duplicate['all_internal_covered_statements'])
+  self.assertEqual(duplicate['coverage_repeated_observations'],7)
+  self.assertEqual(plain['coverage_repeated_observations'],0)
+ def test_coverprofile_invalid_coordinate_and_foreign_module_refuse(self):
+  for raw in (cov()+f'{PREFIX}cli/cli.go:2.1,1.1 1 1\n'.encode(),
+    cov()+b'other.com/fake/internal/cli/a.go:1.1,2.1 1 1\n'):
+   with self.assertRaises(M.Refused):M.parse_coverprofile(raw)
  def test_coverage_missing_package_zero_and_bad_data_refuse(self):
   for bad in [cov().replace((PREFIX+'cli/cli.go').encode(),(PREFIX+'other/cli.go').encode()),
     cov({p:(0 if p=='cli' else 1) for p in M.RISK}),cov().replace(b'mode: atomic',b'mode: set'),cov()+b'bad-line\n']:
@@ -78,7 +110,8 @@ class CoverageTests(unittest.TestCase):
   self.assertEqual(M.validate_receipt(data,SHA,123,2,profile)['named_tests'],6)
   for patch in ({'xbs_source_sha':'b'*40},{'github_run_attempt':'1'},
    {'required_test_ids':[]},{'repeat_root_events':3},{'race_root_events':0},
-   {'coverage_profile_sha256':'b'*64},{'root_executed':True},
+   {'coverage_profile_sha256':'b'*64},{'coverage_repeated_observations':12},
+   {'coverage_unique_blocks':0},{'root_executed':True},
    {'unqualified_risk_targets':['wrong']},{'all_internal_coverage_pct':0},
    {'full_go_suite':{'risk_package_root_cases':{}}},
    {'full_go_suite':{**data['full_go_suite'],'allowed_hosted_skips':0}},

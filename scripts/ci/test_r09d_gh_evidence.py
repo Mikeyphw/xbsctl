@@ -33,15 +33,17 @@ class GithubTests(unittest.TestCase):
    with self.assertRaises(A.Refused):A.check_jobs(candidate)
  def test_log_count_receipt_parity(self):
   receipt={'required_root_tests':6,'repeat_root_events':18,'race_root_events':6,
-   'all_internal_coverage_pct':23.4,'unqualified_risk_targets':['cli','control'],
+   'all_internal_coverage_pct':23.4,'coverage_repeated_observations':400,
+   'unqualified_risk_targets':['cli','control'],
    'full_go_suite':{'no_test_package_skip_count':1}}
-  log='XBS_R09D_REAL_BACKEND_PASS tests=6 repeat=18 race=6 risk_packages=7 total_coverage_pct=23.4 below_target=2 hosted_skips=2 no_test_packages=2 package_only_skips=1\n'
+  log='XBS_R09D_REAL_BACKEND_PASS tests=6 repeat=18 race=6 risk_packages=7 total_coverage_pct=23.4 below_target=2 hosted_skips=2 no_test_packages=2 package_only_skips=1 merged_observations=400\n'
   A.check_log(log,receipt)
   for mutant in (log.replace('repeat=18','repeat=6'),log.replace('risk_packages=7','risk_packages=8'),
        log.replace('below_target=2','below_target=0'),
        log.replace('hosted_skips=2','hosted_skips=0'),
        log.replace('no_test_packages=2','no_test_packages=1'),
-       log.replace('package_only_skips=1','package_only_skips=2'),log+log):
+       log.replace('package_only_skips=1','package_only_skips=2'),
+       log.replace('merged_observations=400','merged_observations=399'),log+log):
    with self.assertRaises(A.Refused):A.check_log(mutant,receipt)
  def test_auditor_is_read_only(self):
   text=P.read_text()

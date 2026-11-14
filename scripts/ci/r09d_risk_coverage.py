@@ -142,24 +142,41 @@ def parse_full_suite(raw):
          'unexpected_skipped_cases':0,'failed_cases':0}
 
 def parse_coverprofile(raw:bytes):
+ """Union repeated Go -coverpkg blocks; never multiply statement denominators.
+
+ `go test -coverpkg=./internal/... ./internal/...` produces one instrumented
+ coverage image per package test binary. Several copies of the same source
+ coordinates legitimately appear with distinct visit counts. A statement is
+ covered if *any* image executed that block. Coordinates and statement counts
+ must remain consistent across images, otherwise the profile is invalid.
+ """
  try:text=raw.decode('utf-8')
  except UnicodeDecodeError as e:raise Refused('COVERPROFILE_ENCODING') from e
  lines=text.splitlines();need(len(lines)>1 and lines[0]=='mode: atomic','COVERPROFILE_MODE_MISSING')
- stats={};duplicates=set()
+ blocks={};repeated=0
  for i,line in enumerate(lines[1:],2):
-  m=re.fullmatch(r'(?P<file>\S+):\d+\.\d+,\d+\.\d+\s+(?P<statements>\d+)\s+(?P<count>\d+)',line)
+  m=re.fullmatch(r'(?P<file>\S+):(?P<sl>\d+)\.(?P<sc>\d+),(?P<el>\d+)\.(?P<ec>\d+)\s+(?P<statements>\d+)\s+(?P<count>\d+)',line)
   need(bool(m),'COVERPROFILE_CORRUPT_LINE '+str(i))
   path=m.group('file')
   need(path.startswith(PREFIX),'COVERPROFILE_UNEXPECTED_PACKAGE '+path)
-  need(line not in duplicates,'COVERPROFILE_DUPLICATE_BLOCK')
-  duplicates.add(line)
-  bucket=path[len(PREFIX):].split('/',1)[0]
+  pos=tuple(int(m.group(f)) for f in ('sl','sc','el','ec'))
+  need(pos[0]>0 and pos[1]>0 and pos[2]>0 and pos[3]>0 and
+       (pos[2],pos[3])>(pos[0],pos[1]),'COVERPROFILE_INVALID_SPAN '+str(i))
+  n=int(m.group('statements'));count=int(m.group('count'))
+  key=(path,*pos)
+  if key in blocks:
+   original,hit=blocks[key]
+   need(original==n,'COVERPROFILE_INCONSISTENT_STATEMENT_COUNT '+str(i))
+   blocks[key]=(n,hit or count>0)
+   repeated+=1
+  else:blocks[key]=(n,count>0)
+ stats={}
+ for key,(n,hit) in blocks.items():
+  path=key[0];bucket=path[len(PREFIX):].split('/',1)[0]
   need(bool(bucket),'COVERPROFILE_EMPTY_PACKAGE')
   v=stats.setdefault(bucket,{'total_statements':0,'covered_statements':0})
-  n=int(m.group('statements'));count=int(m.group('count'))
-  need(n>=0 and count>=0,'COVERPROFILE_INVALID_COUNTER')
   v['total_statements']+=n
-  if count:v['covered_statements']+=n
+  if hit:v['covered_statements']+=n
  required=set(RISK)
  need(required<=set(stats),'COVERPROFILE_REQUIRED_PACKAGES_ABSENT '+repr(sorted(required-set(stats))))
  evidence={}
@@ -174,6 +191,8 @@ def parse_coverprofile(raw:bytes):
  need(n>=covered>0,'TOTAL_RISK_COVERAGE_ZERO')
  return {'risk_packages':evidence,'all_internal_covered_statements':covered,
          'all_internal_statements':n,'all_internal_coverage_pct':round(100*covered/n,2),
+         'coverage_unique_blocks':len(blocks),
+         'coverage_repeated_observations':repeated,
          'unqualified_risk_targets':sorted(p for p,v in evidence.items() if v['below_target']),
          'r09_full_coverage_gate_qualified':all(not x['below_target'] for x in evidence.values())}
 
@@ -255,7 +274,8 @@ def hosted(repo:Path):
   ' below_target='+str(len(data['unqualified_risk_targets']))+
   ' hosted_skips='+str(full['allowed_hosted_skips'])+
   ' no_test_packages='+str(len(full['no_test_package_results']))+
-  ' package_only_skips='+str(full['no_test_package_skip_count']),flush=True)
+  ' package_only_skips='+str(full['no_test_package_skip_count'])+
+  ' merged_observations='+str(data['coverage_repeated_observations']),flush=True)
  print('XBS_R09D_COVERAGE_LEDGER_SHA256 '+data['coverage_profile_sha256'],flush=True)
 
 def main():
