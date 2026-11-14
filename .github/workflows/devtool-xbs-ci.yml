@@ -53,6 +53,10 @@ jobs:
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 -B scripts/ci/r09e_boundary_coverage.py --hosted --repo .
+      - name: R09F adversarial recovery and final hosted evidence ledger
+        env:
+          XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 -B scripts/ci/r09f_final_ledger.py --hosted --repo .
       - name: R06B HF03 actual Go test case counts
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -85,6 +89,7 @@ jobs:
             dist/r09d-risk-coverage.json
             dist/r09d-risk.coverprofile
             dist/r09e-boundary-coverage.json
+            dist/r09f-final-ledger.json
           if-no-files-found: error
           retention-days: 14
   android-companion-jvm:
