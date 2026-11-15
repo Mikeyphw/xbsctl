@@ -47,14 +47,23 @@ def audit_source_and_receipts(root:Path, env:dict):
     run=env.get('GITHUB_RUN_ID','');attempt=env.get('GITHUB_RUN_ATTEMPT','')
     need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
          'GX02_GITHUB_RUN_ATTEMPT_MISSING')
-    # HF05: GitHub checkout has fetch-depth=3, preserving BOTH exact ancestors.
-    # A single shallow commit cannot establish these source identities.
-    need(git(root,'rev-parse','HEAD^')=='593db754484676ceacd3307be9d1f7db86eb9943',
+    # Preserve the immutable GX02 introducing-commit proof on each descendant.
+    # GX03 must be its direct child; its own exact-file policy is separately gated.
+    frozen='ea46616247484edc26bcd9e47e0a5fd8f4565208'
+    need(git(root,'rev-parse',frozen+'^')=='593db754484676ceacd3307be9d1f7db86eb9943',
          'GX02_HF05_PREVIOUS_HEAD_NOT_EXACT')
-    need(git(root,'rev-parse','HEAD~2')==BASE_SHA,
+    need(git(root,'rev-parse',frozen+'~2')==BASE_SHA,
          'GX02_HF05_GX01_ANCESTOR_DRIFT')
-    changed=set(git(root,'diff','--name-only',BASE_SHA,'HEAD').splitlines())
-    need(changed==ALLOWED_CHANGES,'GX02_CHANGED_PATHS_DRIFT '+repr(sorted(changed^ALLOWED_CHANGES)))
+    if head!=frozen:
+        need(git(root,'rev-parse','HEAD^')==frozen,
+             'GX02_DESCENDANT_MUST_BE_EXACT_GX03_CHILD')
+        for path in sorted(ALLOWED_CHANGES-{
+             '.github/workflows/devtool-xbs-ci.yml',
+             'scripts/ci/gx02_ci_verify.py'}):
+            need(git(root,'rev-parse',frozen+':'+path)==git(root,'rev-parse','HEAD:'+path),
+                 'GX02_INTRODUCED_ARTIFACT_MUTATED '+path)
+    changed=set(git(root,'diff','--name-only',BASE_SHA,frozen).splitlines())
+    need(changed==ALLOWED_CHANGES,'GX02_INTRODUCING_COMMIT_CHANGED_PATHS_DRIFT '+repr(sorted(changed^ALLOWED_CHANGES)))
     for path in IMMUTABLE_ORIGINAL:
         need(git(root,'rev-parse',BASE_SHA+':'+path)==git(root,'rev-parse','HEAD:'+path),
              'ORIGINAL_ROADMAP_OR_LEDGER_MUTATED '+path)

@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 3
+          fetch-depth: 12
       - name: R07A immutable action and mandatory gate audit
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -76,6 +76,12 @@ jobs:
         run: |
           python3 -B scripts/ci/gx02_ci_verify.py .
           python3 -B scripts/ci/test_gx02_control.py
+      - name: GX03 Android journeys and compatibility source gates
+        env:
+          XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 -B scripts/ci/gx03_contract_audit.py . --hosted
+          python3 -B scripts/ci/test_gx03_hosted.py
       - name: XBS contracts
         run: go run ./cmd/xbs contracts check
       - name: Source-bound final seal
@@ -189,8 +195,10 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             set -eu
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode preflight --api 36
             gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cBridgeReplayInstrumentedTest,io.github.mikeceead.xbscompanion.R05cTaskerBoundaryInstrumentedTest,io.github.mikeceead.xbscompanion.R05cLifecycleInstrumentedTest,io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditPendingCommandInstrumentedTest,io.github.mikeceead.xbscompanion.PostAuditRoomMainThreadInstrumentedTest' :app:connectedDebugAndroidTest
             python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode api36 --api 36
             gradle -p android-app --no-daemon --console=plain :app:assembleDebug
             APK=android-app/app/build/outputs/apk/debug/app-debug.apk; HEAD_SHA=$(git rev-parse HEAD); test "$HEAD_SHA" = '${{ github.event.pull_request.head.sha || github.sha }}' && test -s "$APK" && "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK" && mkdir -p android-evidence && cp "$APK" android-evidence/xbs-companion-r05c-api36-debug.apk && (cd android-evidence && sha256sum xbs-companion-r05c-api36-debug.apk > SHA256SUMS) && printf '%s\n' "$HEAD_SHA" > android-evidence/SOURCE_SHA
       - name: Publish SHA-bound debug candidate, no logs or private device state
@@ -201,6 +209,13 @@ jobs:
             android-evidence/xbs-companion-r05c-api36-debug.apk
             android-evidence/SHA256SUMS
             android-evidence/SOURCE_SHA
+          if-no-files-found: error
+          retention-days: 14
+      - name: GX03 actual app/test APKs and redacted screenshots
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: xbs-gx03-api36-${{ github.run_id }}-${{ github.run_attempt }}
+          path: android-evidence/gx03/api36/
           if-no-files-found: error
           retention-days: 14
   android-companion-debug:
