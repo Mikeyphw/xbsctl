@@ -242,10 +242,27 @@ def execute(args):
         need(args.api==36,'AUTHORITATIVE_API36_REQUIRED')
         gradle_test('io.github.mikeceead.xbscompanion.Gx03JourneyInstrumentedTest')
         report['journey_assertions']=junit_receipt(RESULTS,JOURNEYS)
+        # GX04: actual API36 instrumented package/TileService security checks.
+        # Mandatory, never synthetic SystemUI acceptance or root qualification.
+        gradle_test('io.github.mikeceead.xbscompanion.Gx04TilesInstrumentedTest')
+        report['gx04_tile_assertions']=junit_receipt(RESULTS,{
+            'Gx04TilesInstrumentedTest':{
+                'allFiveTilesHaveSystemOnlyManifestPermission',
+                'allTileServicesAreBoundToQuickSettingsAction',
+                'unsafeAndUnconfiguredTilesNeverClaimActive',
+                'noConfiguredRestoreRootActionAndAllEventActionsAllowlisted',
+                'hostileEventNamesRejectedBeforeLaunch',
+                'verifiedCompletionRequiresTerminalHistoryAndNewerEvidence',
+                'unverifiedTilesCannotLaunchRootCommands',
+                'runtimeSettingsActivityRendersAllFiveTileRequests',
+                'durablePendingBlocksRepeatedTapAcrossReload'
+            }
+        })
         # Verify & snapshot signed APKs before manual installation, ensuring
         # that no Gradle Test Orchestrator uninstalls stage-A data mid-journey.
         report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
         install_verified_pair_for_stage(serial,report['apk_pair'])
+        report['gx04_systemui_callbacks']=gx04_systemui_probe(serial)
         report['process_death']=process_death(serial)
         out=OUT/'api36';out.mkdir(parents=True,exist_ok=True)
         captures=[]
@@ -278,6 +295,84 @@ def execute(args):
     print('GX03_HOSTED_ANDROID_EVIDENCE_PASS api='+str(args.api)+' source='+identity['source_sha']+
           ' run='+identity['github_run_id']+' attempt='+identity['github_run_attempt']+
           ' physical_root_qualified=false original_cases_accepted=0',flush=True)
+
+
+
+def gx04_systemui_counts(serial):
+    result=adb(serial,'shell','run-as',PKG,'cat','shared_prefs/gx04_tile_lifecycle_v1.xml',check=False)
+    if result.returncode:
+        need('No such file' in (result.stdout+result.stderr),
+             'GX04_SYSTEMUI_PRIVATE_PROBE_UNAVAILABLE '+(result.stderr or '')[-280:])
+        return {}
+    need(len(result.stdout)<8192,'GX04_SYSTEMUI_COUNTER_XML_OVERSIZED')
+    values={}
+    for key,amount in re.findall(r'<int\s+name="([a-z]+_[A-Z]+)"\s+value="([0-9]+)"',result.stdout):
+        values[key]=int(amount)
+    return values
+
+def gx04_systemui_probe(serial):
+    """Rootless SystemUI add/click/remove: verify callbacks, never shell exit alone.
+
+    A freshly installed app has no authenticated XBS daemon; its tile must
+    remain visually non-active yet allow an app-diagnostic click. This is not
+    evidence that any privileged command was executed.
+    """
+    import time
+    service=PKG+'/.XbsPauseTileService'
+    before=gx04_systemui_counts(serial)
+    observed={}
+    commands=[]
+    last_counts=dict(before)
+    def statusbar(command,component=False):
+        args=('shell','cmd','statusbar',command,service) if component else ('shell','cmd','statusbar',command)
+        result=adb(serial,*args,check=False)
+        need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-300:])
+        commands.append(command)
+    def wait_delta(marker,intervals=80):
+        nonlocal last_counts
+        for _ in range(intervals):
+            last_counts=gx04_systemui_counts(serial)
+            if last_counts.get(marker,0)>before.get(marker,0):
+                observed[marker]=last_counts[marker]
+                return True
+            time.sleep(0.25)
+        return False
+    added=False
+    try:
+        check=adb(serial,'shell','cmd','statusbar','check-support',check=False)
+        need(check.returncode==0 and check.stdout.strip()=='true','GX04_SYSTEMUI_NOT_SUPPORTED')
+        statusbar('add-tile',True)
+        added=True
+        need(wait_delta('added_PAUSE'),
+             'GX04_SYSTEMUI_CALLBACK_MISSING added_PAUSE counts='+repr(last_counts))
+        # SystemUI may not dispatch clicks until QS is expanded/listening;
+        # do not infer a click from exit code 0 (shell call is asynchronous).
+        statusbar('expand-settings')
+        time.sleep(1)
+        statusbar('click-tile',True)
+        if not wait_delta('clicked_PAUSE',intervals=64):
+            # Bound one fresh UI activation/retry; no root operation is permitted
+            # because a fresh emulator lacks an authenticated daemon snapshot.
+            statusbar('collapse')
+            statusbar('expand-settings')
+            time.sleep(1)
+            statusbar('click-tile',True)
+            need(wait_delta('clicked_PAUSE',intervals=64),
+                 'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts)+
+                 ' commands='+repr(commands))
+    finally:
+        if added:
+            statusbar('remove-tile',True)
+        statusbar('collapse')
+    need(wait_delta('removed_PAUSE'),
+         'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING counts='+repr(last_counts))
+    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true',flush=True)
+    return {'real_systemui_shell':True,'add_callback':True,'click_callback':True,
+            'remove_callback':True,'api':36,'user_data_recorded':False,
+            'physical_oem_qualified':False,'root_execution_asserted':False,
+            'shell_exit_alone_never_proves_callback':True,
+            'diagnostic_states_remain_non_active':True}
+
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()

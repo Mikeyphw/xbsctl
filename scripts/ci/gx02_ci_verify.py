@@ -82,14 +82,55 @@ def audit_source_and_receipts(root:Path, env:dict):
                     need(changed_hf07==expected_hf07,
                          'GX02_HF07_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf07^expected_hf07)))
                     if head!=hf07:
-                        need(git(root,'rev-parse','HEAD^')==hf07,'GX02_HF08_UNREVIEWED_PARENT')
-                        expected_hf08={'scripts/ci/gx03_emulator_host.py',
-                               'scripts/ci/test_gx03_hosted.py',
-                               'scripts/ci/gx02_ci_verify.py',
-                               'scripts/ci/gx03_contract_audit.py'}
-                        changed_hf08=set(git(root,'diff','--name-only',hf07,'HEAD').splitlines())
-                        need(changed_hf08==expected_hf08,
-                             'GX02_HF08_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf08^expected_hf08)))
+                            hf08='aab3ff6d9e6cd9c343218606a5d8c6c619f1c487'
+                            need(git(root,'rev-parse',hf08+'^')==hf07,'GX02_HF08_PARENT_DRIFT')
+                            expected_hf08={'scripts/ci/gx03_emulator_host.py',
+                                           'scripts/ci/test_gx03_hosted.py',
+                                           'scripts/ci/gx02_ci_verify.py',
+                                           'scripts/ci/gx03_contract_audit.py'}
+                            changed_hf08=set(git(root,'diff','--name-only',hf07,hf08).splitlines())
+                            need(changed_hf08==expected_hf08,'GX02_HF08_CHANGED_PATHS_DRIFT')
+                            if head!=hf08:
+                                gx04='fc1c9760c2fdf63f7b6c5ee64c98e657a9240627'
+                                need(git(root,'rev-parse',gx04+'^')==hf08,'GX02_GX04_PARENT_DRIFT')
+                                expected_gx04={
+                                    'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx04TilesInstrumentedTest.java',
+                                    'android-app/app/src/main/AndroidManifest.xml',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ExecutionSource.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsPauseTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsProfilesTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsQuickTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsRestoreDefaultsTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsSafeModeTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsSaverTileService.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileCompletionPolicy.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileConfiguration.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileController.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileDecision.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileLifecycleStore.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileRefreshReceiver.java',
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsTileSettingsActivity.java',
+                                    'docs/engineering/XBS_GX04_COVERAGE.json',
+                                    'docs/engineering/XBS_GX04_P01_NATIVE_TILE_HANDOFF.md',
+                                    'scripts/ci/gx02_ci_verify.py',
+                                    'scripts/ci/gx03_contract_audit.py',
+                                    'scripts/ci/gx03_emulator_host.py',
+                                    'scripts/ci/gx04_decision_harness.java.txt',
+                                    'scripts/ci/test_gx04_tiles.py',
+                                }
+                                changed_gx04=set(git(root,'diff','--name-only',hf08,gx04).splitlines())
+                                need(changed_gx04==expected_gx04,'GX02_GX04_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx04^expected_gx04)))
+                                if head!=gx04:
+                                    need(git(root,'rev-parse','HEAD^')==gx04,'GX02_GX04_HF01_UNREVIEWED_PARENT')
+                                    expected_hf01={
+                                        'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsQuickTileService.java',
+                                        'scripts/ci/gx02_ci_verify.py',
+                                        'scripts/ci/gx03_contract_audit.py',
+                                        'scripts/ci/gx03_emulator_host.py',
+                                        'scripts/ci/test_gx04_tiles.py',
+                                    }
+                                    changed_hf01=set(git(root,'diff','--name-only',gx04,'HEAD').splitlines())
+                                    need(changed_hf01==expected_hf01,'GX02_GX04_HF01_PATH_DRIFT '+repr(sorted(changed_hf01^expected_hf01)))
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):
