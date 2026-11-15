@@ -1,0 +1,28 @@
+{
+  "gx01_head_sha": "568ba5dd140164bf179b91dd24c2557f114f0aa6",
+  "gx01_hosted_run_id": 43662889628,
+  "gx01_hosted_status": "HOSTED_VERIFIED",
+  "gx02": "IMPLEMENTED_LOCAL_HOSTED_PENDING",
+  "gx02_full_go_jvm_api36": "NOT_EXECUTED",
+  "gx02_native_devtool_apply_on_user_machine": "NOT_EXECUTED",
+  "gx02_pr_number": null,
+  "gx02_run_attempt": null,
+  "gx02_run_id": null,
+  "hotfix": "GX02_HF01_REMOVE_JSON_CLI",
+  "launcher_interface": "RICH_HUMAN_READABLE_NO_JSON_CLI",
+  "local_offline_adversarial_tests": 75,
+  "next_side_milestones": [
+    "GX03",
+    "GX04",
+    "GX05",
+    "GX06"
+  ],
+  "original_audit_findings": 26,
+  "original_roadmap": "UNCHANGED_R00_R13",
+  "original_tasks": 178,
+  "original_test_cases": 131,
+  "original_test_cases_passed": 0,
+  "physical_root_qualified": false,
+  "schema": "xbs-gx02-local-status/v1",
+  "signed_release_qualified": false
+}
