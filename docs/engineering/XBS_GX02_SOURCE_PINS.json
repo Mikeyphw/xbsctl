@@ -1,0 +1,29 @@
+{
+  "devtool_source_sha": "44eb17bbbd63194aa67cde0f7b63d5ada44fb96e",
+  "github_artifact_digest_status": "GITHUB_METADATA_NOT_INDEPENDENTLY_REHASHED",
+  "gx01_base_pr": 26,
+  "gx01_base_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+  "gx01_branch": "feature/xbs-gx01-evidence-reconciliation-20261114",
+  "gx01_ci_attempt": null,
+  "gx01_ci_conclusion": "success",
+  "gx01_ci_jobs": {
+    "android-companion-api36": "success",
+    "android-companion-debug": "skipped",
+    "android-companion-jvm": "success",
+    "go-contract": "success"
+  },
+  "gx01_ci_run_id": 43662889628,
+  "gx01_pr": 27,
+  "gx01_sha": "568ba5dd140164bf179b91dd24c2557f114f0aa6",
+  "main_sha_at_inspection": "f048d2d5526a3d0d7632e477b6b4f052e41e30df",
+  "observed_at_utc_date": "2026-11-15",
+  "qualification_scope": "CONFIRMED_GX01_HOSTED_REMAIN_GX02_UNEXECUTED",
+  "repository": "Mikeyphw/xbsctl",
+  "schema": "xbs-gx02-source-pins/v1",
+  "source_git_blobs": {
+    ".devtool.toml": "499a5baa27f9f8ef2221397e0652326c24c2bcfd",
+    ".github/workflows/devtool-xbs-ci.yml": "c3bbdfe8f85f9232332026cec0e627fd4c107a0f",
+    "scripts/ci/gx01_ci_verify.py": "3a474626c4c957e51485e3b63aa0e964f7dc9b13"
+  },
+  "workflow_id": 386774409
+}
