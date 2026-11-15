@@ -30,7 +30,8 @@ def git(root,*args):
 def verify_source(root:Path):
     need(os.getenv('GITHUB_ACTIONS')=='true' and os.getenv('GITHUB_EVENT_NAME')=='pull_request',
          'GX03_HOSTED_PR_SOURCE_ONLY')
-    need(git(root,'rev-parse','HEAD')==os.getenv('XBS_EXPECTED_HEAD_SHA'),
+    head=git(root,'rev-parse','HEAD')
+    need(head==os.getenv('XBS_EXPECTED_HEAD_SHA'),
          'GX03_RUN_SOURCE_SHA_MISMATCH')
     # Preserve the exact GX03 introducing commit and allow precisely one
     # reviewed descendant patch. Arbitrary history, paths and rewrites refuse.
@@ -39,13 +40,23 @@ def verify_source(root:Path):
     changed=set(git(root,'diff','--name-only',BASE,introduction).splitlines())
     need(changed==ALLOWED,'GX03_SOURCE_FILE_INVENTORY_DRIFT '+repr(sorted(changed^ALLOWED)))
     if head!=introduction:
-        need(git(root,'rev-parse','HEAD^')==introduction,'GX03_UNREVIEWED_HOTFIX_PARENT')
-        expected_hotfix={'scripts/ci/test_r05c_hf08_emulator_shell_scope.py',
+        hf05='8604a5b97c4b07702a4ad024dbd614d59645a8a6'
+        need(git(root,'rev-parse',hf05+'^')==introduction,
+             'GX03_HF05_EXACT_PARENT_DRIFT')
+        expected_hf05={'scripts/ci/test_r05c_hf08_emulator_shell_scope.py',
                          'scripts/ci/gx02_ci_verify.py',
                          'scripts/ci/gx03_contract_audit.py'}
-        changed_hotfix=set(git(root,'diff','--name-only',introduction,'HEAD').splitlines())
-        need(changed_hotfix==expected_hotfix,
-             'GX03_HOTFIX_SOURCE_FILE_DRIFT '+repr(sorted(changed_hotfix^expected_hotfix)))
+        changed_hf05=set(git(root,'diff','--name-only',introduction,hf05).splitlines())
+        need(changed_hf05==expected_hf05,
+             'GX03_HF05_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf05^expected_hf05)))
+        if head!=hf05:
+            need(git(root,'rev-parse','HEAD^')==hf05,
+                 'GX03_HF06_UNREVIEWED_PARENT')
+            expected_hf06={'scripts/ci/gx02_ci_verify.py',
+                           'scripts/ci/gx03_contract_audit.py'}
+            changed_hf06=set(git(root,'diff','--name-only',hf05,'HEAD').splitlines())
+            need(changed_hf06==expected_hf06,
+                 'GX03_HF06_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):

@@ -58,8 +58,18 @@ def audit_source_and_receipts(root:Path, env:dict):
         gx03_intro='78475b2d1634711d7d615210479befedf3d14417'
         need(git(root,'rev-parse',gx03_intro+'^')==frozen,
              'GX02_GX03_INTRO_PARENT_DRIFT')
-        need(head==gx03_intro or git(root,'rev-parse','HEAD^')==gx03_intro,
-             'GX02_UNREVIEWED_DESCENDANT_OR_HOTFIX_PARENT')
+        if head!=gx03_intro:
+            hf05='8604a5b97c4b07702a4ad024dbd614d59645a8a6'
+            need(git(root,'rev-parse',hf05+'^')==gx03_intro,
+                 'GX02_HF05_PARENT_DRIFT')
+            if head!=hf05:
+                need(git(root,'rev-parse','HEAD^')==hf05,
+                     'GX02_UNREVIEWED_HF06_PARENT')
+                expected_hf06={'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                changed_hf06=set(git(root,'diff','--name-only',hf05,'HEAD').splitlines())
+                need(changed_hf06==expected_hf06,
+                     'GX02_HF06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):
