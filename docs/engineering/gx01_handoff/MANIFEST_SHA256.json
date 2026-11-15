@@ -1,0 +1,27 @@
+{
+  "schema": "xbs-handoff-v3-manifest/v1",
+  "created_date": "2026-11-14",
+  "packaging": "read-only documentation, original v2 source preserved",
+  "source_v2_zip_sha256": "f7ff5dcbd2e834bbcf85a9d559f572708dce34df06c4bc5b96853eb0efd93099",
+  "verified_repository_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+  "hosted_run_id": 43650947189,
+  "file_sha256": {
+    "README_FIRST.md": "091b1dff6e66ab3c4882ca69bffdf5d341c694f8a5e470b2579c4f7cc9a7a2c6",
+    "XBS_FINAL_ROADMAP_v3.md": "2d554adaf330d829fb814363ac0d30e8aa069fd474e4d7d0d86712a11ff3b351",
+    "XBS_GAP_CLOSURE_SIDE_ROADMAP_v1.md": "f9855770fc9896eedc3b2f0cec622ca6a17c6505dbac7d983ab4d16628f667f9",
+    "XBS_GX_TRACKER_v1.json": "0fc2139f8886bad2e1029922616b27ecbc1ca6d46a356bbda00c4b1fb30f89ef",
+    "XBS_IMPLEMENTATION_LEDGER_v3.json": "78092d7089e25fcf970d6e8d853fb1524849ea3c90c7ac70164d73d34cd61e0d",
+    "XBS_LEDGER_RECONCILIATION_PROTOCOL.md": "492975a4d4113fc40eee9faac8058c6af067a358c9e3d522f3b039f6d02c4bf7",
+    "XBS_PROGRESS_SNAPSHOT_20261114.json": "e60bdb9bb4106b114ee482f3277ce7b34b08728a08718e207058fe783418c12a",
+    "XBS_PROGRESS_SNAPSHOT_20261114.md": "bdd767cc8abeeaec0df2ac57d80266550e29f42bcafd0d7f5eff78470a72017b",
+    "XBS_TEST_MATRIX_v3.json": "ee14ea3bc5d35f3457251e2731cf756d5048d4e2618cd3d6d1237b9af5a13537",
+    "__main__.py": "ddf8e5892b0d3ab83baa8bdf06c47dbad3f8a9db6a9774074604f65e35332b27",
+    "archive/v2_original/README.md": "a7ea89fc1c4e76a80bb4703a5ee48facfe0923c8ebf37806fcdbb54050aafefc",
+    "archive/v2_original/XBS_FINAL_ROADMAP_v2.md": "14f0a03f193c418faecfdcf9f04b05036073109d5053dce4a442209750fafa39",
+    "archive/v2_original/XBS_IMPLEMENTATION_LEDGER.json": "df009185abf744422e214fb7fcfcbb6dd27162359acc48597c21070b7629c226",
+    "archive/v2_original/XBS_IMPLEMENTATION_LEDGER.md": "bccec900a4e654f691a2e8036a7dcc2e2a589ca34748d2c5ab8c7b382f5932df",
+    "archive/v2_original/XBS_LEDGER_CHECK.py": "f4c5627f91c15935109f0603f9608dd9ec7c5075d25363e48c0a8b791f6c2b4a",
+    "archive/v2_original/XBS_TEST_MATRIX.json": "cfeb26387816bff84283d660b10889c9f4853819d94d194b531908f0d2e424a5",
+    "archive/v2_original/XBS_TEST_STRATEGY.md": "0d5b28ee495fc82d17437bbd9da089d4754f8a66dbafeef5fef4dd339b91fad7"
+  }
+}

@@ -1,0 +1,308 @@
+{
+  "schema": "xbs-gx-side-track/v1",
+  "snapshot_date": "2026-11-14",
+  "status": "PLANNED",
+  "original_roadmap_preserved": true,
+  "original_task_count": 178,
+  "original_test_case_count": 131,
+  "side_milestones": [
+    {
+      "id": "GX01",
+      "name": "Evidence truth and ledger reconciliation",
+      "priority": "P0",
+      "status": "PLANNED",
+      "original_links": [
+        "R00",
+        "R06",
+        "R07",
+        "R09",
+        "R13"
+      ],
+      "tasks": [
+        {
+          "id": "GX01-01",
+          "description": "Freeze main/stack source pins and keep the 10 known successful PR runs; detect any new head/base drift.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-02",
+          "description": "Reconcile every original R00–R13 task with introducing commit, actual tests, evidence, lane and explicit blocker.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-03",
+          "description": "Map all 131 original case IDs to exact test IDs, assertions, SHA, job, run/attempt and artifacts; leave unmatched cases open.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-04",
+          "description": "Review 26 audit findings and reclassify each as open, fixed-but-unverified, tested, or blocked; never erase history.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-05",
+          "description": "Regenerate living Markdown/JSON ledgers from one source and make consistency tests fail on missing IDs or fabricated PASS.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-06",
+          "description": "Preserve obsolete Phase31 918-file/237-contract evidence as archived; explicitly test no stale release proof is counted.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX01-07",
+          "description": "Bind emulator/Go/JVM/device/signature lanes independently; report unqualified fields even when workflow is green.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "178 unique original tasks and 131 unique original cases preserved; all have source-bound evidence or explicit OPEN/UNMAPPED; 26 findings reviewed; zero invented ACCEPTED/PASS; full CI green.",
+      "explicit_exclusions": "No physical/root, release, or automatic roadmap completion."
+    },
+    {
+      "id": "GX02",
+      "name": "Control-plane and CI reliability improvements",
+      "priority": "P0",
+      "status": "PLANNED",
+      "original_links": [
+        "R06",
+        "R07",
+        "R12"
+      ],
+      "tasks": [
+        {
+          "id": "GX02-01",
+          "description": "Make Devtool the central plan/preflight/transaction/ACTIONS-journal controller; keep Python/Rich launchers thin and Zsh/Termux-safe.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-02",
+          "description": "Bound eventual-consistency GH run discovery by exact repo/workflow/branch/head SHA/event/start time/attempt, distinguish pending rc=8 from failed.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-03",
+          "description": "Persist resumable PR, run and artifact identifiers, distinguish not-yet-visible from not-created, prove no duplicate push/dispatch after interrupt.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-04",
+          "description": "Run full hosted Go/Android CI and differential affected-target checks against same exact source, without local Gradle.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-05",
+          "description": "Audit source-pinned action revisions, APK pairing, artifact digests, executor JDK/AGP/Gradle and workflow permissions.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-06",
+          "description": "Improve failure logs and artifact diagnostics: missing dependency, skipped test, zero test, bad coverprofile, unqualified device never false-green.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX02-07",
+          "description": "Test disposable Git rollback, upstream base drift, dirty checkout, symlink/path traversal, PR reuse and late-artifact arrival.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "Existing canonical workflow remains green; fail-closed mutation tests and process-interruption tests pass; exact-run/PR journals resume; no local Gradle or device writes.",
+      "explicit_exclusions": "No novel Android feature or physical qualification."
+    },
+    {
+      "id": "GX03",
+      "name": "Hosted Android journey and compatibility gap closure",
+      "priority": "P1",
+      "status": "PLANNED",
+      "original_links": [
+        "R05",
+        "R08",
+        "R10"
+      ],
+      "tasks": [
+        {
+          "id": "GX03-01",
+          "description": "Inventory original R10-01–13 and EM-001–018, EM-022–024; add missing exact method/fixture mappings.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-02",
+          "description": "Build fresh offline API36 real app + test APK pair identity with SHA/source/run/attempt, emulator-only authority and no root effects.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-03",
+          "description": "Exercise all MainActivity/navigation/editors/Tasker/FGS/Room journeys with nonempty AndroidJUnit results and negative assertions.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-04",
+          "description": "Prove real app process death with host-side kill between two instrumented stages, not just Activity recreation.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-05",
+          "description": "Capture real screenshots at 360dp/393dp, insets, light/dark, locale/RTL, rotation and accessibility with dimensions, hashes and redaction.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-06",
+          "description": "Add isolated API26 and API34 compatibility smoke shards alongside authoritative API36, with accurate supported Gradle/test task pairing.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX03-07",
+          "description": "Validate no overclaim: emulator proof never equals ARM64 KernelSU/Magisk, physical root, signed release, or measured battery benefit.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "Original R10 gate reaches exact-APK and real-journey coverage with API36 counts/screenshots + API26/API34 shards; all evidenced cases mapped, remaining device-specific cases blocked explicitly.",
+      "explicit_exclusions": "No physical hardware effects."
+    },
+    {
+      "id": "GX04",
+      "name": "Native Quick Settings and cross-surface UX closure",
+      "priority": "P1",
+      "status": "PLANNED",
+      "original_links": [
+        "R03",
+        "R05",
+        "R08",
+        "R10"
+      ],
+      "tasks": [
+        {
+          "id": "GX04-01",
+          "description": "Implement shared XbsTileController binding TileService only to observed daemon completion and secure eventbridge state.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX04-02",
+          "description": "Implement Saver, Pause/Resume, Profiles, Safe Mode; defer Restore Defaults behind explicit unlock and in-app confirmation.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX04-03",
+          "description": "Register TileService components and BIND_QUICK_SETTINGS_TILE manifest protection; test lockscreen/exported attack surfaces.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX04-04",
+          "description": "Enforce pending/offline/failed/recovery-required states, no optimistic active claim, and cross-Tasker/app/CLI synchronization.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX04-05",
+          "description": "Prove rapid taps, SystemUI listener lifecycle, process recreation and zero blocking privileged calls on main thread.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX04-06",
+          "description": "Hosted API36 QS/TileService integration plus Add Tile fallback and documented OEM/physical limitations.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "All 14 original R08 tasks have evidence or explicit device-only blockers; four tiles + guarded fifth are implemented; EM-019–021 mapped to real hosted tests; no physical QS claims.",
+      "explicit_exclusions": "OEM/physical QS behavior remains R11."
+    },
+    {
+      "id": "GX05",
+      "name": "Adversarial, privacy, performance and physical-readiness preflight",
+      "priority": "P1",
+      "status": "PLANNED",
+      "original_links": [
+        "R01",
+        "R04",
+        "R11",
+        "R12",
+        "R13"
+      ],
+      "tasks": [
+        {
+          "id": "GX05-01",
+          "description": "Close original R12 negatives with hostile inputs, credential/log redaction and source/run/attempt/artifact mismatch refusals.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-02",
+          "description": "Measure startup p50/p95, ANRs, StrictMode, worker/FD leaks and sustained fake-daemon resource budgets; baseline and variance in receipts.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-03",
+          "description": "Measure safe wakeup/polling rates and separate physical battery-impact claims; no fabricated savings or device-side tests.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-04",
+          "description": "Prepare R11 read-only inventory for API/ABI/KernelSU/module identity; no device installation or writes during preflight.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-05",
+          "description": "Create explicit consent matrix, reversible effects, before/after hash snapshots, rollback and cleanup receipts for future R11.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-06",
+          "description": "Reserve CPU/GMS/Wi-Fi disruption for separately approved disposable hardware; keep main device and automatic lab excluded.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX05-07",
+          "description": "Enforce R13 release refusal when any P0/P1 or physical/signing requirement lacks evidence.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "Hosted R12 performance/security budgets and negative tests measured; R11 read-only protocol ready; RD/PF unexecuted device cases visibly blocked; no release or privileged effect performed.",
+      "explicit_exclusions": "Not actual physical acceptance."
+    },
+    {
+      "id": "GX06",
+      "name": "Stack integration, hardening signoff and original-roadmap handback",
+      "priority": "P1",
+      "status": "PLANNED",
+      "original_links": [
+        "R00",
+        "R07",
+        "R10",
+        "R11",
+        "R12",
+        "R13"
+      ],
+      "tasks": [
+        {
+          "id": "GX06-01",
+          "description": "Rebase R10A naming as a side-track stack preflight only; its prepared ZIP is not an applied original R10 phase.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX06-02",
+          "description": "Verify exact PR ancestry and merge bases, source hashes, required jobs and artifact metadata across stacked PRs; no automatic merge.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX06-03",
+          "description": "Build ordered merge-readiness and conflict report against current main; require fresh full CI on intended aggregate SHA.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX06-04",
+          "description": "Final-diff 178 original tasks, 131 cases, 26 findings, all six GX gates and any unresolved original acceptance blockers.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX06-05",
+          "description": "Publish a signed-off *handoff state* with per-lane qualification; release qualification stays blocked until R11/R13 and operator approval.",
+          "status": "PLANNED"
+        },
+        {
+          "id": "GX06-06",
+          "description": "Resume original roadmap by actual dependency and remaining task IDs only after GX gates are verified; never renumber R08–R13.",
+          "status": "PLANNED"
+        }
+      ],
+      "acceptance_gate": "Exact-SHA integration/merge readiness and updated evidence ledger published; six GX gates validated; original work may resume with unresolved original tests/gates explicit; no automatic merge/release.",
+      "explicit_exclusions": "No PR merge, rooted device or signed release by this handoff."
+    }
+  ]
+}
