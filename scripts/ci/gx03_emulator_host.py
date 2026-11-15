@@ -311,36 +311,68 @@ def gx04_systemui_counts(serial):
     return values
 
 def gx04_systemui_probe(serial):
-    """Real rootless SystemUI add/click/remove; require app-private callback counters."""
+    """Rootless SystemUI add/click/remove: verify callbacks, never shell exit alone.
+
+    A freshly installed app has no authenticated XBS daemon; its tile must
+    remain visually non-active yet allow an app-diagnostic click. This is not
+    evidence that any privileged command was executed.
+    """
     import time
     service=PKG+'/.XbsPauseTileService'
     before=gx04_systemui_counts(serial)
     observed={}
+    commands=[]
+    last_counts=dict(before)
+    def statusbar(command,component=False):
+        args=('shell','cmd','statusbar',command,service) if component else ('shell','cmd','statusbar',command)
+        result=adb(serial,*args,check=False)
+        need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-300:])
+        commands.append(command)
+    def wait_delta(marker,intervals=80):
+        nonlocal last_counts
+        for _ in range(intervals):
+            last_counts=gx04_systemui_counts(serial)
+            if last_counts.get(marker,0)>before.get(marker,0):
+                observed[marker]=last_counts[marker]
+                return True
+            time.sleep(0.25)
+        return False
+    added=False
     try:
-        for command,marker in (('add-tile','added_PAUSE'),('click-tile','clicked_PAUSE')):
-            result=adb(serial,'shell','cmd','statusbar',command,service,check=False)
-            need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-350:])
-            for _ in range(48):
-                current=gx04_systemui_counts(serial)
-                if current.get(marker,0)>before.get(marker,0):
-                    observed[marker]=current[marker]
-                    break
-                time.sleep(0.25)
-            need(marker in observed,'GX04_SYSTEMUI_CALLBACK_MISSING '+marker)
+        check=adb(serial,'shell','cmd','statusbar','check-support',check=False)
+        need(check.returncode==0 and check.stdout.strip()=='true','GX04_SYSTEMUI_NOT_SUPPORTED')
+        statusbar('add-tile',True)
+        added=True
+        need(wait_delta('added_PAUSE'),
+             'GX04_SYSTEMUI_CALLBACK_MISSING added_PAUSE counts='+repr(last_counts))
+        # SystemUI may not dispatch clicks until QS is expanded/listening;
+        # do not infer a click from exit code 0 (shell call is asynchronous).
+        statusbar('expand-settings')
+        time.sleep(1)
+        statusbar('click-tile',True)
+        if not wait_delta('clicked_PAUSE',intervals=64):
+            # Bound one fresh UI activation/retry; no root operation is permitted
+            # because a fresh emulator lacks an authenticated daemon snapshot.
+            statusbar('collapse')
+            statusbar('expand-settings')
+            time.sleep(1)
+            statusbar('click-tile',True)
+            need(wait_delta('clicked_PAUSE',intervals=64),
+                 'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts)+
+                 ' commands='+repr(commands))
     finally:
-        remove=adb(serial,'shell','cmd','statusbar','remove-tile',service,check=False)
-        need(remove.returncode==0,'GX04_SYSTEMUI_REMOVE_TILE_FAILED')
-    for _ in range(48):
-        current=gx04_systemui_counts(serial)
-        if current.get('removed_PAUSE',0)>before.get('removed_PAUSE',0):
-            observed['removed_PAUSE']=current['removed_PAUSE']
-            break
-        time.sleep(0.25)
-    need('removed_PAUSE' in observed,'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING')
+        if added:
+            statusbar('remove-tile',True)
+        statusbar('collapse')
+    need(wait_delta('removed_PAUSE'),
+         'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING counts='+repr(last_counts))
     print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true',flush=True)
     return {'real_systemui_shell':True,'add_callback':True,'click_callback':True,
             'remove_callback':True,'api':36,'user_data_recorded':False,
-            'physical_oem_qualified':False,'root_execution_asserted':False}
+            'physical_oem_qualified':False,'root_execution_asserted':False,
+            'shell_exit_alone_never_proves_callback':True,
+            'diagnostic_states_remain_non_active':True}
+
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()

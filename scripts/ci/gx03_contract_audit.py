@@ -77,7 +77,8 @@ def verify_source(root:Path):
                         changed_hf08=set(git(root,'diff','--name-only',hf07,hf08).splitlines())
                         need(changed_hf08==expected_hf08,'GX03_HF08_CHANGED_PATHS_DRIFT')
                         if head!=hf08:
-                            need(git(root,'rev-parse','HEAD^')==hf08,'GX03_GX04_UNREVIEWED_PARENT')
+                            gx04='fc1c9760c2fdf63f7b6c5ee64c98e657a9240627'
+                            need(git(root,'rev-parse',gx04+'^')==hf08,'GX03_GX04_PARENT_DRIFT')
                             expected_gx04={
                                 'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx04TilesInstrumentedTest.java',
                                 'android-app/app/src/main/AndroidManifest.xml',
@@ -103,8 +104,19 @@ def verify_source(root:Path):
                                 'scripts/ci/gx04_decision_harness.java.txt',
                                 'scripts/ci/test_gx04_tiles.py',
                             }
-                            changed_gx04=set(git(root,'diff','--name-only',hf08,'HEAD').splitlines())
+                            changed_gx04=set(git(root,'diff','--name-only',hf08,gx04).splitlines())
                             need(changed_gx04==expected_gx04,'GX03_GX04_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx04^expected_gx04)))
+                            if head!=gx04:
+                                need(git(root,'rev-parse','HEAD^')==gx04,'GX03_GX04_HF01_UNREVIEWED_PARENT')
+                                expected_hf01={
+                                    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsQuickTileService.java',
+                                    'scripts/ci/gx02_ci_verify.py',
+                                    'scripts/ci/gx03_contract_audit.py',
+                                    'scripts/ci/gx03_emulator_host.py',
+                                    'scripts/ci/test_gx04_tiles.py',
+                                }
+                                changed_hf01=set(git(root,'diff','--name-only',gx04,'HEAD').splitlines())
+                                need(changed_hf01==expected_hf01,'GX03_GX04_HF01_PATH_DRIFT '+repr(sorted(changed_hf01^expected_hf01)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):

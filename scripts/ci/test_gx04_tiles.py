@@ -232,6 +232,24 @@ class Gx04TileContracts(unittest.TestCase):
         self.assertIn('XbsTileController.requestToggle(getApplicationContext(),kind,true)',activity)
         self.assertIn('XbsTileController.acknowledgeRecovery(getApplicationContext(),kind)',activity)
 
+    def test_27_unverified_tile_remains_clickable_but_never_active(self):
+        java=(JAVA/'XbsQuickTileService.java').read_text()
+        self.assertIn('decision.phase==XbsTileDecision.Phase.PENDING?Tile.STATE_UNAVAILABLE',java)
+        self.assertIn('Tile.STATE_INACTIVE);',java)
+        self.assertIn('state.action==null ||',java)
+        self.assertIn('main.post(this::openConfiguration)',java)
+        self.assertIn('if(isLocked() || destroyed)',java)
+        self.assertIn('state.phase==XbsTileDecision.Phase.ACTIVE',java)
+
+    def test_28_click_callback_not_assumed_from_shell_success(self):
+        host=(ROOT/'scripts/ci/gx03_emulator_host.py').read_text()
+        self.assertIn("statusbar('expand-settings')",host)
+        self.assertIn("wait_delta('clicked_PAUSE'",host)
+        self.assertIn("'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='",host)
+        self.assertIn("statusbar('remove-tile',True)",host)
+        self.assertIn('shell_exit_alone_never_proves_callback',host)
+        self.assertIn('root_execution_asserted',host)
+
 def harness_copy(temp,path):
     target=Path(temp)/'Gx04DecisionHarness.java'
     target.write_bytes(path.read_bytes())

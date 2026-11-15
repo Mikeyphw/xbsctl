@@ -29,20 +29,19 @@ public abstract class XbsQuickTileService extends TileService {
         XbsTileLifecycleStore.record(this,kind,"clicked");
         if(isLocked() || destroyed){refresh();return;}
         if(kind==XbsTileDecision.Kind.RESTORE){openConfiguration();return;}
-        if(kind==XbsTileDecision.Kind.SAVER || kind==XbsTileDecision.Kind.PROFILES){
-            dispatch(()->{
-                try{
-                    if(!XbsTileController.configured(getApplicationContext(),kind)
-                        || XbsTileController.observe(getApplicationContext(),kind).phase==XbsTileDecision.Phase.ACTIVE)
-                        main.post(this::openConfiguration);
-                    else XbsTileController.requestToggle(getApplicationContext(),kind);
-                }catch(RuntimeException rejected){/* Corrupt state fails closed. */}
-                refresh();
-            });return;
-        }
         dispatch(()->{
-            try{XbsTileController.requestToggle(getApplicationContext(),kind);}
-            catch(RuntimeException rejected){/* No optimistic state change. */}
+            try{
+                XbsTileDecision state=XbsTileController.observe(getApplicationContext(),kind);
+                // Unverified, failed, recovery, or unconfigured must NOT dispatch a root command.
+                // Keep the tile clickable for explicit app inspection on rootless devices.
+                if(state.action==null ||
+                    (state.phase!=XbsTileDecision.Phase.ACTIVE &&
+                     state.phase!=XbsTileDecision.Phase.INACTIVE) ||
+                    ((kind==XbsTileDecision.Kind.SAVER || kind==XbsTileDecision.Kind.PROFILES)
+                     && state.phase==XbsTileDecision.Phase.ACTIVE)){
+                    main.post(this::openConfiguration);
+                }else XbsTileController.requestToggle(getApplicationContext(),kind);
+            }catch(RuntimeException rejected){/* Corrupt state fails closed; never optimistic. */}
             refresh();
         });
     }
@@ -75,8 +74,13 @@ public abstract class XbsQuickTileService extends TileService {
                 tile.setIcon(Icon.createWithResource(this,android.R.drawable.ic_menu_manage));
                 tile.setLabel(decision.title);
                 if(Build.VERSION.SDK_INT>=29)tile.setSubtitle(decision.detail);
+                // Android SystemUI suppresses clicks on STATE_UNAVAILABLE custom tiles.
+                // In a clean emulator (no daemon), allow a *non-active* tile to open
+                // diagnostics; pending operations remain non-interactive. ACTIVE is
+                // reserved exclusively for authenticated runtime state, never a tap.
                 tile.setState(decision.phase==XbsTileDecision.Phase.ACTIVE?Tile.STATE_ACTIVE:
-                    decision.phase==XbsTileDecision.Phase.INACTIVE?Tile.STATE_INACTIVE:Tile.STATE_UNAVAILABLE);
+                    decision.phase==XbsTileDecision.Phase.PENDING?Tile.STATE_UNAVAILABLE:
+                    Tile.STATE_INACTIVE);
                 tile.updateTile();
             });
         });
