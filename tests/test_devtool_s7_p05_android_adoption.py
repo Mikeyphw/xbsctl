@@ -87,6 +87,36 @@ class AndroidConsumerPilot(unittest.TestCase):
         self.assertIn("apksigner", workflow)
         self.assertIn("SOURCE_SHA", workflow)
 
+
+    def test_gradle_toolchain_seal_resolves_repo_devtool_config(self):
+        # rootProject.file() resolves from android-app, not from the CI shell cwd.
+        import re
+        android_root = ROOT / "android-app"
+        script = (android_root / "build.gradle").read_text(encoding="utf8")
+        matches = re.findall(
+            r"def devtool\s*=\s*rootProject\.file\('([^']+)'\)\.text", script
+        )
+        self.assertEqual(matches, ["../.devtool.toml"])
+        resolved = (android_root / matches[0]).resolve(strict=True)
+        self.assertEqual(resolved, (ROOT / ".devtool.toml").resolve(strict=True))
+        self.assertNotIn("../../../.devtool.toml", script)
+        self.assertIn("[targets.xbs_android.gradle]", resolved.read_text(encoding="utf8"))
+        self.assertEqual(tomllib.loads(resolved.read_text(encoding="utf8"))["targets"]["xbs_android"]["gradle"]["version"], "9.7.1")
+
+    def test_gradle_root_path_is_independent_of_runner_directory(self):
+        # Relocate an isolated repository-shaped tree; resolve exactly as Gradle would.
+        import re
+        script = (ROOT / "android-app/build.gradle").read_text(encoding="utf8")
+        match = re.search(r"def devtool\s*=\s*rootProject\.file\('([^']+)'\)\.text",script)
+        self.assertIsNotNone(match)
+        with tempfile.TemporaryDirectory(prefix="s7-p05-hf02-path-") as td:
+            copied_root = Path(td) / "different" / "checkout"
+            android = copied_root / "android-app"
+            android.mkdir(parents=True)
+            config = copied_root / ".devtool.toml"
+            config.write_text('[targets.xbs_android.gradle]\nversion = "9.7.1"\n', encoding="utf8")
+            self.assertEqual((android / match.group(1)).resolve(strict=True), config.resolve(strict=True))
+
     def test_canonical_android_adoption_audit_does_not_write(self):
         before = git(ROOT, "status", "--porcelain", "--untracked-files=all")
         output = devtool(ROOT, "delivery", "adoption", "audit", "--json")
