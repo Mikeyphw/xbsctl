@@ -1,0 +1,151 @@
+{
+  "schema": "xbs-gx04-coverage/v2",
+  "source_base": "aab3ff6d9e6cd9c343218606a5d8c6c619f1c487",
+  "policy": "No automatic R08/EM acceptance from source presence, mock calls, local Java tests, or unexecuted instrumentation.",
+  "milestone": [
+    {
+      "id": "GX04-01",
+      "status": "IMPLEMENTED_HOSTED_PENDING",
+      "proof": "XbsTileController + authenticated EventBridge; terminal command success and advanced observed target required"
+    },
+    {
+      "id": "GX04-02",
+      "status": "PARTIAL_EXPLICIT_BLOCK",
+      "proof": "Pause/Safe Mode supported; Saver/Profiles map selected allowlisted events; Restore Defaults has no daemon CLI command; only local shortcuts reset"
+    },
+    {
+      "id": "GX04-03",
+      "status": "IMPLEMENTED_HOSTED_PENDING",
+      "proof": "Five system-only BIND_QUICK_SETTINGS_TILE services and private settings activity; OEM lockscreen validation pending"
+    },
+    {
+      "id": "GX04-04",
+      "status": "IMPLEMENTED_HOSTED_PENDING",
+      "proof": "Pending/failed/recovery distinction; no active before successful run+fresh authenticated state; history shared with Tasker/app"
+    },
+    {
+      "id": "GX04-05",
+      "status": "PARTIAL_HOSTED_PENDING",
+      "proof": "Durable pending and rapid-tap control, no main-thread root command, source tests and API36 pending; physical lifecycle not verified"
+    },
+    {
+      "id": "GX04-06",
+      "status": "PARTIAL_HOSTED_PENDING",
+      "proof": "Mandatory API36 real manifest/activity tests plus rootless statusbar add/click/remove callback probe (pending hosted execution); OEM/physical open"
+    }
+  ],
+  "original_R08": [
+    {
+      "id": "R08-01",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-02",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-03",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-04",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-05",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-06",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-07",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-08",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-09",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-10",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-11",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-12",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-13",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    },
+    {
+      "id": "R08-14",
+      "status": "OPEN_EVIDENCE_MAPPING",
+      "accepted": false,
+      "reason": "Original task acceptance requires exact source/test/run/attempt or physical-device evidence, not an inferred match"
+    }
+  ],
+  "original_emulator_cases": [
+    {
+      "id": "EM-019",
+      "status": "UNMAPPED_PENDING_EXACT_ASSERTION",
+      "accepted": false,
+      "reason": "Native SystemUI behavioral acceptance not established by manifest-only instrumentation"
+    },
+    {
+      "id": "EM-020",
+      "status": "UNMAPPED_PENDING_EXACT_ASSERTION",
+      "accepted": false,
+      "reason": "Native SystemUI behavioral acceptance not established by manifest-only instrumentation"
+    },
+    {
+      "id": "EM-021",
+      "status": "UNMAPPED_PENDING_EXACT_ASSERTION",
+      "accepted": false,
+      "reason": "Native SystemUI behavioral acceptance not established by manifest-only instrumentation"
+    }
+  ],
+  "device_lanes": {
+    "hosted_api36": "PENDING_NEW_COMMIT_REAL_CALLBACKS",
+    "systemui_real_taps": "HOSTED_SYSTEMUI_CALLBACK_PROBE_IMPLEMENTED_RUN_PENDING",
+    "arm64_physical": "NOT_RUN",
+    "oem_lockscreen": "NOT_RUN",
+    "signed_release": "NOT_QUALIFIED"
+  },
+  "source_tests_not_physical_acceptance": true
+}

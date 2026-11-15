@@ -242,10 +242,27 @@ def execute(args):
         need(args.api==36,'AUTHORITATIVE_API36_REQUIRED')
         gradle_test('io.github.mikeceead.xbscompanion.Gx03JourneyInstrumentedTest')
         report['journey_assertions']=junit_receipt(RESULTS,JOURNEYS)
+        # GX04: actual API36 instrumented package/TileService security checks.
+        # Mandatory, never synthetic SystemUI acceptance or root qualification.
+        gradle_test('io.github.mikeceead.xbscompanion.Gx04TilesInstrumentedTest')
+        report['gx04_tile_assertions']=junit_receipt(RESULTS,{
+            'Gx04TilesInstrumentedTest':{
+                'allFiveTilesHaveSystemOnlyManifestPermission',
+                'allTileServicesAreBoundToQuickSettingsAction',
+                'unsafeAndUnconfiguredTilesNeverClaimActive',
+                'noConfiguredRestoreRootActionAndAllEventActionsAllowlisted',
+                'hostileEventNamesRejectedBeforeLaunch',
+                'verifiedCompletionRequiresTerminalHistoryAndNewerEvidence',
+                'unverifiedTilesCannotLaunchRootCommands',
+                'runtimeSettingsActivityRendersAllFiveTileRequests',
+                'durablePendingBlocksRepeatedTapAcrossReload'
+            }
+        })
         # Verify & snapshot signed APKs before manual installation, ensuring
         # that no Gradle Test Orchestrator uninstalls stage-A data mid-journey.
         report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
         install_verified_pair_for_stage(serial,report['apk_pair'])
+        report['gx04_systemui_callbacks']=gx04_systemui_probe(serial)
         report['process_death']=process_death(serial)
         out=OUT/'api36';out.mkdir(parents=True,exist_ok=True)
         captures=[]
@@ -278,6 +295,52 @@ def execute(args):
     print('GX03_HOSTED_ANDROID_EVIDENCE_PASS api='+str(args.api)+' source='+identity['source_sha']+
           ' run='+identity['github_run_id']+' attempt='+identity['github_run_attempt']+
           ' physical_root_qualified=false original_cases_accepted=0',flush=True)
+
+
+
+def gx04_systemui_counts(serial):
+    result=adb(serial,'shell','run-as',PKG,'cat','shared_prefs/gx04_tile_lifecycle_v1.xml',check=False)
+    if result.returncode:
+        need('No such file' in (result.stdout+result.stderr),
+             'GX04_SYSTEMUI_PRIVATE_PROBE_UNAVAILABLE '+(result.stderr or '')[-280:])
+        return {}
+    need(len(result.stdout)<8192,'GX04_SYSTEMUI_COUNTER_XML_OVERSIZED')
+    values={}
+    for key,amount in re.findall(r'<int\s+name="([a-z]+_[A-Z]+)"\s+value="([0-9]+)"',result.stdout):
+        values[key]=int(amount)
+    return values
+
+def gx04_systemui_probe(serial):
+    """Real rootless SystemUI add/click/remove; require app-private callback counters."""
+    import time
+    service=PKG+'/.XbsPauseTileService'
+    before=gx04_systemui_counts(serial)
+    observed={}
+    try:
+        for command,marker in (('add-tile','added_PAUSE'),('click-tile','clicked_PAUSE')):
+            result=adb(serial,'shell','cmd','statusbar',command,service,check=False)
+            need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-350:])
+            for _ in range(48):
+                current=gx04_systemui_counts(serial)
+                if current.get(marker,0)>before.get(marker,0):
+                    observed[marker]=current[marker]
+                    break
+                time.sleep(0.25)
+            need(marker in observed,'GX04_SYSTEMUI_CALLBACK_MISSING '+marker)
+    finally:
+        remove=adb(serial,'shell','cmd','statusbar','remove-tile',service,check=False)
+        need(remove.returncode==0,'GX04_SYSTEMUI_REMOVE_TILE_FAILED')
+    for _ in range(48):
+        current=gx04_systemui_counts(serial)
+        if current.get('removed_PAUSE',0)>before.get('removed_PAUSE',0):
+            observed['removed_PAUSE']=current['removed_PAUSE']
+            break
+        time.sleep(0.25)
+    need('removed_PAUSE' in observed,'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING')
+    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true',flush=True)
+    return {'real_systemui_shell':True,'add_callback':True,'click_callback':True,
+            'remove_callback':True,'api':36,'user_data_recorded':False,
+            'physical_oem_qualified':False,'root_execution_asserted':False}
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()

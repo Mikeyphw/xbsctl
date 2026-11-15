@@ -140,5 +140,59 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Runs user-triggered XBS root commands with bounded timeouts, cancellation, and foreground execution visibility." />
         </service>
+
+        <!-- GX04 P01: system-only QS entry points; Android enforces BIND_QUICK_SETTINGS_TILE. -->
+        <service android:name=".XbsPauseTileService"
+            android:label="XBS Pause"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+        <service android:name=".XbsSafeModeTileService"
+            android:label="XBS Safe Mode"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+        <service android:name=".XbsSaverTileService"
+            android:label="XBS Saver"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+        <service android:name=".XbsProfilesTileService"
+            android:label="XBS Profiles"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+        <service android:name=".XbsRestoreDefaultsTileService"
+            android:label="XBS Restore Defaults"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+        <activity android:name=".XbsTileSettingsActivity" android:exported="false" />
+        <receiver android:name=".XbsTileRefreshReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="io.github.mikeceead.xbscompanion.STATE_UPDATED" />
+                <action android:name="io.github.mikeceead.xbscompanion.RUN_UPDATED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
