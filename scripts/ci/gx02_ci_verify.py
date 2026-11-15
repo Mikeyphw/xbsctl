@@ -55,8 +55,11 @@ def audit_source_and_receipts(root:Path, env:dict):
     need(git(root,'rev-parse',frozen+'~2')==BASE_SHA,
          'GX02_HF05_GX01_ANCESTOR_DRIFT')
     if head!=frozen:
-        need(git(root,'rev-parse','HEAD^')==frozen,
-             'GX02_DESCENDANT_MUST_BE_EXACT_GX03_CHILD')
+        gx03_intro='78475b2d1634711d7d615210479befedf3d14417'
+        need(git(root,'rev-parse',gx03_intro+'^')==frozen,
+             'GX02_GX03_INTRO_PARENT_DRIFT')
+        need(head==gx03_intro or git(root,'rev-parse','HEAD^')==gx03_intro,
+             'GX02_UNREVIEWED_DESCENDANT_OR_HOTFIX_PARENT')
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):

@@ -33,15 +33,21 @@ def inspect(workflow:str)->str:
     if job.count(SCRIPT_START)!=1: raise Refused('EMULATOR_SCRIPT_AMBIGUOUS')
     script=job.split(SCRIPT_START,1)[1].split('\n      - name:',1)[0]
     lines=script.splitlines()
-    if len(lines)!=5 or lines[0]!='            set -eu':
+    # The R05C shell-scope contract remains required, but GX03 inserts two
+    # source-pinned emulator-host commands, without weakening any old gate.
+    if len(lines)!=7 or lines[0]!='            set -eu':
         raise Refused('EMULATOR_COMMAND_INVENTORY_DRIFT')
-    if 'connectedDebugAndroidTest' not in lines[1] or lines[1].count('gradle -p android-app')!=1:
+    gx_pre="            XBS_EXPECTED_HEAD_SHA='"+HEAD_EXPRESSION+"' python3 scripts/ci/gx03_emulator_host.py --mode preflight --api 36"
+    gx_post="            XBS_EXPECTED_HEAD_SHA='"+HEAD_EXPRESSION+"' python3 scripts/ci/gx03_emulator_host.py --mode api36 --api 36"
+    if lines[1]!=gx_pre or lines[4]!=gx_post:
+        raise Refused('GX03_EMULATOR_HOST_GATES_MISSING_OR_REORDERED')
+    if 'connectedDebugAndroidTest' not in lines[2] or lines[2].count('gradle -p android-app')!=1:
         raise Refused('INSTRUMENTATION_NOT_REQUIRED')
-    if lines[2].strip()!='python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected':
+    if lines[3].strip()!='python3 scripts/ci/r05c_verify_instrumentation.py --results android-app/app/build/outputs/androidTest-results/connected':
         raise Refused('SIXTEEN_CASE_GATE_NOT_REQUIRED')
-    if lines[3].strip()!='gradle -p android-app --no-daemon --console=plain :app:assembleDebug':
+    if lines[5].strip()!='gradle -p android-app --no-daemon --console=plain :app:assembleDebug':
         raise Refused('DEBUG_ASSEMBLY_NOT_REQUIRED')
-    package=lines[4].strip()
+    package=lines[6].strip()
     parts=package.split(' && ')
     if len(parts)!=8: raise Refused('PUBLICATION_NOT_SINGLE_FAIL_CLOSED_SHELL')
     tokens=[
@@ -82,6 +88,24 @@ class EmulatorShellScope(unittest.TestCase):
     def test_all_sixteen_emulator_cases_and_linux_race_remain_required(self):
         self.assertIn('r05c_verify_instrumentation.py',self.workflow)
         self.assertIn('go test -race ./internal/config ./internal/control ./internal/daemon',self.workflow)
+
+    def test_gx03_preflight_cannot_be_removed(self):
+        mutated=self.workflow.replace('gx03_emulator_host.py --mode preflight --api 36','gx03_emulator_host.py --mode omitted --api 36',1)
+        with self.assertRaisesRegex(Refused,'GX03_EMULATOR_HOST_GATES_MISSING_OR_REORDERED'):inspect(mutated)
+
+    def test_gx03_post_test_evidence_cannot_be_removed(self):
+        mutated=self.workflow.replace('gx03_emulator_host.py --mode api36 --api 36','gx03_emulator_host.py --mode omitted --api 36',1)
+        with self.assertRaisesRegex(Refused,'GX03_EMULATOR_HOST_GATES_MISSING_OR_REORDERED'):inspect(mutated)
+
+    def test_gx03_preflight_must_pin_pr_sha(self):
+        mutated=self.workflow.replace("XBS_EXPECTED_HEAD_SHA='"+HEAD_EXPRESSION+"' python3 scripts/ci/gx03_emulator_host.py --mode preflight","XBS_EXPECTED_HEAD_SHA='0' python3 scripts/ci/gx03_emulator_host.py --mode preflight",1)
+        with self.assertRaisesRegex(Refused,'GX03_EMULATOR_HOST_GATES_MISSING_OR_REORDERED'):inspect(mutated)
+
+    def test_gx03_host_gate_order_is_immutable(self):
+        pre="XBS_EXPECTED_HEAD_SHA='"+HEAD_EXPRESSION+"' python3 scripts/ci/gx03_emulator_host.py --mode preflight --api 36"
+        post="XBS_EXPECTED_HEAD_SHA='"+HEAD_EXPRESSION+"' python3 scripts/ci/gx03_emulator_host.py --mode api36 --api 36"
+        mutated=self.workflow.replace(pre,'__GX03_SWAP__',1).replace(post,pre,1).replace('__GX03_SWAP__',post,1)
+        with self.assertRaisesRegex(Refused,'GX03_EMULATOR_HOST_GATES_MISSING_OR_REORDERED'):inspect(mutated)
 
     def test_legacy_independent_variable_assignments_are_rejected(self):
         mutated=self.workflow.replace('            APK='+TARGET_APK+'; HEAD_SHA=', '            APK='+TARGET_APK+'\n            HEAD_SHA=',1)

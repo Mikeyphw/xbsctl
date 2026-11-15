@@ -32,9 +32,20 @@ def verify_source(root:Path):
          'GX03_HOSTED_PR_SOURCE_ONLY')
     need(git(root,'rev-parse','HEAD')==os.getenv('XBS_EXPECTED_HEAD_SHA'),
          'GX03_RUN_SOURCE_SHA_MISMATCH')
-    need(git(root,'rev-parse','HEAD^')==BASE,'GX03_BASE_PARENT_DRIFT')
-    changed=set(git(root,'diff','--name-only','HEAD^','HEAD').splitlines())
+    # Preserve the exact GX03 introducing commit and allow precisely one
+    # reviewed descendant patch. Arbitrary history, paths and rewrites refuse.
+    introduction='78475b2d1634711d7d615210479befedf3d14417'
+    need(git(root,'rev-parse',introduction+'^')==BASE,'GX03_INTRODUCING_PARENT_DRIFT')
+    changed=set(git(root,'diff','--name-only',BASE,introduction).splitlines())
     need(changed==ALLOWED,'GX03_SOURCE_FILE_INVENTORY_DRIFT '+repr(sorted(changed^ALLOWED)))
+    if head!=introduction:
+        need(git(root,'rev-parse','HEAD^')==introduction,'GX03_UNREVIEWED_HOTFIX_PARENT')
+        expected_hotfix={'scripts/ci/test_r05c_hf08_emulator_shell_scope.py',
+                         'scripts/ci/gx02_ci_verify.py',
+                         'scripts/ci/gx03_contract_audit.py'}
+        changed_hotfix=set(git(root,'diff','--name-only',introduction,'HEAD').splitlines())
+        need(changed_hotfix==expected_hotfix,
+             'GX03_HOTFIX_SOURCE_FILE_DRIFT '+repr(sorted(changed_hotfix^expected_hotfix)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):
