@@ -209,7 +209,7 @@ class GX03DirectProcessStageTests(unittest.TestCase):
             result=host.direct_stage('emulator-5554',sel)
             self.assertEqual(result['required_testcases'],1)
             args=fake.call_args.args
-            self.assertEqual(args[1:10],('shell','am','instrument','-w','-e','clearPackageData','false','-e','class'))
+            self.assertEqual(args[1:11],('shell','am','instrument','-w','-r','-e','clearPackageData','false','-e','class'))
             self.assertNotIn('gradle',args)
 
     def test_48_unknown_stage_refused_without_device_access(self):
@@ -218,5 +218,48 @@ class GX03DirectProcessStageTests(unittest.TestCase):
             with self.assertRaises(host.Refused):
                 host.direct_stage('emulator-5554','io.github.mikeceead.xbscompanion.Evil#escape')
             fake.assert_not_called()
+
+    def test_49_raw_mode_is_required_for_host_stage(self):
+        import unittest.mock
+        raw,sel=self.sample()
+        with unittest.mock.patch.object(host,'adb',return_value=types.SimpleNamespace(returncode=0,stdout=raw,stderr='')) as mock:
+            host.direct_stage('emulator-5554',sel)
+            self.assertEqual(mock.call_args.args[1:11],
+                ('shell','am','instrument','-w','-r','-e','clearPackageData','false','-e','class'))
+
+    def test_50_human_decoded_mode_is_never_success(self):
+        raw,sel=self.sample()
+        with self.assertRaisesRegex(host.Refused,'DIRECT_STAGE_STATUS_CODES_INVALID'):
+            host.verified_direct_stage_receipt('Time: 0.1\nOK (1 test)\nINSTRUMENTATION_CODE: -1\n',sel)
+
+    def test_51_failure_diagnostics_are_bounded_and_secret_free(self):
+        import unittest.mock,io,contextlib
+        raw,sel=self.sample();secret='DO_NOT_EXPOSE_RAW_TEST_BODY'
+        failure=types.SimpleNamespace(returncode=0,stdout='INSTRUMENTATION_FAILED: '+secret+'\n',stderr=secret)
+        err=io.StringIO()
+        with unittest.mock.patch.object(host,'adb',return_value=failure):
+            with contextlib.redirect_stderr(err):
+                with self.assertRaises(host.Refused):host.direct_stage('emulator-5554',sel)
+        self.assertIn('GX03_DIRECT_STAGE_DIAGNOSTIC',err.getvalue())
+        self.assertNotIn(secret,err.getvalue())
+        self.assertIn('"status_codes": []',err.getvalue())
+
+    def test_52_good_codes_but_adb_nonzero_still_refuses(self):
+        import unittest.mock,io,contextlib
+        raw,sel=self.sample()
+        fail=types.SimpleNamespace(returncode=2,stdout=raw,stderr='secret')
+        with unittest.mock.patch.object(host,'adb',return_value=fail):
+            with contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(host.Refused,'DIRECT_STAGE_ADB_EXIT_NONZERO'):
+                    host.direct_stage('emulator-5554',sel)
+
+    def test_53_raw_failure_and_incorrect_count_refused(self):
+        raw,sel=self.sample()
+        for val in (raw.replace('INSTRUMENTATION_STATUS_CODE: 0','INSTRUMENTATION_STATUS_CODE: -2'),
+                    raw.replace('INSTRUMENTATION_CODE: -1','INSTRUMENTATION_CODE: 0'),
+                    raw.replace('OK (1 test)','FAILURES!!!'),
+                    raw.replace('numtests=1','numtests=2')):
+            with self.subTest(code=val[-50:]):
+                with self.assertRaises(host.Refused):host.verified_direct_stage_receipt(val,sel)
 
 if __name__=='__main__':unittest.main(verbosity=2)

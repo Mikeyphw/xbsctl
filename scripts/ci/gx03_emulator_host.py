@@ -140,16 +140,42 @@ def verified_direct_stage_receipt(output:str,selector:str)->dict:
             'source':'androidx-test-runner-direct-host-instrumentation',
             'clear_package_data':False,'orchestrator_bypassed_for_persistent_state':True}
 
+def direct_stage_diagnostic(stdout:str,stderr:str,returncode:int,selector:str)->dict:
+    """Fixed fields only; never log test stream, packages, tokens or secrets."""
+    text=(stdout or '')[:256_000]
+    lines=[v.strip() for v in text.splitlines()]
+    codes=[v.split(':',1)[1].strip() for v in lines if v.startswith('INSTRUMENTATION_STATUS_CODE:')]
+    final=[v.split(':',1)[1].strip() for v in lines if v.startswith('INSTRUMENTATION_CODE:')]
+    return {'stage':selector.rsplit('#',1)[-1], 'shell_exit_code':int(returncode),
+            'stdout_bytes':len((stdout or '').encode('utf8')),
+            'stderr_bytes':len((stderr or '').encode('utf8')),
+            'stdout_sha256':sha((stdout or '').encode('utf8')),
+            'stderr_sha256':sha((stderr or '').encode('utf8')),
+            'status_codes':codes[:8], 'final_codes':final[:4],
+            'status_code_count':len(codes),'runner_final_count':len(final),
+            'failure_marker':any(('INSTRUMENTATION_FAILED' in v or
+                'INSTRUMENTATION_ABORTED' in v or 'shortMsg=' in v or
+                'FAILURES!!!' in v) for v in lines)}
+
 def direct_stage(serial:str,selector:str)->dict:
     """Run exactly one signed AndroidJUnitRunner test without Orchestrator data wipe."""
     need(selector in (
       'io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest#stageAWriteDurablePendingOwnership',
       'io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest#stageBInspectRecoveryAfterExternalForceStop'),
       'DIRECT_PROCESS_STAGE_NOT_ALLOWLISTED')
-    args=('shell','am','instrument','-w','-e','clearPackageData','false',
+    # -w alone decodes human-readable output and hides raw per-test codes.
+    # -r is essential for the exact INSTRUMENTATION_STATUS_CODE evidence contract.
+    args=('shell','am','instrument','-w','-r','-e','clearPackageData','false',
           '-e','class',selector,PKG+'.test/androidx.test.runner.AndroidJUnitRunner')
-    completed=adb(serial,*args,timeout=300)
-    receipt=verified_direct_stage_receipt(completed.stdout,selector)
+    completed=adb(serial,*args,timeout=300,check=False)
+    try:
+        need(completed.returncode==0,'DIRECT_STAGE_ADB_EXIT_NONZERO')
+        receipt=verified_direct_stage_receipt(completed.stdout,selector)
+    except Refused:
+        print('GX03_DIRECT_STAGE_DIAGNOSTIC '+json.dumps(direct_stage_diagnostic(
+            completed.stdout,completed.stderr,completed.returncode,selector),
+            sort_keys=True),file=sys.stderr,flush=True)
+        raise
     print('GX03_DIRECT_PROCESS_STAGE_PASS '+selector.rsplit('#',1)[-1],flush=True)
     return receipt
 

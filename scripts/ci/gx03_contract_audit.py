@@ -58,14 +58,24 @@ def verify_source(root:Path):
             need(changed_hf06==expected_hf06,
                  'GX03_HF06_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
             if head!=hf06:
-                need(git(root,'rev-parse','HEAD^')==hf06,'GX03_HF07_UNREVIEWED_PARENT')
+                hf07='b0298c83e5eaaa730f6333e5a750025599b04fa2'
+                need(git(root,'rev-parse',hf07+'^')==hf06,'GX03_HF07_PARENT_DRIFT')
                 expected_hf07={'scripts/ci/gx03_emulator_host.py',
                                'scripts/ci/test_gx03_hosted.py',
                                'scripts/ci/gx02_ci_verify.py',
                                'scripts/ci/gx03_contract_audit.py'}
-                changed_hf07=set(git(root,'diff','--name-only',hf06,'HEAD').splitlines())
+                changed_hf07=set(git(root,'diff','--name-only',hf06,hf07).splitlines())
                 need(changed_hf07==expected_hf07,
                      'GX03_HF07_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf07^expected_hf07)))
+                if head!=hf07:
+                    need(git(root,'rev-parse','HEAD^')==hf07,'GX03_HF08_UNREVIEWED_PARENT')
+                    expected_hf08={'scripts/ci/gx03_emulator_host.py',
+                               'scripts/ci/test_gx03_hosted.py',
+                               'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                    changed_hf08=set(git(root,'diff','--name-only',hf07,'HEAD').splitlines())
+                    need(changed_hf08==expected_hf08,
+                         'GX03_HF08_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf08^expected_hf08)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):
@@ -119,7 +129,7 @@ def verify_local(root:Path):
     need("'shell','am','force-stop',PKG" in host and
          'GITHUB_ACTIONS' in host and 'GITHUB_RUN_ATTEMPT' in host and
          'root_command_effects_executed' in host,'GX03_HOSTED_PROCESS_GATE_LOST')
-    need("'shell','am','instrument','-w','-e','clearPackageData','false'" in host and
+    need("'shell','am','instrument','-w','-r','-e','clearPackageData','false'" in host and
          "install_verified_pair_for_stage(serial,report['apk_pair'])" in host and
          "second=direct_stage(serial,cls+'#stageBInspectRecoveryAfterExternalForceStop')" in host and
          "gradle_test(cls+'#stageAWriteDurablePendingOwnership')" not in host,
