@@ -47,7 +47,12 @@ def audit_source_and_receipts(root:Path, env:dict):
     run=env.get('GITHUB_RUN_ID','');attempt=env.get('GITHUB_RUN_ATTEMPT','')
     need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
          'GX02_GITHUB_RUN_ATTEMPT_MISSING')
-    need(git(root,'rev-parse','HEAD^')==BASE_SHA,'GX02_EXPECTED_IMMEDIATE_PARENT_DRIFT')
+    # HF05: GitHub checkout has fetch-depth=3, preserving BOTH exact ancestors.
+    # A single shallow commit cannot establish these source identities.
+    need(git(root,'rev-parse','HEAD^')=='593db754484676ceacd3307be9d1f7db86eb9943',
+         'GX02_HF05_PREVIOUS_HEAD_NOT_EXACT')
+    need(git(root,'rev-parse','HEAD~2')==BASE_SHA,
+         'GX02_HF05_GX01_ANCESTOR_DRIFT')
     changed=set(git(root,'diff','--name-only',BASE_SHA,'HEAD').splitlines())
     need(changed==ALLOWED_CHANGES,'GX02_CHANGED_PATHS_DRIFT '+repr(sorted(changed^ALLOWED_CHANGES)))
     for path in IMMUTABLE_ORIGINAL:
