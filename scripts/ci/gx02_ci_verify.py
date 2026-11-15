@@ -47,14 +47,56 @@ def audit_source_and_receipts(root:Path, env:dict):
     run=env.get('GITHUB_RUN_ID','');attempt=env.get('GITHUB_RUN_ATTEMPT','')
     need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
          'GX02_GITHUB_RUN_ATTEMPT_MISSING')
-    # HF05: GitHub checkout has fetch-depth=3, preserving BOTH exact ancestors.
-    # A single shallow commit cannot establish these source identities.
-    need(git(root,'rev-parse','HEAD^')=='593db754484676ceacd3307be9d1f7db86eb9943',
+    # Preserve the immutable GX02 introducing-commit proof on each descendant.
+    # GX03 must be its direct child; its own exact-file policy is separately gated.
+    frozen='ea46616247484edc26bcd9e47e0a5fd8f4565208'
+    need(git(root,'rev-parse',frozen+'^')=='593db754484676ceacd3307be9d1f7db86eb9943',
          'GX02_HF05_PREVIOUS_HEAD_NOT_EXACT')
-    need(git(root,'rev-parse','HEAD~2')==BASE_SHA,
+    need(git(root,'rev-parse',frozen+'~2')==BASE_SHA,
          'GX02_HF05_GX01_ANCESTOR_DRIFT')
-    changed=set(git(root,'diff','--name-only',BASE_SHA,'HEAD').splitlines())
-    need(changed==ALLOWED_CHANGES,'GX02_CHANGED_PATHS_DRIFT '+repr(sorted(changed^ALLOWED_CHANGES)))
+    if head!=frozen:
+        gx03_intro='78475b2d1634711d7d615210479befedf3d14417'
+        need(git(root,'rev-parse',gx03_intro+'^')==frozen,
+             'GX02_GX03_INTRO_PARENT_DRIFT')
+        if head!=gx03_intro:
+            hf05='8604a5b97c4b07702a4ad024dbd614d59645a8a6'
+            need(git(root,'rev-parse',hf05+'^')==gx03_intro,
+                 'GX02_HF05_PARENT_DRIFT')
+            if head!=hf05:
+                hf06='7ee71272537948ab04a7f581e520d307e9044321'
+                need(git(root,'rev-parse',hf06+'^')==hf05,
+                     'GX02_HF06_PARENT_DRIFT')
+                expected_hf06={'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                changed_hf06=set(git(root,'diff','--name-only',hf05,hf06).splitlines())
+                need(changed_hf06==expected_hf06,
+                     'GX02_HF06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
+                if head!=hf06:
+                    hf07='b0298c83e5eaaa730f6333e5a750025599b04fa2'
+                    need(git(root,'rev-parse',hf07+'^')==hf06,'GX02_HF07_PARENT_DRIFT')
+                    expected_hf07={'scripts/ci/gx03_emulator_host.py',
+                               'scripts/ci/test_gx03_hosted.py',
+                               'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                    changed_hf07=set(git(root,'diff','--name-only',hf06,hf07).splitlines())
+                    need(changed_hf07==expected_hf07,
+                         'GX02_HF07_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf07^expected_hf07)))
+                    if head!=hf07:
+                        need(git(root,'rev-parse','HEAD^')==hf07,'GX02_HF08_UNREVIEWED_PARENT')
+                        expected_hf08={'scripts/ci/gx03_emulator_host.py',
+                               'scripts/ci/test_gx03_hosted.py',
+                               'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                        changed_hf08=set(git(root,'diff','--name-only',hf07,'HEAD').splitlines())
+                        need(changed_hf08==expected_hf08,
+                             'GX02_HF08_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf08^expected_hf08)))
+        for path in sorted(ALLOWED_CHANGES-{
+             '.github/workflows/devtool-xbs-ci.yml',
+             'scripts/ci/gx02_ci_verify.py'}):
+            need(git(root,'rev-parse',frozen+':'+path)==git(root,'rev-parse','HEAD:'+path),
+                 'GX02_INTRODUCED_ARTIFACT_MUTATED '+path)
+    changed=set(git(root,'diff','--name-only',BASE_SHA,frozen).splitlines())
+    need(changed==ALLOWED_CHANGES,'GX02_INTRODUCING_COMMIT_CHANGED_PATHS_DRIFT '+repr(sorted(changed^ALLOWED_CHANGES)))
     for path in IMMUTABLE_ORIGINAL:
         need(git(root,'rev-parse',BASE_SHA+':'+path)==git(root,'rev-parse','HEAD:'+path),
              'ORIGINAL_ROADMAP_OR_LEDGER_MUTATED '+path)

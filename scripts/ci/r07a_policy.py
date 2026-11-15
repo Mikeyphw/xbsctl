@@ -7,6 +7,7 @@ GitHub upon PR. The analyzer refuses unrecognised actions and duplicate jobs.
 """
 from __future__ import annotations
 import argparse
+import hashlib
 from pathlib import Path
 import re
 import subprocess
@@ -15,6 +16,8 @@ import sys
 
 REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = '.github/workflows/devtool-xbs-ci.yml'
+GX03_COMPAT = '.github/workflows/gx03-hosted-compat.yml'
+GX03_COMPAT_SHA256 = '03f0b8810d61ee2b1c1051382e87d1c2e3ce215736f105f319afbe65ac973b15'
 # GitHub REST git/ref/tags/vN, recursively dereferenced to commit on 2026-11-14.
 ACTIONS = {
     'actions/checkout': '11d5960a326750d5838078e36cf38b85af677262',
@@ -128,9 +131,18 @@ def guard(source):
 def audit(root:Path, *, hosted=False):
     workflow=root/WORKFLOW
     require(workflow.is_file() and not workflow.is_symlink(),'CANONICAL_WORKFLOW_MISSING')
+    # GX03 adds exactly one reviewed, content-addressed API26/API34 workflow.
+    # All other workflows remain disallowed; never treat a filename as approval.
     files=list((root/'.github/workflows').glob('*.yml'))+list((root/'.github/workflows').glob('*.yaml'))
-    require(len(files)==1 and files[0].resolve()==workflow.resolve(),'UNREVIEWED_EXTRA_WORKFLOW')
+    approved={WORKFLOW,GX03_COMPAT}
+    actual={str(p.relative_to(root)) for p in files}
+    require(len(files)==2 and actual==approved and all(p.is_file() and not p.is_symlink() for p in files),
+            'UNREVIEWED_EXTRA_WORKFLOW')
+    compat=root/GX03_COMPAT
+    require(hashlib.sha256(compat.read_bytes()).hexdigest()==GX03_COMPAT_SHA256,
+            'GX03_COMPAT_WORKFLOW_SHA256_DRIFT')
     result=guard(workflow.read_text(encoding='utf-8'))
+    result['reviewed_workflows']=2
     if hosted:
         require(os.getenv('GITHUB_ACTIONS')=='true','GITHUB_ACTIONS_REQUIRED')
         sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
