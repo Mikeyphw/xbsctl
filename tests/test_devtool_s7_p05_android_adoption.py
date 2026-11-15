@@ -66,7 +66,26 @@ class AndroidConsumerPilot(unittest.TestCase):
         self.assertNotIn("assembleRelease", yaml)
         self.assertNotIn("workflow_run:", yaml)
         self.assertNotIn("permissions: write-all", yaml)
-        self.assertNotIn("android-actions/setup-android@v4", yaml)
+        self.assertNotIn("android-actions/setup-android@v3", yaml)
+        self.assertIn("android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd", yaml)
+        self.assertIn("packages: 'platform-tools'", yaml)
+        self.assertIn("cmdline-tools-version: '15859902'", yaml)
+
+    def test_sdk_setup_is_pinned_tools_free_and_preserves_hosted_android_gate(self):
+        workflow = (ROOT / ".github/workflows/devtool-s7-p05-android-consumer.yml").read_text(encoding="utf8")
+        # Older action revisions attempted `sdkmanager tools`, a removed SDK package.
+        sdk_block = workflow.split("      - name: Configure hosted Android SDK (tools-free v4.0.4)\n", 1)[1].split("      - name: Provision API 36", 1)[0]
+        self.assertIn("android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd", sdk_block)
+        self.assertIn("packages: 'platform-tools'", sdk_block)
+        self.assertIn("cmdline-tools-version: '15859902'", sdk_block)
+        self.assertNotRegex(sdk_block, r"(?m)^\s*packages:\s*['\"]?tools(?:\s|['\"]|$)")
+        self.assertNotIn("sdkmanager tools", sdk_block)
+        self.assertNotIn("setup-android@v3", workflow)
+        self.assertIn("sdkmanager 'platforms;android-36' 'build-tools;36.0.0'", workflow)
+        self.assertIn("gradle-version: '9.7.1'", workflow)
+        self.assertIn(":app:assembleDebug :app:testDebugUnitTest", workflow)
+        self.assertIn("apksigner", workflow)
+        self.assertIn("SOURCE_SHA", workflow)
 
     def test_canonical_android_adoption_audit_does_not_write(self):
         before = git(ROOT, "status", "--porcelain", "--untracked-files=all")
