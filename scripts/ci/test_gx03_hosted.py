@@ -11,6 +11,7 @@ import unittest
 import zlib
 sys.path.insert(0,str(Path(__file__).parent))
 import gx03_evidence as e
+import gx03_emulator_host as host
 
 
 def png(width=1080,height=1200,*,mode=2,filters=0,extra=False):
@@ -129,5 +130,93 @@ class GX03EvidenceTests(unittest.TestCase):
     def test_38_duplicate_original_matrix_refused(self):
         a=[{'id':e.ORIGINAL_CASES[0],'phases':['R10']}]*131
         self.assertRefused(e.expected_inventory,{'cases':a})
+
+
+class GX03DirectProcessStageTests(unittest.TestCase):
+    def sample(self,method='stageAWriteDurablePendingOwnership'):
+        clazz='io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest'
+        selector=clazz+'#'+method
+        raw=('INSTRUMENTATION_STATUS: class='+clazz+'\n'
+             'INSTRUMENTATION_STATUS: numtests=1\n'
+             'INSTRUMENTATION_STATUS: test='+method+'\n'
+             'INSTRUMENTATION_STATUS_CODE: 1\n'
+             'INSTRUMENTATION_STATUS: class='+clazz+'\n'
+             'INSTRUMENTATION_STATUS: test='+method+'\n'
+             'INSTRUMENTATION_STATUS_CODE: 0\n'
+             'INSTRUMENTATION_RESULT: stream=\n'
+             'Time: 0.123\nOK (1 test)\nINSTRUMENTATION_CODE: -1\n')
+        return raw,selector
+
+    def test_39_valid_direct_stage_one(self):
+        raw,sel=self.sample()
+        receipt=host.verified_direct_stage_receipt(raw,sel)
+        self.assertEqual(receipt['required_testcases'],1)
+        self.assertEqual(receipt['failed_cases'],0)
+        self.assertTrue(receipt['orchestrator_bypassed_for_persistent_state'])
+
+    def test_40_stage_b_direct_receipt(self):
+        raw,sel=self.sample('stageBInspectRecoveryAfterExternalForceStop')
+        self.assertEqual(host.verified_direct_stage_receipt(raw,sel)['required_testcases'],1)
+
+    def test_41_missing_success_refused(self):
+        raw,sel=self.sample()
+        with self.assertRaises(host.Refused):
+            host.verified_direct_stage_receipt(raw.replace('INSTRUMENTATION_STATUS_CODE: 0','INSTRUMENTATION_STATUS_CODE: -2'),sel)
+
+    def test_42_negative_runner_result_refused(self):
+        raw,sel=self.sample()
+        with self.assertRaises(host.Refused):
+            host.verified_direct_stage_receipt(raw.replace('INSTRUMENTATION_CODE: -1','INSTRUMENTATION_CODE: 0'),sel)
+
+    def test_43_wrong_test_name_refused(self):
+        raw,sel=self.sample()
+        with self.assertRaises(host.Refused):
+            host.verified_direct_stage_receipt(raw.replace('stageAWriteDurablePendingOwnership','otherName'),sel)
+
+    def test_44_two_tests_refused(self):
+        raw,sel=self.sample()
+        with self.assertRaises(host.Refused):
+            host.verified_direct_stage_receipt(raw.replace('INSTRUMENTATION_STATUS_CODE: 1','INSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS_CODE: 1'),sel)
+
+    def test_45_failure_marker_refused(self):
+        raw,sel=self.sample()
+        with self.assertRaises(host.Refused):host.verified_direct_stage_receipt(raw+'FAILURES!!!\n',sel)
+
+    def test_46_installer_is_exact_sized_and_preserves_data(self):
+        import unittest.mock
+        with tempfile.TemporaryDirectory() as t:
+            with unittest.mock.patch.object(host,'ROOT',Path(t)):
+                base=Path(t)/'android-app/app/build/outputs/apk'
+                app=base/'debug/app-debug.apk';test=base/'androidTest/debug/app-debug-androidTest.apk'
+                for file in (app,test):file.parent.mkdir(parents=True,exist_ok=True);file.write_bytes(b'x'*12000)
+                calls=[]
+                def fake_adb(serial,*cmd,**kw):
+                    calls.append(cmd)
+                    if cmd[0]=='install':return types.SimpleNamespace(returncode=0,stdout='Success\n')
+                    if cmd[0]=='shell' and cmd[1]=='pm':return types.SimpleNamespace(returncode=0,stdout='package:/data/app/app.apk\n')
+                    self.fail('Unreviewed device command')
+                with unittest.mock.patch.object(host,'adb',fake_adb):
+                    host.install_verified_pair_for_stage('emulator-5554',
+                       {'app':{'sha256':e.sha(app.read_bytes())},
+                        'test':{'sha256':e.sha(test.read_bytes())}})
+                self.assertEqual([x[0:2] for x in calls[:2]],[('install','-r'),('install','-r')])
+                self.assertNotIn('uninstall',str(calls))
+
+    def test_47_stage_selector_pinned_and_clear_data_false(self):
+        import unittest.mock
+        raw,sel=self.sample()
+        with unittest.mock.patch.object(host,'adb',return_value=types.SimpleNamespace(returncode=0,stdout=raw)) as fake:
+            result=host.direct_stage('emulator-5554',sel)
+            self.assertEqual(result['required_testcases'],1)
+            args=fake.call_args.args
+            self.assertEqual(args[1:10],('shell','am','instrument','-w','-e','clearPackageData','false','-e','class'))
+            self.assertNotIn('gradle',args)
+
+    def test_48_unknown_stage_refused_without_device_access(self):
+        import unittest.mock
+        with unittest.mock.patch.object(host,'adb') as fake:
+            with self.assertRaises(host.Refused):
+                host.direct_stage('emulator-5554','io.github.mikeceead.xbscompanion.Evil#escape')
+            fake.assert_not_called()
 
 if __name__=='__main__':unittest.main(verbosity=2)

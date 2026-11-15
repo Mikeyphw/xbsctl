@@ -63,13 +63,23 @@ def audit_source_and_receipts(root:Path, env:dict):
             need(git(root,'rev-parse',hf05+'^')==gx03_intro,
                  'GX02_HF05_PARENT_DRIFT')
             if head!=hf05:
-                need(git(root,'rev-parse','HEAD^')==hf05,
-                     'GX02_UNREVIEWED_HF06_PARENT')
+                hf06='7ee71272537948ab04a7f581e520d307e9044321'
+                need(git(root,'rev-parse',hf06+'^')==hf05,
+                     'GX02_HF06_PARENT_DRIFT')
                 expected_hf06={'scripts/ci/gx02_ci_verify.py',
                                'scripts/ci/gx03_contract_audit.py'}
-                changed_hf06=set(git(root,'diff','--name-only',hf05,'HEAD').splitlines())
+                changed_hf06=set(git(root,'diff','--name-only',hf05,hf06).splitlines())
                 need(changed_hf06==expected_hf06,
                      'GX02_HF06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
+                if head!=hf06:
+                    need(git(root,'rev-parse','HEAD^')==hf06,'GX02_HF07_UNREVIEWED_PARENT')
+                    expected_hf07={'scripts/ci/gx03_emulator_host.py',
+                               'scripts/ci/test_gx03_hosted.py',
+                               'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                    changed_hf07=set(git(root,'diff','--name-only',hf06,'HEAD').splitlines())
+                    need(changed_hf07==expected_hf07,
+                         'GX02_HF07_CHANGED_PATHS_DRIFT '+repr(sorted(changed_hf07^expected_hf07)))
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):

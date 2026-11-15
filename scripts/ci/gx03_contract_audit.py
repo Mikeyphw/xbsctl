@@ -50,13 +50,22 @@ def verify_source(root:Path):
         need(changed_hf05==expected_hf05,
              'GX03_HF05_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf05^expected_hf05)))
         if head!=hf05:
-            need(git(root,'rev-parse','HEAD^')==hf05,
-                 'GX03_HF06_UNREVIEWED_PARENT')
+            hf06='7ee71272537948ab04a7f581e520d307e9044321'
+            need(git(root,'rev-parse',hf06+'^')==hf05,'GX03_HF06_PARENT_DRIFT')
             expected_hf06={'scripts/ci/gx02_ci_verify.py',
                            'scripts/ci/gx03_contract_audit.py'}
-            changed_hf06=set(git(root,'diff','--name-only',hf05,'HEAD').splitlines())
+            changed_hf06=set(git(root,'diff','--name-only',hf05,hf06).splitlines())
             need(changed_hf06==expected_hf06,
                  'GX03_HF06_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf06^expected_hf06)))
+            if head!=hf06:
+                need(git(root,'rev-parse','HEAD^')==hf06,'GX03_HF07_UNREVIEWED_PARENT')
+                expected_hf07={'scripts/ci/gx03_emulator_host.py',
+                               'scripts/ci/test_gx03_hosted.py',
+                               'scripts/ci/gx02_ci_verify.py',
+                               'scripts/ci/gx03_contract_audit.py'}
+                changed_hf07=set(git(root,'diff','--name-only',hf06,'HEAD').splitlines())
+                need(changed_hf07==expected_hf07,
+                     'GX03_HF07_SOURCE_FILE_DRIFT '+repr(sorted(changed_hf07^expected_hf07)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):
@@ -110,6 +119,11 @@ def verify_local(root:Path):
     need("'shell','am','force-stop',PKG" in host and
          'GITHUB_ACTIONS' in host and 'GITHUB_RUN_ATTEMPT' in host and
          'root_command_effects_executed' in host,'GX03_HOSTED_PROCESS_GATE_LOST')
+    need("'shell','am','instrument','-w','-e','clearPackageData','false'" in host and
+         "install_verified_pair_for_stage(serial,report['apk_pair'])" in host and
+         "second=direct_stage(serial,cls+'#stageBInspectRecoveryAfterExternalForceStop')" in host and
+         "gradle_test(cls+'#stageAWriteDurablePendingOwnership')" not in host,
+         'GX03_HF07_PERSISTENT_PROCESS_STAGE_NOT_ENFORCED')
     return len(ORIGINAL_CASES)
 
 if __name__=='__main__':

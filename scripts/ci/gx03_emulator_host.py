@@ -107,10 +107,83 @@ def screenshot(serial,width,theme,out):
                  'redaction_scope':'status_and_navigation_bands_only'})
     return meta
 
+def verified_direct_stage_receipt(output:str,selector:str)->dict:
+    """Accept precisely one successful, real AndroidJUnitRunner instrumentation.
+
+    Android instrumentation may return shell exit 0 even when assertions fail.
+    Both per-test status codes and final runner status are mandatory.
+    """
+    need(isinstance(output,str) and 0<len(output)<256_000,'DIRECT_STAGE_OUTPUT_UNSAFE')
+    need(re.fullmatch(r'io\.github\.mikeceead\.xbscompanion\.Gx03ProcessDeathInstrumentedTest#[A-Za-z0-9_]+',selector),
+         'DIRECT_STAGE_SELECTOR_INVALID')
+    clazz,method=selector.split('#')
+    lines=[v.strip() for v in output.splitlines()]
+    codes=[v.split(':',1)[1].strip() for v in lines
+           if v.startswith('INSTRUMENTATION_STATUS_CODE:')]
+    need(codes==['1','0'],'DIRECT_STAGE_STATUS_CODES_INVALID '+repr(codes))
+    need(sum(v=='INSTRUMENTATION_STATUS: class='+clazz for v in lines)>=1,
+         'DIRECT_STAGE_CLASS_MISSING')
+    need(sum(v=='INSTRUMENTATION_STATUS: test='+method for v in lines)>=1,
+         'DIRECT_STAGE_METHOD_MISSING')
+    need('INSTRUMENTATION_STATUS: numtests=1' in lines,'DIRECT_STAGE_COUNT_MISSING')
+    need(lines.count('INSTRUMENTATION_CODE: -1')==1,
+         'DIRECT_STAGE_FINAL_RESULT_NOT_PASS')
+    need(any(re.fullmatch(r'OK \(1 test\)',v) for v in lines),
+         'DIRECT_STAGE_ONE_TEST_PASS_RECEIPT_MISSING')
+    need(not any('FAILURES!!!' in v or 'INSTRUMENTATION_FAILED' in v or
+                 'INSTRUMENTATION_ABORTED' in v or 'shortMsg=' in v or
+                 v.startswith('FAILURES:') for v in lines),
+         'DIRECT_STAGE_FAILURE_MARKER')
+    return {'required_testcases':1,'total_testcases':1,'failed_cases':0,
+            'skipped_cases':0,'testcase_identifiers_verified':True,
+            'matched':{clazz.rsplit('.',1)[-1]:[method]},
+            'source':'androidx-test-runner-direct-host-instrumentation',
+            'clear_package_data':False,'orchestrator_bypassed_for_persistent_state':True}
+
+def direct_stage(serial:str,selector:str)->dict:
+    """Run exactly one signed AndroidJUnitRunner test without Orchestrator data wipe."""
+    need(selector in (
+      'io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest#stageAWriteDurablePendingOwnership',
+      'io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest#stageBInspectRecoveryAfterExternalForceStop'),
+      'DIRECT_PROCESS_STAGE_NOT_ALLOWLISTED')
+    args=('shell','am','instrument','-w','-e','clearPackageData','false',
+          '-e','class',selector,PKG+'.test/androidx.test.runner.AndroidJUnitRunner')
+    completed=adb(serial,*args,timeout=300)
+    receipt=verified_direct_stage_receipt(completed.stdout,selector)
+    print('GX03_DIRECT_PROCESS_STAGE_PASS '+selector.rsplit('#',1)[-1],flush=True)
+    return receipt
+
+def check_installed_pair(serial:str)->None:
+    # A real PM registration is mandatory, not a fabricated success from Gradle.
+    for package in (PKG,PKG+'.test'):
+        result=adb(serial,'shell','pm','path',package,check=False)
+        need(result.returncode==0 and
+             any(line.startswith('package:') for line in result.stdout.splitlines()),
+             'DIRECT_STAGE_APP_OR_TEST_NOT_INSTALLED '+package)
+
+def install_verified_pair_for_stage(serial:str,verified:dict)->None:
+    # Runs only inside disposable hosted emulator, after signer/package checks.
+    base=ROOT/'android-app/app/build/outputs/apk'
+    for kind,relative in (('app','debug/app-debug.apk'),
+                          ('test','androidTest/debug/app-debug-androidTest.apk')):
+        source=base/relative
+        need(source.is_file() and not source.is_symlink() and source.stat().st_size>10_000,
+             'DIRECT_STAGE_VERIFIED_APK_MISSING '+relative)
+        need(sha(source.read_bytes())==verified[kind]['sha256'],
+             'DIRECT_STAGE_PREINSTALL_SIGNED_PAIR_SHA_DRIFT '+kind)
+        installed=adb(serial,'install','-r',str(source),timeout=300)
+        need('Success' in installed.stdout,'DIRECT_STAGE_INSTALL_NOT_CONFIRMED '+relative)
+    check_installed_pair(serial)
+
 def process_death(serial):
     cls='io.github.mikeceead.xbscompanion.Gx03ProcessDeathInstrumentedTest'
-    gradle_test(cls+'#stageAWriteDurablePendingOwnership')
-    first=junit_receipt(RESULTS,STAGE_A)
+    # Only the two persistence stages bypass AndroidX Test Orchestrator. Its
+    # connectedDebugAndroidTest lifecycle can uninstall/clear the app between
+    # individual Gradle invocations, invalidating an actual process-death test.
+    check_installed_pair(serial)
+    first=direct_stage(serial,cls+'#stageAWriteDurablePendingOwnership')
+    # DO NOT reinstall or clear package data between the two stages.
+    check_installed_pair(serial)
     adb(serial,'shell','am','start','-W','-n',PKG+'/.MainActivity')
     pid=adb(serial,'shell','pidof',PKG,check=False)
     need(pid.returncode==0 and pid.stdout.strip().isdigit(),'PROCESS_DEATH_TARGET_NOT_ALIVE_BEFORE_KILL')
@@ -119,10 +192,9 @@ def process_death(serial):
     pid_after=adb(serial,'shell','pidof',PKG,check=False)
     need(pid_after.returncode!=0 or not pid_after.stdout.strip(),
          'FORCE_STOP_DID_NOT_TERMINATE_APP')
-    gradle_test(cls+'#stageBInspectRecoveryAfterExternalForceStop')
-    second=junit_receipt(RESULTS,STAGE_B)
+    second=direct_stage(serial,cls+'#stageBInspectRecoveryAfterExternalForceStop')
     return {'stage_a':first,'stage_b':second,'host_force_stop_executed':True,
-            'old_process_pid_observed':True,'post_kill_absent':True,
+            'old_process_pid_observed':bool(oldpid),'post_kill_absent':True,
             'root_command_effects_executed':False,'outcome':'real-process-death-tested',
             'claimed_no_automatic_replay':False}
 
@@ -144,6 +216,10 @@ def execute(args):
         need(args.api==36,'AUTHORITATIVE_API36_REQUIRED')
         gradle_test('io.github.mikeceead.xbscompanion.Gx03JourneyInstrumentedTest')
         report['journey_assertions']=junit_receipt(RESULTS,JOURNEYS)
+        # Verify & snapshot signed APKs before manual installation, ensuring
+        # that no Gradle Test Orchestrator uninstalls stage-A data mid-journey.
+        report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
+        install_verified_pair_for_stage(serial,report['apk_pair'])
         report['process_death']=process_death(serial)
         out=OUT/'api36';out.mkdir(parents=True,exist_ok=True)
         captures=[]
@@ -166,7 +242,8 @@ def execute(args):
         report['original_cases_accepted']=[]
         report['compat_scope']='emulator smoke/Tasker boundary only; no full API-specific signoff'
     else:raise Refused('UNKNOWN_GX03_MODE')
-    report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
+    if args.mode=='compat':
+        report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
     out=OUT/('api'+str(args.api));out.mkdir(parents=True,exist_ok=True)
     dest=out/'evidence.json'
     need(not dest.exists(),'STALE_ANDROID_RECEIPT_REFUSED')
