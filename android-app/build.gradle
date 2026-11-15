@@ -15,7 +15,7 @@ tasks.register('verifyStableToolchainBaseline') {
         def benchmarkBuild = rootProject.file('benchmark/build.gradle').text
         def props = rootProject.file('gradle.properties').text
         def builder = rootProject.file('gradle-build.py').text
-        def devtool = rootProject.file('../../../.devtool.toml').text
+        def devtool = rootProject.file('../.devtool.toml').text
         def prerelease = ~/(?i)(?:alpha|beta|rc|snapshot|preview|canary)/
         if (rootBuild.count("version '9.3.1' apply false") < 2) throw new GradleException('XBS requires AGP 9.3.1 for app and test plugins')
         if (!rootBuild.contains("androidx.baselineprofile' version '1.4.1'")) throw new GradleException('XBS requires stable Baseline Profile plugin 1.4.1')
