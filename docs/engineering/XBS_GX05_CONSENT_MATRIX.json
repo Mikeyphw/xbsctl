@@ -1,0 +1,30 @@
+{
+  "schema": "xbs-gx05-r11-consent/v1",
+  "original_roadmap_preserved": true,
+  "physical_device_readiness": "PREPARED_NOT_EXECUTED",
+  "device_inventory": {
+    "required": ["api", "abi", "root_manager", "module_id", "module_version", "module_digest", "device_is_disposable", "user_consent"],
+    "reader": "python3 scripts/ci/gx05_preflight.py --inspect-inventory inventory.json",
+    "device_access_by_this_reader": false,
+    "root_or_privileged_write": false
+  },
+  "explicit_permission_before_any_physical_effect": [
+    "Separate disposable physical device and affirmative consent for exact actions",
+    "Read-only baseline module list, API/ABI, boot ID, battery state and state hashes",
+    "Written maximum duration, timeouts, and rollback order for each effect",
+    "Proof target is not user's primary phone; no automatic lab invocation",
+    "Dry-run capability check, explicit per-effect go/no-go before invocation",
+    "Durable before/after hashes, restoration proof and independent recovery mechanism",
+    "R13 signing/release qualification is a separate gate"
+  ],
+  "effect_matrix": [
+    {"effect": "read_only_inventory", "consent": "required", "allowed_in_gx05": "offline JSON validation only", "reversible": true},
+    {"effect": "cpu_governor_or_cpuset_change", "consent": "separate physical approval", "allowed_in_gx05": false, "reversible": "requires proof"},
+    {"effect": "wifi_or_gms_disruption", "consent": "separate disposable physical approval", "allowed_in_gx05": false, "reversible": "requires proof"},
+    {"effect": "module_install_or_remove", "consent": "separate physical approval", "allowed_in_gx05": false, "reversible": "requires proof"},
+    {"effect": "battery_savings_claim", "consent": "measured physical study", "allowed_in_gx05": false, "reversible": "not applicable"}
+  ],
+  "physical_root_qualified": false,
+  "battery_savings_qualified": false,
+  "signed_release_qualified": false
+}

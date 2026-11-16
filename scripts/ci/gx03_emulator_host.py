@@ -258,13 +258,62 @@ def execute(args):
                 'durablePendingBlocksRepeatedTapAcrossReload'
             }
         })
+        # GX05: keep Python adversarial gates mandatory in the hosted API36 lane.
+        gx05_unit=subprocess.run([sys.executable,'-B','-m','unittest','discover',
+            '-s','scripts/ci','-p','test_gx05_*.py','-v'],cwd=ROOT,timeout=120,check=False)
+        need(gx05_unit.returncode==0,'GX05_ADVERSARIAL_HOSTED_TESTS_FAILED')
+        # GX05: real rootless Android security assertions, never a source-only PASS.
+        gradle_test('io.github.mikeceead.xbscompanion.Gx05PreflightInstrumentedTest')
+        report['gx05_security_assertions']=junit_receipt(RESULTS,{
+            'Gx05PreflightInstrumentedTest':{
+                'privilegedForegroundServicesNotExported',
+                'notificationAndBootReceiversNotExported',
+                'allSystemUiTilesBoundBySystemPermission',
+                'hostileTaskerIntentWithoutAuthorizationCannotStartCommand',
+                'unverifiedSnapshotCannotAuthorizeQuickTiles',
+                'readOnlyStateReadsDoNotLeakDescriptors',
+                'readOnlyStateReadsDoNotSpawnUnboundedWorkers'
+            }
+        })
         # Verify & snapshot signed APKs before manual installation, ensuring
         # that no Gradle Test Orchestrator uninstalls stage-A data mid-journey.
         report['apk_pair']=pair(serial,identity,str(apksigner),str(aapt))
         install_verified_pair_for_stage(serial,report['apk_pair'])
         report['gx04_systemui_callbacks']=gx04_systemui_probe(serial)
         report['process_death']=process_death(serial)
+        # GX05: real per-invocation cold-start and total-PSS measurements.
+        # No battery savings, wakeup rate, physical-root or signing claim.
+        from gx05_hosted_measure import collect as gx05_collect
+        from gx05_preflight import evidence as gx05_evidence, digest as gx05_digest
+        measured=gx05_collect(serial,adb,PKG,identity)
         out=OUT/'api36';out.mkdir(parents=True,exist_ok=True)
+        security=report['gx05_security_assertions']
+        require_security=security['required_testcases']==7 and security['skipped_cases']==0 and security['failed_cases']==0
+        need(require_security,'GX05_MANDATORY_SECURITY_ASSERTIONS_MISSING')
+        raw_files={
+            'gx05-startup-samples.json':json.dumps(measured,sort_keys=True,indent=2).encode(),
+            'gx05-security-tests.json':json.dumps(security,sort_keys=True,indent=2).encode()
+        }
+        artifact_rows=[]
+        for name,blob in sorted(raw_files.items()):
+            dest=out/name
+            need(not dest.exists(),'GX05_PREVIOUS_RUN_ARTIFACT_REFUSED '+name)
+            dest.write_bytes(blob)
+            need(gx05_digest(dest.read_bytes())==gx05_digest(blob),'GX05_ARTIFACT_WRITE_MISMATCH')
+            artifact_rows.append({'path':name,'sha256':gx05_digest(blob),'size':len(blob),
+                'source_sha':identity['source_sha'],'run_id':identity['github_run_id'],
+                'run_attempt':identity['github_run_attempt']})
+        report['gx05_preflight']=gx05_evidence(
+            identity={'source_sha':identity['source_sha'],'run_id':identity['github_run_id'],
+                      'run_attempt':identity['github_run_attempt'],'event':os.getenv('GITHUB_EVENT_NAME'),
+                      'hosted':os.getenv('GITHUB_ACTIONS')=='true'},
+            performance=measured,artifacts=artifact_rows,
+            security={'instrumented_count':security['required_testcases'],
+                      'failed':security['failed_cases'],'skipped':security['skipped_cases'],
+                      'exported_components_verified':True,'untrusted_receiver_tests':True})
+        print('GX05_ROOTLESS_SECURITY_PERFORMANCE_PASS source='+identity['source_sha']+
+            ' run='+identity['github_run_id']+' attempt='+identity['github_run_attempt']+
+            ' samples=7 physical_qualified=false release_qualified=false',flush=True)
         captures=[]
         try:
             for width in (360,393):
