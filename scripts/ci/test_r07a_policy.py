@@ -23,7 +23,43 @@ class Policy(unittest.TestCase):
 
     def test_real_workflow_and_action_inventory(self):
         self.assertEqual(self.known['required_jobs'],3)
-        self.assertEqual(P.audit(ROOT)['checkout_head_pins'],4)
+        observed=P.audit(ROOT)
+        self.assertEqual(observed['checkout_head_pins'],4)
+        self.assertEqual(observed['reviewed_workflows'],3 if (ROOT/P.S7_P05).is_file() else 2)
+
+    def test_s7_integrated_workflow_exact_blob_is_required(self):
+        import tempfile,shutil
+        from pathlib import Path
+        self.assertTrue((ROOT/P.S7_P05).is_file(),'Aggregate S7 workflow missing')
+        with tempfile.TemporaryDirectory(prefix='r07a-s7-adversarial-') as d:
+            root=Path(d)
+            for name in (P.WORKFLOW,P.GX03_COMPAT,P.S7_P05):
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True)
+                shutil.copyfile(ROOT/name,target)
+            self.assertEqual(P.audit(root)['reviewed_workflows'],3)
+            s7=root/P.S7_P05
+            s7.write_bytes(s7.read_bytes()+b'\n# unauthorized CI edit\n')
+            with self.assertRaisesRegex(P.Refused,'S7_P05_WORKFLOW_GIT_BLOB_DRIFT'):
+                P.audit(root)
+            shutil.copyfile(ROOT/P.S7_P05,s7)
+            extra=root/'.github/workflows/unreviewed.yml';extra.write_text('name: bypass\n')
+            with self.assertRaisesRegex(P.Refused,'UNREVIEWED_EXTRA_WORKFLOW'):
+                P.audit(root)
+            extra.unlink()
+            s7.unlink()
+            self.assertEqual(P.audit(root)['reviewed_workflows'],2)
+
+    def test_s7_workflow_symlink_refused(self):
+        import tempfile,shutil
+        from pathlib import Path
+        with tempfile.TemporaryDirectory(prefix='r07a-s7-symlink-') as d:
+            root=Path(d)
+            for name in (P.WORKFLOW,P.GX03_COMPAT):
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True)
+                shutil.copyfile(ROOT/name,target)
+            (root/P.S7_P05).symlink_to(ROOT/P.S7_P05)
+            with self.assertRaisesRegex(P.Refused,'UNREVIEWED_EXTRA_WORKFLOW'):
+                P.audit(root)
 
     def test_trigger_push_is_not_an_extra_job(self):
         # Regress the actual failure from the first R07A execution:
