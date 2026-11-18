@@ -134,6 +134,10 @@ class GX06AuditIntegrationTests(unittest.TestCase):
                      'config/delivery-required-ci.json'):
             src=HERE/name;dest=self.root/name;dest.parent.mkdir(parents=True,exist_ok=True)
             dest.write_bytes(src.read_bytes())
+            if name=='config/delivery-required-ci.json':
+                policy=json.loads(dest.read_text())
+                policy['base_branch']=GX05_BRANCH
+                dest.write_text(json.dumps(policy))
         ledger,matrix,tracker=original_fixture()
         for name,payload in [
             ('docs/engineering/XBS_IMPLEMENTATION_LEDGER.json',ledger),

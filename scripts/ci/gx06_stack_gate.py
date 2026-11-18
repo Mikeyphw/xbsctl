@@ -19,6 +19,8 @@ REPO = 'Mikeyphw/xbsctl'
 GX05_HEAD = '1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf'
 GX05_TREE = '45daa340788913aa1b626a3f3f96b6c20f141391'
 GX06_BRANCH = 'feature/xbs-gx06-stack-integration-20261118'
+GX06_HEAD = '5287f4a41eedc2b7fa3a33c6af820f117db78b84'
+R08R10_BRANCH = 'feature/xbs-r08-r10-acceptance-20261118'
 GX05_BRANCH = 'feature/xbs-gx05-security-performance-readiness-20261116'
 LOCK = 'docs/engineering/XBS_GX06_STACK_LOCK.json'
 GATES = 'docs/engineering/XBS_GX06_COVERAGE.json'
@@ -44,6 +46,7 @@ GX06_CHANGED_PATHS = frozenset({
     'scripts/ci/test_gx06_stack_gate.py',
     'scripts/ci/test_gx06_live_audit.py',
 })
+R08R10_CHANGED_PATHS = frozenset(('.github/workflows/devtool-xbs-ci.yml', 'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx04TilesInstrumentedTest.java', 'android-app/build.gradle', 'config/delivery-required-ci.json', 'docs/engineering/XBS_R08_R10_ACCEPTANCE_HANDOFF.md', 'docs/engineering/XBS_R08_R10_EVIDENCE_MAP.json', 'scripts/ci/gx02_ci_verify.py', 'scripts/ci/gx03_contract_audit.py', 'scripts/ci/gx03_emulator_host.py', 'scripts/ci/gx06_stack_gate.py', 'scripts/ci/r08_r10_acceptance.py', 'scripts/ci/test_gx06_stack_gate.py', 'scripts/ci/test_r08_r10_acceptance.py'))
 SHA = re.compile(r'[0-9a-f]{40}\Z')
 SHA256 = re.compile(r'[0-9a-f]{64}\Z')
 RUN_REQUIRED = {'Devtool XBS Go and Android candidates': 386774409,
@@ -164,19 +167,30 @@ def audit_local(root: Path, *, env: dict|None=None):
     tree=git(root,'rev-parse','HEAD^{tree}')
     need(SHA.fullmatch(head) is not None and SHA.fullmatch(tree) is not None,
          'GX06_HEAD_OR_TREE_INVALID')
-    need(git(root,'rev-parse','HEAD^')==GX05_HEAD,'GX06_UNREVIEWED_PARENT')
-    need(git(root,'rev-parse',GX05_HEAD+'^{tree}')==GX05_TREE,'GX06_GX05_TREE_DRIFT')
-    if env.get('GITHUB_ACTIONS')!='true':
-        need(git(root,'symbolic-ref','--short','HEAD')==GX06_BRANCH,
-             'GX06_NAMED_BRANCH_MISMATCH')
+    branch=(env.get('GITHUB_HEAD_REF') if env.get('GITHUB_ACTIONS')=='true'
+            else git(root,'symbolic-ref','--short','HEAD'))
+    need(branch in (GX06_BRANCH,R08R10_BRANCH),'GX06_UNREVIEWED_BRANCH')
+    continuation=branch==R08R10_BRANCH
+    if continuation:
+        need(git(root,'rev-parse','HEAD^')==GX06_HEAD,
+             'R08R10_PARENT_NOT_EXACT_GX06')
+        need(git(root,'rev-parse',GX06_HEAD+'^')==GX05_HEAD,
+             'R08R10_GX06_SOURCE_PARENT_DRIFT')
     else:
-        need(env.get('GITHUB_HEAD_REF')==GX06_BRANCH,
-             'GX06_HOSTED_BRANCH_MISMATCH')
+        need(git(root,'rev-parse','HEAD^')==GX05_HEAD,'GX06_UNREVIEWED_PARENT')
+    need(git(root,'rev-parse',GX05_HEAD+'^{tree}')==GX05_TREE,'GX06_GX05_TREE_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),
          'GX06_DIRTY_SOURCE_CHECKOUT')
-    changed=set(git(root,'diff','--name-only',GX05_HEAD,'HEAD').splitlines())
+    gx06_diff_target=GX06_HEAD if continuation else 'HEAD'
+    changed=set(git(root,'diff','--name-only',GX05_HEAD,gx06_diff_target).splitlines())
     need(changed==GX06_CHANGED_PATHS,
          'GX06_EXACT_CHANGE_INVENTORY_MISMATCH '+repr(sorted(changed^GX06_CHANGED_PATHS)))
+    if continuation:
+        next_changed=set(git(root,'diff','--name-only',GX06_HEAD,'HEAD').splitlines())
+        need(next_changed==R08R10_CHANGED_PATHS,
+             'R08R10_EXACT_CHANGE_INVENTORY_MISMATCH '+repr(sorted(next_changed^R08R10_CHANGED_PATHS)))
+        from r08_r10_acceptance import audit_source
+        audit_source(root)
     for path in ORIGINAL:
         need(git(root,'rev-parse',GX05_HEAD+':'+path)==git(root,'rev-parse','HEAD:'+path),
              'GX06_ORIGINAL_PROTECTED_FILE_CHANGED '+path)
@@ -190,13 +204,14 @@ def audit_local(root: Path, *, env: dict|None=None):
     tracker=load_bounded(root/ORIGINAL[2],'TRACKER',100000)
     original=validate_original_inventory(ledger,matrix,tracker)
     policy=load_bounded(root/'config/delivery-required-ci.json','CI_POLICY',100000)
-    need(policy.get('base_branch')==GX05_BRANCH and policy.get('repository')==REPO and
+    need(policy.get('base_branch')==(GX06_BRANCH if continuation else GX05_BRANCH) and
+         policy.get('repository')==REPO and
          policy.get('event')=='pull_request' and policy.get('release_qualification')=='separate' and
          {(v.get('name'),v.get('workflow_id')) for v in policy.get('required_workflows',[])}==set(RUN_REQUIRED.items()),
-         'GX06_DELIVERY_CI_POLICY_NOT_REBASED_ON_GX05')
+         'GX06_DELIVERY_CI_POLICY_INVALID_FOR_TARGET_BRANCH')
     if env.get('GITHUB_ACTIONS')=='true':
         need(env.get('GITHUB_EVENT_NAME')=='pull_request' and
-             env.get('GITHUB_HEAD_REF')==GX06_BRANCH and
+             env.get('GITHUB_HEAD_REF')==branch and
              env.get('XBS_EXPECTED_HEAD_SHA')==head,
              'GX06_HOSTED_PR_SOURCE_IDENTITY_REFUSED')
         run,attempt=env.get('GITHUB_RUN_ID',''),env.get('GITHUB_RUN_ATTEMPT','')
@@ -204,7 +219,7 @@ def audit_local(root: Path, *, env: dict|None=None):
              'GX06_HOSTED_RUN_ATTEMPT_MISSING')
     else: run=attempt=''
     out=dict(original, schema='xbs-gx06-local-audit/v1', source_sha=head,
-             source_tree=tree, base_sha=GX05_HEAD, branch=GX06_BRANCH,
+             source_tree=tree, base_sha=GX05_HEAD, branch=branch,
              github_run_id=run, github_run_attempt=attempt,
              inspected_prs=[p['pr'] for p in stack],
              prior_hosted_status='HISTORICAL_RUN_IDS_SOURCE_BOUND_LIVE_RECHECK_REQUIRED',
