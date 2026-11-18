@@ -1,0 +1,60 @@
+{
+  "schema": "xbs-gx06-coverage/v1",
+  "source_base": "1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf",
+  "gx06": "IMPLEMENTED_HOSTED_PENDING_LIVE_STACK_REVIEW",
+  "release_gate": "REFUSED_UNTIL_R11_R13_PHYSICAL_SIGNING_AND_APPROVAL",
+  "r10a": "SIDE_TRACK_PREFLIGHT_ONLY_NOT_ORIGINAL_R10_APPLIED",
+  "physical_root_qualified": false,
+  "kernel_su_qualified": false,
+  "signed_release_qualified": false,
+  "battery_savings_measured": false,
+  "auto_merge_approved": false,
+  "original_cases_accepted": false,
+  "gx_gates": [
+    {
+      "id": "GX01",
+      "status": "HISTORICAL_HOSTED_WORKFLOWS_GREEN_SOURCE_BOUND_LIVE_RECHECK_REQUIRED",
+      "original_acceptance": false
+    },
+    {
+      "id": "GX02",
+      "status": "HISTORICAL_HOSTED_WORKFLOWS_GREEN_SOURCE_BOUND_LIVE_RECHECK_REQUIRED",
+      "original_acceptance": false
+    },
+    {
+      "id": "GX03",
+      "status": "HISTORICAL_HOSTED_WORKFLOWS_GREEN_SOURCE_BOUND_LIVE_RECHECK_REQUIRED",
+      "original_acceptance": false
+    },
+    {
+      "id": "GX04",
+      "status": "HISTORICAL_HOSTED_WORKFLOWS_GREEN_SOURCE_BOUND_LIVE_RECHECK_REQUIRED",
+      "original_acceptance": false
+    },
+    {
+      "id": "GX05",
+      "status": "HISTORICAL_HOSTED_WORKFLOWS_GREEN_SOURCE_BOUND_LIVE_RECHECK_REQUIRED",
+      "original_acceptance": false
+    },
+    {
+      "id": "GX06",
+      "status": "SOURCE_IMPLEMENTED_HOSTED_AND_LIVE_PENDING",
+      "original_acceptance": false
+    }
+  ],
+  "original": {
+    "tasks": 178,
+    "cases": 131,
+    "findings": 26,
+    "unresolved_original_cases": "EXPLICIT_NOT_AUTOMATICALLY_MAPPED",
+    "R08_R13": "REMAIN_OPEN_UNTIL_EXACT_ORIGINAL_GATES_AND_PHYSICAL_SIGNING"
+  },
+  "merge_readiness": {
+    "status": "UNPROVEN",
+    "main_inspected_sha": "c52561dfa203090befb680a058aa5e5e79870f1b",
+    "requires": "ordered PR review, read-only exact SHA merge-tree preview, fresh full CI at intended aggregate SHA, human merge approvals"
+  },
+  "device_protocol": "GX05 read-only consent and rollback matrix, no writes by GX06",
+  "release_qualified": false,
+  "notes": "A green GX06 source gate never signs or merges, never promotes 131 cases, and does not prove OEM, ARM64 root, ANR, battery impact, or release."
+}

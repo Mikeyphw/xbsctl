@@ -133,10 +133,17 @@ def audit_source_and_receipts(root:Path, env:dict):
                                     changed_hf01=set(git(root,'diff','--name-only',gx04,hf01).splitlines())
                                     need(changed_hf01==expected_hf01,'GX02_GX04_HF01_PATH_DRIFT '+repr(sorted(changed_hf01^expected_hf01)))
                                     if head!=hf01:
-                                        need(git(root,'rev-parse','HEAD^')==hf01,'GX02_GX05_PARENT_UNREVIEWED')
+                                        gx05='1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf'
+                                        need(git(root,'rev-parse',gx05+'^')==hf01,'GX02_GX05_PARENT_DRIFT')
                                         expected_gx05={'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx05PreflightInstrumentedTest.java','config/delivery-required-ci.json','docs/engineering/XBS_GX05_CONSENT_MATRIX.json','docs/engineering/XBS_GX05_COVERAGE.json','docs/engineering/XBS_GX05_HANDOFF.md','scripts/ci/gx02_ci_verify.py','scripts/ci/gx03_contract_audit.py','scripts/ci/gx03_emulator_host.py','scripts/ci/gx05_hosted_measure.py','scripts/ci/gx05_preflight.py','scripts/ci/test_gx05_hosted_measure.py','scripts/ci/test_gx05_preflight.py'}
-                                        changed_gx05=set(git(root,'diff','--name-only',hf01,'HEAD').splitlines())
+                                        changed_gx05=set(git(root,'diff','--name-only',hf01,gx05).splitlines())
                                         need(changed_gx05==expected_gx05,'GX02_GX05_FILES_DRIFT '+repr(sorted(changed_gx05^expected_gx05)))
+                                        if head!=gx05:
+                                            from gx06_stack_gate import GX06_CHANGED_PATHS, GX05_HEAD
+                                            need(git(root,'rev-parse','HEAD^')==GX05_HEAD, 'GX06_PARENT_NOT_GX05')
+                                            changed_gx06=set(git(root,'diff','--name-only',gx05,'HEAD').splitlines())
+                                            need(changed_gx06==GX06_CHANGED_PATHS,
+                                                 'GX06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx06^GX06_CHANGED_PATHS)))
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):
@@ -192,6 +199,13 @@ def audit_source_and_receipts(root:Path, env:dict):
     need(f.get('device_mutated') is False and f.get('physical_root_qualified') is False and
          f.get('release_qualified') is False,'GX02_R09F_PHYSICAL_CLAIM_REFUSED')
     coverage=audit_coverage((root/files[3]).read_bytes())
+    if head!='1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf':
+        from gx06_stack_gate import audit_local
+        gx06=audit_local(root,env=env)
+        need(gx06['source_sha']==head and gx06['original_tasks']==178 and
+             gx06['original_cases']==131 and gx06['original_findings']==26,
+             'GX06_ORIGINAL_HANDOFF_GATE_NOT_VERIFIED')
+        print('GX06_SOURCE_AND_HANDOFF_GATE_PASS '+json.dumps(gx06,sort_keys=True),flush=True)
     return {'source_sha':head,'github_run_id':int(run),'github_run_attempt':int(attempt),
             'devtool_source_sha':devtool['devtool_source_commit'],
             'devtool_wheel_sha256':devtool['wheel_sha256'],
