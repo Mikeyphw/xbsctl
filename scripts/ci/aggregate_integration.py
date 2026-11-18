@@ -5,6 +5,8 @@ import argparse,os,re,subprocess,sys
 from pathlib import Path
 
 AGG_BRANCH = 'feature/xbs-aggregate-r08-r10-main-20261118'
+AGG_HEAD = 'b693612fc76bef3bd4d7fb8375861a990180fd0a'
+FIX_BRANCH = 'feature/xbs-aggregate-r07a-ci-repair-20261118'
 R08R10_HEAD = '77825deb673c4973e82b9c428efcbc5991409a11'
 MAIN_SHA = 'c52561dfa203090befb680a058aa5e5e79870f1b'
 MERGE_TREE = 'ae7292929149833cbecd65667d9a4f7b0588697d'
@@ -30,19 +32,25 @@ def git(root,*args):
 
 def audit(root,hosted=False):
     root=Path(root).resolve(strict=True)
-    from gx06_stack_gate import AGG_CHANGED_PATHS
+    from gx06_stack_gate import AGG_CHANGED_PATHS,FIX_CHANGED_PATHS
     branch=os.environ.get('GITHUB_HEAD_REF') if hosted else git(root,'symbolic-ref','--short','HEAD')
-    need(branch==AGG_BRANCH,'AGG_UNREVIEWED_BRANCH')
+    need(branch in (AGG_BRANCH,FIX_BRANCH),'AGG_UNREVIEWED_BRANCH')
+    fix=branch==FIX_BRANCH
     head=git(root,'rev-parse','HEAD')
     need(re.fullmatch('[a-f0-9]{40}',head) is not None,'AGG_INVALID_HEAD')
-    need(git(root,'rev-parse','HEAD^')==R08R10_HEAD,'AGG_PARENT_DRIFT')
+    need(git(root,'rev-parse','HEAD^')==(AGG_HEAD if fix else R08R10_HEAD),'AGG_PARENT_DRIFT')
+    if fix:need(git(root,'rev-parse',AGG_HEAD+'^')==R08R10_HEAD,'AGG_ORIGINAL_PARENT_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),'AGG_DIRTY_WORKTREE')
-    changed=set(git(root,'diff','--name-only',R08R10_HEAD,'HEAD').splitlines())
+    original=AGG_HEAD if fix else 'HEAD'
+    changed=set(git(root,'diff','--name-only',R08R10_HEAD,original).splitlines())
     need(changed==AGG_CHANGED_PATHS,'AGG_UNREVIEWED_CHANGED_PATHS '+str(sorted(changed^AGG_CHANGED_PATHS)))
+    if fix:
+        delta=set(git(root,'diff','--name-only',AGG_HEAD,'HEAD').splitlines())
+        need(delta==FIX_CHANGED_PATHS,'AGG_UNREVIEWED_FIX_PATHS '+str(sorted(delta^FIX_CHANGED_PATHS)))
     observed={p:git(root,'rev-parse','HEAD:'+p) for p in list(MAIN_FILES)+['android-app/build.gradle']}
     verify_blob_map(observed)
     policy=__import__('json').loads((root/'config/delivery-required-ci.json').read_text())
-    need(policy.get('base_branch')=='feature/xbs-r08-r10-acceptance-rebuild-20261118','AGG_CI_BASE_DRIFT')
+    need(policy.get('base_branch')==(AGG_BRANCH if fix else 'feature/xbs-r08-r10-acceptance-rebuild-20261118'),'AGG_CI_BASE_DRIFT')
     required={(x['name'],x['workflow_id']) for x in policy['required_workflows']}
     need(required=={
         ('Devtool XBS Go and Android candidates',386774409),

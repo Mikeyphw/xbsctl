@@ -126,24 +126,29 @@ def verify_source(root:Path):
                                     need(changed_gx05==expected_gx05,'GX03_GX05_FILES_DRIFT '+repr(sorted(changed_gx05^expected_gx05)))
                                     if head!=gx05:
                                         from gx06_stack_gate import (GX06_CHANGED_PATHS, GX05_HEAD, GX06_HEAD, R08R10_HEAD,
-                                            R08R10_CHANGED_PATHS, AGG_CHANGED_PATHS)
+                                            R08R10_CHANGED_PATHS, AGG_CHANGED_PATHS, AGG_HEAD, FIX_CHANGED_PATHS)
                                         need(git(root,'rev-parse',GX06_HEAD+'^')==GX05_HEAD,
                                             'GX06_IMMUTABLE_PARENT_DRIFT')
                                         parent=git(root,'rev-parse','HEAD^')
-                                        need(parent in (GX05_HEAD,GX06_HEAD,R08R10_HEAD),'AGG_UNREVIEWED_PARENT')
+                                        need(parent in (GX05_HEAD,GX06_HEAD,R08R10_HEAD,AGG_HEAD),'AGG_UNREVIEWED_PARENT')
                                         gx06_target=GX06_HEAD if parent!=GX05_HEAD else 'HEAD'
                                         changed_gx06=set(git(root,'diff','--name-only',gx05,gx06_target).splitlines())
                                         need(changed_gx06==GX06_CHANGED_PATHS,
                                             'GX06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx06^GX06_CHANGED_PATHS)))
-                                        if parent in (GX06_HEAD,R08R10_HEAD):
+                                        if parent in (GX06_HEAD,R08R10_HEAD,AGG_HEAD):
                                             r08_target=R08R10_HEAD if parent==R08R10_HEAD else 'HEAD'
                                             next_changed=set(git(root,'diff','--name-only',GX06_HEAD,r08_target).splitlines())
                                             need(next_changed==R08R10_CHANGED_PATHS,
                                                 'R08R10_CHANGED_PATHS_DRIFT '+repr(sorted(next_changed^R08R10_CHANGED_PATHS)))
-                                        if parent==R08R10_HEAD:
-                                            integration_changed=set(git(root,'diff','--name-only',R08R10_HEAD,'HEAD').splitlines())
+                                        if parent in (R08R10_HEAD,AGG_HEAD):
+                                            aggregate_target=AGG_HEAD if parent==AGG_HEAD else 'HEAD'
+                                            integration_changed=set(git(root,'diff','--name-only',R08R10_HEAD,aggregate_target).splitlines())
                                             need(integration_changed==AGG_CHANGED_PATHS,
                                                 'AGG_CHANGED_PATHS_DRIFT '+repr(sorted(integration_changed^AGG_CHANGED_PATHS)))
+                                            if parent==AGG_HEAD:
+                                                fix_changed=set(git(root,'diff','--name-only',AGG_HEAD,'HEAD').splitlines())
+                                                need(fix_changed==FIX_CHANGED_PATHS,
+                                                    'R07A_FIX_PATHS_DRIFT '+repr(sorted(fix_changed^FIX_CHANGED_PATHS)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):
@@ -157,7 +162,8 @@ def verify_local(root:Path):
          stored['original_cases_accepted']==[] and stored['signed_release']==False and
          stored['physical_root_qualified']==False,'GX03_CASE_INVENTORY_FALSE_CLAIM')
     from r07a_policy import audit as r07a_audit
-    need(r07a_audit(root).get('reviewed_workflows')==2,
+    expected_workflows=3 if (root/'.github/workflows/devtool-s7-p05-android-consumer.yml').is_file() else 2
+    need(r07a_audit(root).get('reviewed_workflows')==expected_workflows,
          'GX03_R07A_COMPAT_NOT_SOURCE_PINNED')
     workflow=(root/FLOW).read_text()
     need(workflow.count('name: GX03 Android journeys and compatibility source gates')==1,

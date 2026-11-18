@@ -4,6 +4,10 @@ import unittest
 from aggregate_integration import verify_blob_map,Refused,MAIN_FILES,GRADLE_BLOB,AGG_BRANCH,R08R10_HEAD,MAIN_SHA,MERGE_TREE
 
 class AggregateTests(unittest.TestCase):
+    def test_r07a_fix_does_not_rewrite_aggregate_source(self):
+        from aggregate_integration import AGG_HEAD,FIX_BRANCH
+        self.assertEqual(AGG_HEAD,'b693612fc76bef3bd4d7fb8375861a990180fd0a')
+        self.assertTrue(FIX_BRANCH.startswith('feature/xbs-aggregate-r07a-'))
     def fixture(self):return dict(MAIN_FILES, **{'android-app/build.gradle':GRADLE_BLOB})
     def test_all_main_blobs_present(self):self.assertTrue(verify_blob_map(self.fixture()))
     def test_distinct_named_branch(self):self.assertTrue(AGG_BRANCH.startswith('feature/xbs-aggregate-'))

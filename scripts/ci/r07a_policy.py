@@ -18,6 +18,8 @@ REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = '.github/workflows/devtool-xbs-ci.yml'
 GX03_COMPAT = '.github/workflows/gx03-hosted-compat.yml'
 GX03_COMPAT_SHA256 = '03f0b8810d61ee2b1c1051382e87d1c2e3ce215736f105f319afbe65ac973b15'
+S7_P05 = '.github/workflows/devtool-s7-p05-android-consumer.yml'
+S7_P05_GIT_BLOB = '11367960a6fd311926db890b632433000b767a0b'
 # GitHub REST git/ref/tags/vN, recursively dereferenced to commit on 2026-11-14.
 ACTIONS = {
     'actions/checkout': '11d5960a326750d5838078e36cf38b85af677262',
@@ -131,18 +133,26 @@ def guard(source):
 def audit(root:Path, *, hosted=False):
     workflow=root/WORKFLOW
     require(workflow.is_file() and not workflow.is_symlink(),'CANONICAL_WORKFLOW_MISSING')
-    # GX03 adds exactly one reviewed, content-addressed API26/API34 workflow.
-    # All other workflows remain disallowed; never treat a filename as approval.
+    # GX03 and S7 P05 are the only additional reviewed workflows. S7 is
+    # accepted ONLY with its exact Git blob identity from the independently
+    # merged main commit; never use filename-only trust or a mutable tag as proof.
     files=list((root/'.github/workflows').glob('*.yml'))+list((root/'.github/workflows').glob('*.yaml'))
-    approved={WORKFLOW,GX03_COMPAT}
+    original={WORKFLOW,GX03_COMPAT}
     actual={str(p.relative_to(root)) for p in files}
-    require(len(files)==2 and actual==approved and all(p.is_file() and not p.is_symlink() for p in files),
+    reviewed=original|({S7_P05} if S7_P05 in actual else set())
+    require(len(files)==len(actual) and actual==reviewed and
+            all(p.is_file() and not p.is_symlink() for p in files),
             'UNREVIEWED_EXTRA_WORKFLOW')
     compat=root/GX03_COMPAT
     require(hashlib.sha256(compat.read_bytes()).hexdigest()==GX03_COMPAT_SHA256,
             'GX03_COMPAT_WORKFLOW_SHA256_DRIFT')
+    if S7_P05 in actual:
+        data=(root/S7_P05).read_bytes()
+        require(len(data)<16384 and
+                hashlib.sha1(b'blob '+str(len(data)).encode('ascii')+bytes([0])+data).hexdigest()==S7_P05_GIT_BLOB,
+                'S7_P05_WORKFLOW_GIT_BLOB_DRIFT')
     result=guard(workflow.read_text(encoding='utf-8'))
-    result['reviewed_workflows']=2
+    result['reviewed_workflows']=len(reviewed)
     if hosted:
         require(os.getenv('GITHUB_ACTIONS')=='true','GITHUB_ACTIONS_REQUIRED')
         sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
