@@ -4,7 +4,7 @@ import copy
 import json
 from pathlib import Path
 import unittest
-from gx06_stack_gate import (REPO,GX06_CHANGED_PATHS,GX05_HEAD,
+from gx06_stack_gate import (REPO,GX06_CHANGED_PATHS,R08R10_CHANGED_PATHS,R08R10_BRANCH,GX05_HEAD,
                              Refused,validated_lock,validate_original_inventory,
                              validate_release_limits)
 
@@ -37,6 +37,25 @@ class GX06StackTests(unittest.TestCase):
         self.assertEqual(len(validated_lock(self.lock)),5)
     def test_file_inventory_exact(self):
         self.assertEqual(set(self.lock['expected_changed_paths']),GX06_CHANGED_PATHS)
+    def test_rebuilt_r08r10_inventory_exact(self):
+        expected = {
+            '.github/workflows/devtool-xbs-ci.yml',
+            'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx04TilesInstrumentedTest.java',
+            'android-app/build.gradle',
+            'config/delivery-required-ci.json',
+            'docs/engineering/XBS_R08_R10_ACCEPTANCE_HANDOFF.md',
+            'docs/engineering/XBS_R08_R10_EVIDENCE_MAP.json',
+            'scripts/ci/gx02_ci_verify.py',
+            'scripts/ci/gx03_contract_audit.py',
+            'scripts/ci/gx03_emulator_host.py',
+            'scripts/ci/gx06_stack_gate.py',
+            'scripts/ci/r08_r10_acceptance.py',
+            'scripts/ci/test_gx04_tiles.py',
+            'scripts/ci/test_gx06_stack_gate.py',
+            'scripts/ci/test_r08_r10_acceptance.py',
+        }
+        self.assertEqual(R08R10_CHANGED_PATHS, expected)
+        self.assertEqual(R08R10_BRANCH, 'feature/xbs-r08-r10-acceptance-rebuild-20261118')
     def test_source_parent_exact(self):
         self.assertEqual(self.lock['base_head'],GX05_HEAD)
     def test_main_is_not_merge_claim(self):
@@ -134,6 +153,10 @@ class GX06AuditIntegrationTests(unittest.TestCase):
                      'config/delivery-required-ci.json'):
             src=HERE/name;dest=self.root/name;dest.parent.mkdir(parents=True,exist_ok=True)
             dest.write_bytes(src.read_bytes())
+            if name=='config/delivery-required-ci.json':
+                policy=json.loads(dest.read_text())
+                policy['base_branch']=GX05_BRANCH
+                dest.write_text(json.dumps(policy))
         ledger,matrix,tracker=original_fixture()
         for name,payload in [
             ('docs/engineering/XBS_IMPLEMENTATION_LEDGER.json',ledger),

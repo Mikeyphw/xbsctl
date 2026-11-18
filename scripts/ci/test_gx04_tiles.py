@@ -205,7 +205,10 @@ class Gx04TileContracts(unittest.TestCase):
                        'durablePendingBlocksRepeatedTapAcrossReload'):
             self.assertIn("'"+method+"'",host)
             self.assertIn('void '+method+'()',instrumentation)
-        self.assertEqual(instrumentation.count('@Test'),9)
+        # Require all nine original and six new Android tests to appear once,
+        # and be required by the real hosted JUnit receipt.
+        from r08_r10_acceptance import validate_complete_gx04_inventory
+        self.assertEqual(validate_complete_gx04_inventory(instrumentation,host),15)
         self.assertIn('ActivityScenario.launch(XbsTileSettingsActivity.class)',instrumentation)
         self.assertIn('gx04_systemui_probe(serial)',host)
         self.assertIn('GX04_SYSTEMUI_CALLBACK_MISSING',host)
