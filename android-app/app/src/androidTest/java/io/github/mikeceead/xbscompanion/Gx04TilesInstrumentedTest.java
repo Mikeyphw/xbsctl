@@ -146,4 +146,92 @@ public final class Gx04TilesInstrumentedTest {
         }
     }
 
+    /** R08 original candidates: test every fail-closed state, not just one example. */
+    @Test public void r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery() {
+        for(XbsTileDecision.Kind kind:XbsTileDecision.Kind.values()) {
+            for(boolean observed:new boolean[]{false,true}) {
+                for(int hazard=0;hazard<3;hazard++) {
+                    XbsTileDecision result=XbsTileDecision.evaluate(kind,observed,true,true,
+                        hazard==0,hazard==1,hazard==2);
+                    assertNull("Hazard must not authorize a command: "+kind+"/"+hazard,result.action);
+                    assertEquals("Wrong hazard precedence: "+kind,
+                        hazard==0?XbsTileDecision.Phase.PENDING:
+                            hazard==1?XbsTileDecision.Phase.FAILED:
+                                      XbsTileDecision.Phase.RECOVERY_REQUIRED,result.phase);
+                }
+            }
+        }
+    }
+
+    @Test public void r08EventTilesRequireConfiguredAuthenticatedUnpausedState() {
+        for(XbsTileDecision.Kind kind:new XbsTileDecision.Kind[]{
+                XbsTileDecision.Kind.SAVER,XbsTileDecision.Kind.PROFILES}) {
+            assertNull(XbsTileDecision.event(kind,false,true,false,false,false,false,false).action);
+            assertNull(XbsTileDecision.event(kind,true,false,false,false,false,false,false).action);
+            assertNull(XbsTileDecision.event(kind,true,true,false,true,false,false,false).action);
+            assertNull(XbsTileDecision.event(kind,true,true,true,false,true,false,false).action);
+            assertNull(XbsTileDecision.event(kind,true,true,true,false,false,true,false).action);
+            assertNull(XbsTileDecision.event(kind,true,true,true,false,false,false,true).action);
+            assertEquals("event_run",XbsTileDecision.event(kind,true,true,false,
+                false,false,false,false).action);
+            assertEquals("event_stop",XbsTileDecision.event(kind,true,true,true,
+                false,false,false,false).action);
+        }
+    }
+
+    @Test public void r08RecoveryCannotBeAcknowledgedWhileCommandPending() {
+        Context app=ApplicationProvider.getApplicationContext();
+        SharedPreferences prefs=app.getSharedPreferences("gx04_tile_pending_v1_PAUSE",Context.MODE_PRIVATE);
+        assertTrue(prefs.edit().clear().putBoolean("recovery",true)
+            .putString("action","pause")
+            .putLong("started",System.currentTimeMillis()).commit());
+        try {
+            assertFalse("Pending recovery may not be dismissed",
+                XbsTileController.acknowledgeRecovery(app,XbsTileDecision.Kind.PAUSE));
+            assertFalse("Unverified pending command may not be repeated",
+                XbsTileController.requestToggle(app,XbsTileDecision.Kind.PAUSE));
+        } finally {
+            assertTrue("Pending fixture cleanup",prefs.edit().clear().commit());
+        }
+    }
+
+    @Test public void r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation() {
+        Context app=ApplicationProvider.getApplicationContext();
+        for(boolean observed:new boolean[]{false,true})
+            for(boolean paused:new boolean[]{false,true})
+                for(boolean safe:new boolean[]{false,true}) {
+                    XbsTileDecision result=XbsTileDecision.evaluate(XbsTileDecision.Kind.RESTORE,
+                        observed,paused,safe,false,false,false);
+                    assertEquals(XbsTileDecision.Phase.INACTIVE,result.phase);
+                    assertNull("Restore Defaults cannot directly dispatch",result.action);
+                }
+        assertFalse(XbsTileController.requestToggle(app,XbsTileDecision.Kind.RESTORE));
+    }
+
+    @Test public void r10SettingsFiveTileFallbackSurvivesActivityRecreation() {
+        try(ActivityScenario<XbsTileSettingsActivity> scenario=
+                ActivityScenario.launch(XbsTileSettingsActivity.class)) {
+            scenario.recreate();
+            scenario.onActivity(activity->{
+                ViewGroup content=activity.findViewById(android.R.id.content);
+                assertNotNull(content);
+                assertEquals("Five real post-recreation tile requests",5,countAddTileButtons(content));
+            });
+        }
+    }
+
+    @Test public void r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles() {
+        Context app=ApplicationProvider.getApplicationContext();
+        XbsStateStore.save(app,XbsSnapshot.unavailable("R08/R10 rootless test"),
+            java.util.Collections.emptyList());
+        EventBridgeStore.save(app,EventBridgeReport.unavailable());
+        XbsTileLifecycleStore.record(app,XbsTileDecision.Kind.PAUSE,"added");
+        XbsTileLifecycleStore.record(app,XbsTileDecision.Kind.PAUSE,"clicked");
+        XbsTileLifecycleStore.record(app,XbsTileDecision.Kind.PAUSE,"listening");
+        XbsTileDecision state=XbsTileController.observe(app,XbsTileDecision.Kind.PAUSE);
+        assertNull("SystemUI callbacks are not authenticated daemon evidence",state.action);
+        assertFalse("Callback counters cannot start root work",
+            XbsTileController.requestToggle(app,XbsTileDecision.Kind.PAUSE));
+    }
+
 }

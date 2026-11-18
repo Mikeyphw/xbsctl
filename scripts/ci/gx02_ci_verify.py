@@ -139,11 +139,19 @@ def audit_source_and_receipts(root:Path, env:dict):
                                         changed_gx05=set(git(root,'diff','--name-only',hf01,gx05).splitlines())
                                         need(changed_gx05==expected_gx05,'GX02_GX05_FILES_DRIFT '+repr(sorted(changed_gx05^expected_gx05)))
                                         if head!=gx05:
-                                            from gx06_stack_gate import GX06_CHANGED_PATHS, GX05_HEAD
-                                            need(git(root,'rev-parse','HEAD^')==GX05_HEAD, 'GX06_PARENT_NOT_GX05')
-                                            changed_gx06=set(git(root,'diff','--name-only',gx05,'HEAD').splitlines())
+                                            from gx06_stack_gate import GX06_CHANGED_PATHS, GX05_HEAD, GX06_HEAD, R08R10_CHANGED_PATHS
+                                            need(git(root,'rev-parse',GX06_HEAD+'^')==GX05_HEAD,
+                                                'GX06_IMMUTABLE_PARENT_DRIFT')
+                                            parent=git(root,'rev-parse','HEAD^')
+                                            need(parent in (GX05_HEAD,GX06_HEAD),'R08R10_UNREVIEWED_PARENT')
+                                            gx06_target=GX06_HEAD if parent==GX06_HEAD else 'HEAD'
+                                            changed_gx06=set(git(root,'diff','--name-only',gx05,gx06_target).splitlines())
                                             need(changed_gx06==GX06_CHANGED_PATHS,
-                                                 'GX06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx06^GX06_CHANGED_PATHS)))
+                                                'GX06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx06^GX06_CHANGED_PATHS)))
+                                            if parent==GX06_HEAD:
+                                                next_changed=set(git(root,'diff','--name-only',GX06_HEAD,'HEAD').splitlines())
+                                                need(next_changed==R08R10_CHANGED_PATHS,
+                                                    'R08R10_CHANGED_PATHS_DRIFT '+repr(sorted(next_changed^R08R10_CHANGED_PATHS)))
         for path in sorted(ALLOWED_CHANGES-{
              '.github/workflows/devtool-xbs-ci.yml',
              'scripts/ci/gx02_ci_verify.py'}):

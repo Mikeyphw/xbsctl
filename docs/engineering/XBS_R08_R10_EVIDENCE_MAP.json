@@ -1,0 +1,34 @@
+{
+  "schema": "xbs-r08-r10-acceptance/v1",
+  "repository": "Mikeyphw/xbsctl",
+  "base_source_sha": "5287f4a41eedc2b7fa3a33c6af820f117db78b84",
+  "original_tasks_preserved": 178,
+  "original_cases_preserved": 131,
+  "original_findings_preserved": 26,
+  "r08_original_tasks": ["R08-01", "R08-02", "R08-03", "R08-04", "R08-05", "R08-06", "R08-07", "R08-08", "R08-09", "R08-10", "R08-11", "R08-12", "R08-13", "R08-14"],
+  "emulator_candidate_cases": ["EM-019", "EM-020", "EM-021"],
+  "required_api36_methods": [
+    "r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery",
+    "r08EventTilesRequireConfiguredAuthenticatedUnpausedState",
+    "r08RecoveryCannotBeAcknowledgedWhileCommandPending",
+    "r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation",
+    "r10SettingsFiveTileFallbackSurvivesActivityRecreation",
+    "r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles"
+  ],
+  "candidate_assertions": {
+    "EM-019": ["r10SettingsFiveTileFallbackSurvivesActivityRecreation"],
+    "EM-020": ["r08RecoveryCannotBeAcknowledgedWhileCommandPending", "r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles"],
+    "EM-021": ["r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery", "r08EventTilesRequireConfiguredAuthenticatedUnpausedState", "r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation"]
+  },
+  "original_cases_accepted": [],
+  "qualifications": {
+    "rootless_hosted": "PENDING_NEW_RUN",
+    "physical_oem": "NOT_RUN",
+    "root_effects": "NOT_RUN",
+    "original_case_assertion_mapping": "CANDIDATES_ONLY_NOT_ACCEPTED"
+  },
+  "physical_root_qualified": false,
+  "signed_release_qualified": false,
+  "aggregate_ci_qualified": false,
+  "auto_merge_approved": false
+}

@@ -255,7 +255,13 @@ def execute(args):
                 'verifiedCompletionRequiresTerminalHistoryAndNewerEvidence',
                 'unverifiedTilesCannotLaunchRootCommands',
                 'runtimeSettingsActivityRendersAllFiveTileRequests',
-                'durablePendingBlocksRepeatedTapAcrossReload'
+                'durablePendingBlocksRepeatedTapAcrossReload',
+                'r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery',
+                'r08EventTilesRequireConfiguredAuthenticatedUnpausedState',
+                'r08RecoveryCannotBeAcknowledgedWhileCommandPending',
+                'r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation',
+                'r10SettingsFiveTileFallbackSurvivesActivityRecreation',
+                'r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles'
             }
         })
         # GX05: keep Python adversarial gates mandatory in the hosted API36 lane.

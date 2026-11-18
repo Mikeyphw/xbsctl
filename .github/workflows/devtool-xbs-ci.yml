@@ -82,6 +82,7 @@ jobs:
         run: |
           python3 -B scripts/ci/gx03_contract_audit.py . --hosted
           python3 -B scripts/ci/test_gx03_hosted.py
+          python3 -B scripts/ci/test_r08_r10_acceptance.py
       - name: XBS contracts
         run: go run ./cmd/xbs contracts check
       - name: Source-bound final seal
