@@ -141,7 +141,8 @@ def validate_gradle_merge_compatibility(text: str) -> None:
     need('../../../.devtool.toml' not in text and 'verifyStableToolchainBaseline' in text,
          'GRADLE_STANDALONE_PATH_REGRESSION')
 
-def audit_source(root: Path) -> dict:
+def audit_source(root: Path, expected_base: str = BASE_BRANCH) -> dict:
+    need(expected_base in (BASE_BRANCH, 'feature/xbs-r08-r10-acceptance-rebuild-20261118'), 'UNKNOWN_REQUIRED_CI_BASE')
     root = Path(root).resolve(strict=True)
     mapping = json.loads(read_regular(root, MAP))
     validate_mapping(mapping)
@@ -150,12 +151,15 @@ def audit_source(root: Path) -> dict:
                                 read_regular(root, WORKFLOW).decode('utf8'))
     validate_gradle_merge_compatibility(read_regular(root, GRADLE).decode('utf8'))
     policy = json.loads(read_regular(root, POLICY))
-    need(policy.get('repository') == REPO and policy.get('base_branch') == BASE_BRANCH and
+    need(policy.get('repository') == REPO and policy.get('base_branch') == expected_base and
          policy.get('event') == 'pull_request' and
          policy.get('release_qualification') == 'separate', 'REQUIRED_CI_POLICY_DRIFT')
-    need({(x.get('name'),x.get('workflow_id')) for x in policy.get('required_workflows', [])} == {
+    expected_workflows={
          ('Devtool XBS Go and Android candidates', 386774409),
-         ('XBS GX03 hosted API26 / API34 compatibility', 419253895)},
+         ('XBS GX03 hosted API26 / API34 compatibility', 419253895)}
+    if expected_base != BASE_BRANCH:
+        expected_workflows.add(('Devtool S7 P05 XBS Android Consumer Adoption',418896455))
+    need({(x.get('name'),x.get('workflow_id')) for x in policy.get('required_workflows', [])} == expected_workflows,
          'REQUIRED_CI_WORKFLOWS_DRIFT')
     return {'source_base': BASE_HEAD, 'required_instrumentation': len(METHODS),
             'total_tile_instrumentation': len(HISTORICAL_TILE_METHODS)+len(METHODS),
