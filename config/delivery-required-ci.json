@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repository": "Mikeyphw/xbsctl",
-  "base_branch": "feature/xbs-gx04-native-tiles-p01-20261115",
+  "base_branch": "feature/xbs-gx05-security-performance-readiness-20261116",
   "event": "pull_request",
   "required_workflows": [
     {"name": "Devtool XBS Go and Android candidates", "workflow_id": 386774409},

@@ -119,10 +119,17 @@ def verify_source(root:Path):
                                 changed_hf01=set(git(root,'diff','--name-only',gx04,hf01).splitlines())
                                 need(changed_hf01==expected_hf01,'GX03_GX04_HF01_PATH_DRIFT '+repr(sorted(changed_hf01^expected_hf01)))
                                 if head!=hf01:
-                                    need(git(root,'rev-parse','HEAD^')==hf01,'GX03_GX05_PARENT_UNREVIEWED')
+                                    gx05='1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf'
+                                    need(git(root,'rev-parse',gx05+'^')==hf01,'GX03_GX05_PARENT_DRIFT')
                                     expected_gx05={'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx05PreflightInstrumentedTest.java','config/delivery-required-ci.json','docs/engineering/XBS_GX05_CONSENT_MATRIX.json','docs/engineering/XBS_GX05_COVERAGE.json','docs/engineering/XBS_GX05_HANDOFF.md','scripts/ci/gx02_ci_verify.py','scripts/ci/gx03_contract_audit.py','scripts/ci/gx03_emulator_host.py','scripts/ci/gx05_hosted_measure.py','scripts/ci/gx05_preflight.py','scripts/ci/test_gx05_hosted_measure.py','scripts/ci/test_gx05_preflight.py'}
-                                    changed_gx05=set(git(root,'diff','--name-only',hf01,'HEAD').splitlines())
+                                    changed_gx05=set(git(root,'diff','--name-only',hf01,gx05).splitlines())
                                     need(changed_gx05==expected_gx05,'GX03_GX05_FILES_DRIFT '+repr(sorted(changed_gx05^expected_gx05)))
+                                    if head!=gx05:
+                                        from gx06_stack_gate import GX06_CHANGED_PATHS, GX05_HEAD
+                                        need(git(root,'rev-parse','HEAD^')==GX05_HEAD, 'GX06_PARENT_NOT_GX05')
+                                        changed_gx06=set(git(root,'diff','--name-only',gx05,'HEAD').splitlines())
+                                        need(changed_gx06==GX06_CHANGED_PATHS,
+                                             'GX06_CHANGED_PATHS_DRIFT '+repr(sorted(changed_gx06^GX06_CHANGED_PATHS)))
     need(not git(root,'status','--porcelain'),'GX03_DIRTY_HOSTED_CHECKOUT')
 
 def verify_local(root:Path):
@@ -151,7 +158,7 @@ def verify_local(root:Path):
          'R05C source and workflow contracts' in workflow,'R05C_ORIGINAL_GATE_REMOVED')
     need(workflow.count('          ref: ${{ github.event.pull_request.head.sha || github.sha }}')==4,
          'EXACT_SHA_CHECKOUT_QUANTITY_CHANGED')
-    need(workflow.count('          fetch-depth: 12')==1,'STACKED_CHECKOUT_HISTORY_TOO_SHALLOW')
+    need(workflow.count('          fetch-depth: 24')==1,'STACKED_CHECKOUT_HISTORY_TOO_SHALLOW')
     need('needs: [go-contract, android-companion-jvm]' in workflow,
          'API36_REQUIRED_JOB_DEPENDENCIES_CHANGED')
     need('GX03 actual app/test APKs and redacted screenshots' in workflow and

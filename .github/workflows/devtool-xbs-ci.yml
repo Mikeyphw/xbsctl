@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 12
+          fetch-depth: 24
       - name: R07A immutable action and mandatory gate audit
         env:
           XBS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
