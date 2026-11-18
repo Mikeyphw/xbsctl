@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repository": "Mikeyphw/xbsctl",
-  "base_branch": "feature/xbs-gx06-stack-integration-20261118",
+  "base_branch": "feature/xbs-r08-r10-acceptance-rebuild-20261118",
   "event": "pull_request",
   "required_workflows": [
     {
@@ -11,6 +11,10 @@
     {
       "name": "XBS GX03 hosted API26 / API34 compatibility",
       "workflow_id": 419253895
+    },
+    {
+      "name": "Devtool S7 P05 XBS Android Consumer Adoption",
+      "workflow_id": 418896455
     }
   ],
   "release_qualification": "separate"
