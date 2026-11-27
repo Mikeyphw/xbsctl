@@ -1,0 +1,3235 @@
+{
+  "auto_merge_approved": false,
+  "historical_head": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+  "historical_pr": 37,
+  "historical_run_evidence": {
+    "android": {
+      "api26": {
+        "apk_pair_receipt": {
+          "app": {
+            "cert_sha256": "d8d9edab52bc4f08699f234627dbf48818051e4f8a43c3d74e2728785841ed2b",
+            "package": "io.github.mikeceead.xbscompanion",
+            "path": "app-debug.apk",
+            "sha256": "0654bbf771836553aa558d330e935e21192cabd3a9988b62deebcc3e83aab844",
+            "size_bytes": 6635987
+          },
+          "test": {
+            "cert_sha256": "d8d9edab52bc4f08699f234627dbf48818051e4f8a43c3d74e2728785841ed2b",
+            "package": "io.github.mikeceead.xbscompanion.test",
+            "path": "app-debug-androidTest.apk",
+            "sha256": "f48bb96ad02864f078a7b11a961676d8733e3bfabe0a317785b8a02914ffd4bf",
+            "size_bytes": 3884516
+          }
+        },
+        "assertions": {
+          "R05cLifecycleInstrumentedTest": [
+            "corruptPendingCommandCannotBeReplayed",
+            "duplicateStartCheckSeesExistingOwner",
+            "ownedPendingCommandSurvivesMemoryLossWithoutReplay"
+          ],
+          "R05cUiSmokeInstrumentedTest": [
+            "launcherActivityReachesResumedWithoutTaskerOrRoot"
+          ]
+        },
+        "attempt": 1,
+        "run_id": 45925618029,
+        "signer_package_observation": "HOSTED_RECEIPT_NOT_LOCAL_APKSIGNER",
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f"
+      },
+      "api34": {
+        "apk_pair_receipt": {
+          "app": {
+            "cert_sha256": "1b7bb07dc37b0e290f7228f3724359870f77be4236acea087f020f661c2489a5",
+            "package": "io.github.mikeceead.xbscompanion",
+            "path": "app-debug.apk",
+            "sha256": "ca222d3122d7cbda192d9feb81924b067e7d43b3ede1a22a416437cb0e773513",
+            "size_bytes": 6635987
+          },
+          "test": {
+            "cert_sha256": "1b7bb07dc37b0e290f7228f3724359870f77be4236acea087f020f661c2489a5",
+            "package": "io.github.mikeceead.xbscompanion.test",
+            "path": "app-debug-androidTest.apk",
+            "sha256": "9c5d9c8a1384e84eac31dccb51fad4be741983ca4d0c213ba4b0feb86d6a004f",
+            "size_bytes": 3884516
+          }
+        },
+        "assertions": {
+          "R05cTaskerBoundaryInstrumentedTest": [
+            "exportedBoundaryIsLimitedToTaskerReceivers",
+            "policyDetectsModifiedSignedPayload",
+            "unsignedActionFailsWithoutStartingRoot",
+            "unsignedConditionIsUnknownRatherThanSatisfied"
+          ],
+          "R05cUiSmokeInstrumentedTest": [
+            "launcherActivityReachesResumedWithoutTaskerOrRoot"
+          ]
+        },
+        "attempt": 1,
+        "run_id": 45925618029,
+        "signer_package_observation": "HOSTED_RECEIPT_NOT_LOCAL_APKSIGNER",
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f"
+      },
+      "api36": {
+        "apk_pair_receipt": {
+          "app": {
+            "cert_sha256": "ff6548a17af26120f59b48ddd56fa30607bfc4437e70d3eeeec86497fc542ef9",
+            "package": "io.github.mikeceead.xbscompanion",
+            "path": "app-debug.apk",
+            "sha256": "4a32578211ce8f17832823d6f74527b5bf0d7d9df3d032ca5160dd7a97bd6a1b",
+            "size_bytes": 6635987
+          },
+          "test": {
+            "cert_sha256": "ff6548a17af26120f59b48ddd56fa30607bfc4437e70d3eeeec86497fc542ef9",
+            "package": "io.github.mikeceead.xbscompanion.test",
+            "path": "app-debug-androidTest.apk",
+            "sha256": "5a2d724948bb3e83f917f6ad206c68e8d1525a741ced050af0c3bfc7a222c5e0",
+            "size_bytes": 3884516
+          }
+        },
+        "assertions": {
+          "Gx03JourneyInstrumentedTest": [
+            "allFivePagesHaveRealNonemptyViewTrees",
+            "hostilePageInputCannotOpenAnUnboundedPage",
+            "realMainActivityRendersAndNavigatesFiveTabs"
+          ]
+        },
+        "attempt": 1,
+        "distinct_theme_content_by_width": {
+          "360": false,
+          "393": false
+        },
+        "process_death": {
+          "automatic_replay_qualified": false,
+          "host_force_stop_observed": true,
+          "stage_a": {
+            "Gx03ProcessDeathInstrumentedTest": [
+              "stageAWriteDurablePendingOwnership"
+            ]
+          },
+          "stage_b": {
+            "Gx03ProcessDeathInstrumentedTest": [
+              "stageBInspectRecoveryAfterExternalForceStop"
+            ]
+          }
+        },
+        "run_id": 45925618088,
+        "screenshots": [
+          {
+            "accessibility_accepted": false,
+            "file": "gx03-360dp-light-redacted.png",
+            "height_px": 2400,
+            "locale_rtl_accepted": false,
+            "redacted_sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "redaction_scope": "status_and_navigation_bands_only",
+            "theme_requested": "light",
+            "width_dp": 360,
+            "width_px": 1080
+          },
+          {
+            "accessibility_accepted": false,
+            "file": "gx03-360dp-dark-redacted.png",
+            "height_px": 2400,
+            "locale_rtl_accepted": false,
+            "redacted_sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "redaction_scope": "status_and_navigation_bands_only",
+            "theme_requested": "dark",
+            "width_dp": 360,
+            "width_px": 1080
+          },
+          {
+            "accessibility_accepted": false,
+            "file": "gx03-393dp-light-redacted.png",
+            "height_px": 2620,
+            "locale_rtl_accepted": false,
+            "redacted_sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "redaction_scope": "status_and_navigation_bands_only",
+            "theme_requested": "light",
+            "width_dp": 393,
+            "width_px": 1179
+          },
+          {
+            "accessibility_accepted": false,
+            "file": "gx03-393dp-dark-redacted.png",
+            "height_px": 2620,
+            "locale_rtl_accepted": false,
+            "redacted_sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "redaction_scope": "status_and_navigation_bands_only",
+            "theme_requested": "dark",
+            "width_dp": 393,
+            "width_px": 1179
+          }
+        ],
+        "security": {
+          "Gx05PreflightInstrumentedTest": [
+            "allSystemUiTilesBoundBySystemPermission",
+            "hostileTaskerIntentWithoutAuthorizationCannotStartCommand",
+            "notificationAndBootReceiversNotExported",
+            "privilegedForegroundServicesNotExported",
+            "readOnlyStateReadsDoNotLeakDescriptors",
+            "readOnlyStateReadsDoNotSpawnUnboundedWorkers",
+            "unverifiedSnapshotCannotAuthorizeQuickTiles"
+          ]
+        },
+        "signer_package_observation": "HOSTED_RECEIPT_NOT_LOCAL_APKSIGNER",
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "startup": {
+          "battery_savings_qualified": false,
+          "budget_p50_ms": 8000,
+          "budget_p95_ms": 15000,
+          "budget_pss_kib": 524288,
+          "max_pss_kib": 65173,
+          "physical_qualified": false,
+          "rootless_emulator_measurement": true,
+          "sample_count": 7,
+          "startup_p50_ms": 1049,
+          "startup_p95_ms": 1383
+        },
+        "systemui_callbacks": {
+          "add_callback": true,
+          "api": 36,
+          "click_callback": true,
+          "diagnostic_states_remain_non_active": true,
+          "physical_oem_qualified": false,
+          "real_systemui_shell": true,
+          "remove_callback": true,
+          "root_execution_asserted": false,
+          "shell_exit_alone_never_proves_callback": true,
+          "user_data_recorded": false
+        },
+        "tiles": {
+          "Gx04TilesInstrumentedTest": [
+            "allFiveTilesHaveSystemOnlyManifestPermission",
+            "allTileServicesAreBoundToQuickSettingsAction",
+            "durablePendingBlocksRepeatedTapAcrossReload",
+            "hostileEventNamesRejectedBeforeLaunch",
+            "noConfiguredRestoreRootActionAndAllEventActionsAllowlisted",
+            "r08EventTilesRequireConfiguredAuthenticatedUnpausedState",
+            "r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery",
+            "r08RecoveryCannotBeAcknowledgedWhileCommandPending",
+            "r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation",
+            "r10SettingsFiveTileFallbackSurvivesActivityRecreation",
+            "r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles",
+            "runtimeSettingsActivityRendersAllFiveTileRequests",
+            "unsafeAndUnconfiguredTilesNeverClaimActive",
+            "unverifiedTilesCannotLaunchRootCommands",
+            "verifiedCompletionRequiresTerminalHistoryAndNewerEvidence"
+          ]
+        }
+      }
+    },
+    "archives": {
+      "api26": {
+        "archive_size_bytes": 8563426,
+        "artifact_id": 15166507088,
+        "attempt": 1,
+        "members": {
+          "app-debug.apk": {
+            "sha256": "0654bbf771836553aa558d330e935e21192cabd3a9988b62deebcc3e83aab844",
+            "size_bytes": 6635987
+          },
+          "evidence.json": {
+            "sha256": "bf43061f380311c82084c704ae5b81b1e9f723899996e6aee7366a630478592e",
+            "size_bytes": 1778
+          },
+          "test-debug.apk": {
+            "sha256": "f48bb96ad02864f078a7b11a961676d8733e3bfabe0a317785b8a02914ffd4bf",
+            "size_bytes": 3884516
+          }
+        },
+        "provider_sha256": "e66dbf368dcde4ac6a462c5e4d5784e254be410db873da1912403e946891fc2a",
+        "run_id": 45925618029,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 419253895
+      },
+      "api34": {
+        "archive_size_bytes": 8563441,
+        "artifact_id": 15166517568,
+        "attempt": 1,
+        "members": {
+          "app-debug.apk": {
+            "sha256": "ca222d3122d7cbda192d9feb81924b067e7d43b3ede1a22a416437cb0e773513",
+            "size_bytes": 6635987
+          },
+          "evidence.json": {
+            "sha256": "7e215a13267d9ac1d1cd538a72c7e92136edb1097d006cbb5e3577fd7516dd80",
+            "size_bytes": 1831
+          },
+          "test-debug.apk": {
+            "sha256": "9c5d9c8a1384e84eac31dccb51fad4be741983ca4d0c213ba4b0feb86d6a004f",
+            "size_bytes": 3884516
+          }
+        },
+        "provider_sha256": "13d25122a702f13a9c899772d251db8372a58aba0cf427cd607cfce7b6ee4516",
+        "run_id": 45925618029,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 419253895
+      },
+      "api36": {
+        "archive_size_bytes": 9055737,
+        "artifact_id": 15166985751,
+        "attempt": 1,
+        "members": {
+          "app-debug.apk": {
+            "sha256": "4a32578211ce8f17832823d6f74527b5bf0d7d9df3d032ca5160dd7a97bd6a1b",
+            "size_bytes": 6635987
+          },
+          "evidence.json": {
+            "sha256": "f83223274f5dc05de13c6d8fd9397fbdbb62a0528798c5cb48cdd5810b9157f6",
+            "size_bytes": 9015
+          },
+          "gx03-360dp-dark-redacted.png": {
+            "sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "size_bytes": 136396
+          },
+          "gx03-360dp-light-redacted.png": {
+            "sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "size_bytes": 136396
+          },
+          "gx03-393dp-dark-redacted.png": {
+            "sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "size_bytes": 150483
+          },
+          "gx03-393dp-light-redacted.png": {
+            "sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "size_bytes": 150483
+          },
+          "gx05-security-tests.json": {
+            "sha256": "04d4cdfc152f2616107b72762370a5813097ab680b60322ff23a3420affae6fe",
+            "size_bytes": 588
+          },
+          "gx05-startup-samples.json": {
+            "sha256": "36094d5bcd06afe9388b0f69a4d2c38f2e555d6ed3e0240d4dab58437047932f",
+            "size_bytes": 359
+          },
+          "test-debug.apk": {
+            "sha256": "5a2d724948bb3e83f917f6ad206c68e8d1525a741ced050af0c3bfc7a222c5e0",
+            "size_bytes": 3884516
+          }
+        },
+        "provider_sha256": "13e0e09102ef61c89a621ba5c8e59b8e007eb234090a27fed91b4ba134ea0249",
+        "run_id": 45925618088,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 386774409
+      },
+      "jvm": {
+        "archive_size_bytes": 376,
+        "artifact_id": 15166431868,
+        "attempt": 1,
+        "members": {
+          "r06b-jvm-test-counts.json": {
+            "sha256": "b4eaaa7f9cd47e2fdf1388fa7bfdbded786706def2db4e071cd117818a543fb6",
+            "size_bytes": 335
+          }
+        },
+        "provider_sha256": "bfb063cb780f06496cbd1806b92baa46294a455faa03d15687640ea22a88bae7",
+        "run_id": 45925618088,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 386774409
+      },
+      "module": {
+        "archive_size_bytes": 6533858,
+        "artifact_id": 15166481908,
+        "attempt": 1,
+        "members": {
+          "SHA256SUMS": {
+            "sha256": "767dd838588faf018dd6d3d36994a0e8fa5e171a3099e49b72acc38ef130dfc8",
+            "size_bytes": 87
+          },
+          "XtremeBS-go.zip": {
+            "sha256": "556ca815031b8cfe34b19e8aa7bd3a30b099314f8aafc41c5b08bd132b113639",
+            "size_bytes": 6233221
+          },
+          "r06b-devtool-qualification.json": {
+            "sha256": "00ace8e01415fa4c678f75decf280c1460f3aafd4b2517b5e6c61e68dd42fe8d",
+            "size_bytes": 3184
+          },
+          "r06b-go-test-counts.json": {
+            "sha256": "8e2707db99d33965ca204f39a74253fe8d03b0e6079b3be5750796b949488b1f",
+            "size_bytes": 750
+          },
+          "r09a-backend-qualification.json": {
+            "sha256": "33a619c202c46bfccf99687fd1e0c5e1ba83d863a618361591f286365179c53f",
+            "size_bytes": 4641
+          },
+          "r09a-backend.coverprofile": {
+            "sha256": "79a87ce356ddd9cf6951550d642729b37fd2db46a8e431cc077550e0024dc4f9",
+            "size_bytes": 87933
+          },
+          "r09b-backend-matrix.json": {
+            "sha256": "93c1aeb8c2f93c945c801518345e1af9caefbcf24bbe3336194e116c1fc06e47",
+            "size_bytes": 1546
+          },
+          "r09c-backend-model.json": {
+            "sha256": "31909ceaa9a6155afddbdd2efd8e08923a14ce820202faf749de02a4bed651d2",
+            "size_bytes": 1575
+          },
+          "r09c-backend.coverprofile": {
+            "sha256": "20623fe3d7bf288e0a4a75cc5dc3c16f4ea2486c2d59faaf9b17ef85e26b3eb3",
+            "size_bytes": 48489
+          },
+          "r09d-risk-coverage.json": {
+            "sha256": "ce5681f9959b6d4d3179d591d43e9d42ab5725e47a20e776fed60c9722c592bb",
+            "size_bytes": 3329
+          },
+          "r09d-risk.coverprofile": {
+            "sha256": "5b044eaa9f434e04578168bc1615ba215159c561920b1b15843dda71d098c982",
+            "size_bytes": 2729122
+          },
+          "r09e-boundary-coverage.json": {
+            "sha256": "0b7574aa02d0e818e0213e2eb0dd81f6941dca36aec7a7638a59dc33c000557f",
+            "size_bytes": 1619
+          },
+          "r09f-final-ledger.json": {
+            "sha256": "355da92df3ee123634f3027c33f547d27a5830504c48c49b4255b95c476d44df",
+            "size_bytes": 11372
+          }
+        },
+        "provider_sha256": "a3131641804f52c0e3a1b07a3ed18153c4941a267217016661628937699635d9",
+        "run_id": 45925618088,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 386774409
+      },
+      "r05c-api36": {
+        "archive_size_bytes": 5636115,
+        "artifact_id": 15166706505,
+        "attempt": 1,
+        "members": {
+          "SHA256SUMS": {
+            "sha256": "7fa281c233b4a92212cc21a1b8e0b8c9e3f962b111e33b77106ef92fee88bd05",
+            "size_bytes": 101
+          },
+          "SOURCE_SHA": {
+            "sha256": "e6be65020919fc40a828eb5121e8731acc29fe0e22999e17ff5e8a79353db2a9",
+            "size_bytes": 41
+          },
+          "xbs-companion-r05c-api36-debug.apk": {
+            "sha256": "4a32578211ce8f17832823d6f74527b5bf0d7d9df3d032ca5160dd7a97bd6a1b",
+            "size_bytes": 6635987
+          }
+        },
+        "provider_sha256": "5cf86feb2c9577168503505c64c99099e5325e0c8b50aceb7e4b45948662587b",
+        "run_id": 45925618088,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 386774409
+      },
+      "s7": {
+        "archive_size_bytes": 5636057,
+        "artifact_id": 15165784304,
+        "attempt": 1,
+        "members": {
+          "SHA256SUMS": {
+            "sha256": "183eed12ebb88ce33169198ec188b6fdf774bee515e7c77c97bad2c52c212489",
+            "size_bytes": 80
+          },
+          "SOURCE_SHA": {
+            "sha256": "e6be65020919fc40a828eb5121e8731acc29fe0e22999e17ff5e8a79353db2a9",
+            "size_bytes": 41
+          },
+          "xbs-debug.apk": {
+            "sha256": "93c12ebbb9999cbe4a090d91d87669337498e4e712c1b85dc1c2397f10780982",
+            "size_bytes": 6635987
+          }
+        },
+        "provider_sha256": "dab96489050ad80347de5291bf3366c5497b37bba501967b9dce3d60f8cc2384",
+        "run_id": 45925618098,
+        "source_sha": "455c7493ee3b14e7ac5d0595d82daf2f69983e0f",
+        "workflow_id": 418896455
+      }
+    },
+    "backend": {
+      "coverage": {
+        "delta_over_r09e_pp": 0.02,
+        "full_internal_pct": 72.09,
+        "nonregression_floor_pct": 72.07,
+        "profile_sha256": "5b044eaa9f434e04578168bc1615ba215159c561920b1b15843dda71d098c982",
+        "risk_package_percentages": {
+          "cli": 70.0,
+          "config": 84.59,
+          "control": 69.92,
+          "daemon": 70.41,
+          "eventbridge": 69.62,
+          "module": 65.72,
+          "tuning": 79.2
+        },
+        "seven_package_floor_qualified": true
+      },
+      "phase_ledger": {
+        "r09a": {
+          "filename": "r09a-backend-qualification.json",
+          "schema": "xbs-r09a-backend-evidence/v1",
+          "sha256": "33a619c202c46bfccf99687fd1e0c5e1ba83d863a618361591f286365179c53f",
+          "size_bytes": 4641
+        },
+        "r09b": {
+          "filename": "r09b-backend-matrix.json",
+          "schema": "xbs-r09b-backend-fault-matrix/v1",
+          "sha256": "93c1aeb8c2f93c945c801518345e1af9caefbcf24bbe3336194e116c1fc06e47",
+          "size_bytes": 1546
+        },
+        "r09c": {
+          "filename": "r09c-backend-model.json",
+          "schema": "xbs-r09c-backend-model/v1",
+          "sha256": "31909ceaa9a6155afddbdd2efd8e08923a14ce820202faf749de02a4bed651d2",
+          "size_bytes": 1575
+        },
+        "r09d": {
+          "filename": "r09d-risk-coverage.json",
+          "schema": "xbs-r09d-risk-coverage/v1",
+          "sha256": "ce5681f9959b6d4d3179d591d43e9d42ab5725e47a20e776fed60c9722c592bb",
+          "size_bytes": 3329
+        },
+        "r09e": {
+          "filename": "r09e-boundary-coverage.json",
+          "schema": "xbs-r09e-seven-package-boundaries/v1",
+          "sha256": "0b7574aa02d0e818e0213e2eb0dd81f6941dca36aec7a7638a59dc33c000557f",
+          "size_bytes": 1619
+        }
+      },
+      "race_subtest_pass_events": 88,
+      "repeat_subtest_pass_events": 264,
+      "required_subtest_ids": [
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-00",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-01",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-02",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-03",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-04",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-05",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-06",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-07",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-08",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-09",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-10",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-11",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-12",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-13",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-14",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule/ack-15",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-00",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-01",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-02",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-03",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-04",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-05",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-06",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-07",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-08",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-09",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-10",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-11",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-12",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-13",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-14",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule/restart-15",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-00",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-01",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-02",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-03",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-04",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-05",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-06",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule/symlink-07",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-lowram",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-online",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-0-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-lowram",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-online",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-1-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-lowram",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-online",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-2-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-lowram",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-online",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule/round-3-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-0-already-offline-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-0-gms-disabled-externally",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-0-preforced-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-1-already-offline-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-1-gms-disabled-externally",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-1-preforced-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-2-already-offline-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-2-gms-disabled-externally",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-2-preforced-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-3-already-offline-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-3-gms-disabled-externally",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership/round-3-preforced-doze",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-0-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-0-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-0-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-1-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-1-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-1-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-2-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-2-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-2-wifi",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-3-gms",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-3-governor",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation/round-3-wifi"
+      ],
+      "required_test_ids": [
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FAckImmutabilitySchedule",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FQueueRestartSchedule",
+        "github.com/Mikeyphw/xbsctl/internal/control::TestR09FSymlinkPathRefusalSchedule",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FAdversarialCrashSchedule",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FExternalStateOwnership",
+        "github.com/Mikeyphw/xbsctl/internal/tuning::TestR09FJournalReleasePermutation"
+      ],
+      "subtest_pass_events": 88
+    },
+    "test_counts": {
+      "jvm": {
+        "executed_or_skipped": 223,
+        "failed": 0,
+        "passed": 223,
+        "skipped": 0
+      },
+      "module": {
+        "executed_or_skipped": 537,
+        "failed": 0,
+        "passed": 535,
+        "skipped": 2
+      }
+    }
+  },
+  "historical_tree": "ec485329264b86501fd70e76accc8e37ac060071",
+  "new_candidate_ci_qualified": false,
+  "original_cases_accepted": [],
+  "original_inventory": {
+    "cases": [
+      {
+        "accepted": false,
+        "assertion_sha256": "fca816d10e0a9b57fdf0152af5131c091b62502ff813ebb6222bdc9c54c9260b",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-001",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "95e17a31a3727cf5bfc387ce49c6d86c474f4862b58f2360d40ee8556297ed6b",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-002",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "b067e165a03e1cf6b970419755483bb0d5d70e71a72389573205e6144c034ec4",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-003",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "1e81eac48e8bd378b5ca2b1b4e9b8001e985e2fd9498c60ab774036be890e11f",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-004",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "ecd691f7ff480983f01a4caecb34381fe4654836f1671c37f4fad0d2eb05c34f",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-005",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "53e1d8296aeb3ff5d6483a1c00501c6e15ba5cdf806e18587e662dd210f057a1",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-006",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "8d1be9bdf166bb12aae98913490e779d00633d484db9c8dfd6108a46d6dcd190",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-007",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "fab050f79afe8daba5f49720e8696ed93495fb88e1623e6506dc4d3a4f198ee0",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-008",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "c18537cc552be23684dbef7b4b523e5a9a5ec85a266ca7432869fd0d053306a3",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-009",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "c365a2c4b60dfbde1f6868ba953d7d20497d1a67e69e48c4980d0645b12c1de6",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-010",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "7575315456eb6000395b9fd05203d5adf145bb009be046c40aae3947c2e49732",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-011",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "73e4cc48f3134273488f8b66186cbf475efcbf4b1cb0d24a901b371b8540ef9c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-012",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "1e219d33e77a3179b9ca4127cbcccf62f1ad57b714f8eb99022ee5226d58c7ad",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-013",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "69f602178db9ad4e32ac70cb6162ed6b0eb14a8daa0b3e62a0b6dcef11addf01",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-014",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "d184e75317be62afdb52e3dfd0666215d7f9943b1cd434982d40fe3bbb5df916",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-015",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "cba2122857a73167f389a20c0997e09c1719ea034072a758fca0b5e347a4f7ff",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-016",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "90dcc2bad7eb4cb09a8c4909fcbaf77163aa5d223515ba18552f85a1de63cc91",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-017",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "710cd2999dbe496f83e6138ad0ee62e669ed097ffe17244e884a0b3ea59a1f1f",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-018",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "eee7eb0b52678621324bb3ac558c896d68e4f0f9bbb3331b0f33b9f47ed668b8",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-019",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "85156ba2d53ecbad8cd12b6157a2fa6f3c38d625fbe3ced20d51d2a02ed73ae0",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-020",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "d478fcefe4bfaeeffdbe17c832d4ba191f7de3b71cfa3488b87b84422562198e",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-021",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "d5bcde86d9ef03cff76580bcb505945279d89f77da837e0b9381498b8edc836c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BE-022",
+        "lane": "GO_UNIT_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "af0ad9708eb93039b0d8537692df8d58340f8ba99015ebaefc3b6bbf4ddb01a0",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-001",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6cb43037288c39fdeacaa9684bc66b09d30e9f7576caf5f04618f95280b372d5",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-002",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "ed9d7ea7d8bf91e72b9fb805e41d58935dfe7be874ce6139c90b28c6015e03a6",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-003",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "5a8c5f88a981fd36860dd641a76858f5d866de5bf93b9902ddee590c3648b4a2",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-004",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6074e5d666e14e6e0fcbd255299801b90d1e9dda8e95abeebc7296e94ba03574",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-005",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e4bbcef65efcb3f0e8aa37c8fa3dde309bb2f0e3464ee711531b16a16e170d9d",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-006",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6a791f50ba3317365069a63ab1890afe62bb6e897d99d1bc6f8ca89e75708120",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-007",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "65af7b84ccab480ced2508684ec1e43a8a195e5b128345668064c19ddcf448d4",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-008",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a7d391b4c7911c3e70d19d00976ff1d1156e08ca94e9ff3003f8f1cc56a3bccc",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-009",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0513e6c1b6b997587718edb4d87cb901536f32edbdfe4c4fa7dc31fbb18ce190",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-010",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "33104074383272dea9174972cee04ddaac7f0da8514c5779ae9b080d1d5f531a",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-011",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e216418ae2c41b6cf2db5837626cf616c40cb98e032e7dec0367395f53a0a8f5",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-012",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e6e70db2b188bbb4b90bd9465a739ac4f5fea84d9db9265e3289089f72fde0bc",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-013",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6b8280d53f044b2732e98cb86ea9a990c8e04bd327db55a17f0f92c09029f777",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-014",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3110c04a7556f6e222ad46e71e18712062a49041230c5edbd4b5209dae758b0c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-015",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e8d23c2f65addd0388fb2def78040e5aaf55b6901834d8406a2855ad3ac40365",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-016",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "7904cd8ca292988f23663d36584688fcfb00df09c293a0d73e768646be573f58",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-017",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "09b3f1ace9898ae29e1c2a7cd07afb9186f2b13debfa528a2481c2cdfc3f64ef",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-018",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "8fb5f1aae6aee9d5ddd2238964cb80d7dbf62d87ee5bd5993da47b5cb607bea2",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-019",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "4f1e6ed88e0bae6e288b93298947bcacc0931868ec548d16e5315223a07b257c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "FX-020",
+        "lane": "GO_FAKE_BACKEND_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "b1028f9a5e2263a19fc0a3544dc8abbb7a9280eedd2b2008791dac522fe06129",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-001",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "82cdf88d9b599f392431793b6bc10087005d96bac20f0f31ae1e0a1dd6cb4397",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-002",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "9aef25ffd7a8d55d121392c5c8c7ef33370f3e256d8ca9c8f75c5b8a58d3e5df",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-003",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "bfbd5cdd43a10680d82c13649d2ff812ebdd4b9dcbd09974eaa4184d015f50dd",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-004",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3229092961566e9dfc2719c316960e1205764e29170420756817972e46b0faed",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-005",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "4e624e978b0c103e3d0edfae46dc69567cf7c8637df42e756d841852dfa0067c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-006",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a4f9c46a695d3a052276d3bdb2d7cb02e4cd18769b33f712b94bee3820ccb957",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-007",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "43dd3aa4d8598c778df3088b736f216baaeca78ed238133052f10f323d72483d",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-008",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a26bd459ad7dc890a5f10c78d06c8bdb125ed69ed7410324d80f0e0a4039a670",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "BR-009",
+        "lane": "GO_BRIDGE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6d9ef73168c8f50eb0a26a1af85fb21a2f78574e10f1beca940879a9a43d9550",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-001",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a51125b71753662d47f1917ef56e86a5162ccde2a49693746ab85d11864ab2c3",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-002",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "b3f3c6a57583281b07adb546ae86b860492ba500fdea0ad9d3367ea0ac727141",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-003",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "45a75a9caf4d5e54528ba866e703a902abc95dc91b4447907da18af62ef8ff49",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-004",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a89b71792094e74773a9d477432b81f2d8ce44f890114d8a0ed59ee63f8f5046",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-005",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3d23c35f6f6507046232e55083c3a7c409caef23caaa33c339d0da2f91f9e146",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-006",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "96c528e1e109d64f024a33d93bfa63d88f7de03a34ab5c4b1343f362922bd38d",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-007",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0b0a19e7dbec55ee555e17962d1e3463998cb772cd76425a8d17903346df5ee9",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-008",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "47c8e3d4bf7e7de0837bdb42be9ff76a7d6ac154a0c5dc9f6fd79f6105ecbbd3",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-009",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0ab1f46bc0c225c96acf474a4b16fea4ad1c4a16a0365bf8f2a2f4c4025b1de9",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-010",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "8ac4753149bb346adf6ac01b0d6a6c9d728d8fe736cfcd3cb40d21635c2a7c31",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-011",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "82a45f2b77a35b56fcf02754e1e3b5c8f3f3bd6706dfee98162e6b8f54151fc6",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-012",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "bf41b7adede16143d7e4c66f87dee8cbba494af0d696ed7b698dcb9e7f884b0c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-013",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a37bfe660319890ae9b31f7c5e2cf99ecbc9508e670ff4273329abedcdce8a30",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-014",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "20432473b9881cef91598e8e5585b171ce6b6b2eb059a38996a36de943220c17",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-015",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "315979ae6aa827a33507522efa67db5492c36ee55c5aac62103ca83cb2a0a1fb",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-016",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "875d3c2700b17ee8cfb5ee53a4f32df0ea484e51b604acfb0ae1ac3b694f1e2a",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-017",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "92390465de097e20ce3212d843a1b6672d76934b8238a2179e098bf442181415",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-018",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "92a886a481a196f590450335098a27b5b76d4518760de4aa5299b449a50afaad",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "AJ-019",
+        "lane": "ANDROID_JVM_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "f05b98f7293cd1238310effe27501d95407825c964a83d961163904ca30fa8b4",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-001",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "4821b8bb927d61bea19cf81ccc1821581343ce44c1e2501f4355ccb96f943a16",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-002",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "apk_pair_receipt",
+        "remaining_gap": "App/test bytes match the hosted package/signer receipt; independent local signer and complete original fixture audit not executed."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "57d455a56f26f393865b7083aa5b17eac03700645b0c7c13e1648dbf61b69c76",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-003",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "assertions",
+        "remaining_gap": "Five-tab navigation and real nonempty views; fresh offline actionable guidance not independently traced."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "c6970e0bfd4160a07498f428e2b4e460e5a68cc1ccde4b441c0f71755fec82d8",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-004",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "assertions",
+        "remaining_gap": "Three actual navigation/view assertions; full screen and back-stack coverage missing."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "18a54dec980c1a779c245969c3d6aca8f678998b2445a751466a9e3bbdcc7089",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-005",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "268af72174ae5d34d9268f673ecce9ea6689c417be58ec00db4e03240fc4a01e",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-006",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "c5f7ff6eeb0c1004a8c9a0b5aea4d1072f81c6adbabd7e602a28660eeac6761a",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-007",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "1c28e84df27c783023b706f1426b5c120da37352e7615d436db70905e57529ed",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-008",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "bc627e4e1c3fb517c55880f2d4168951a105a9236f85c7352ed0b4e2b1d104cd",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-009",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "2de2b7cd8f1b838e21b5854886963b497d63bb8a00afbeb9f6a00822a53d8c9e",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-010",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "security",
+        "remaining_gap": "Hostile Tasker intent refusal executed; complete original hostile fixtures and result timing still open."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "293c196f125e42aab10dd9fd38667e72cd8769fadbb08d379ca5ee4301e0e0f3",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-011",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6be5c19dfd87e294f64fbce79c52ffc53770f8d6ac7bbd924fc7652fc4b6e731",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-012",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "5673267555969bfe8bfdbe95c82e97860c6ac35f2494c1b9b7a37f635ef27297",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-013",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "3727706a4c99ee071b4878adce85602369bf5ee76c490eeee448391234dd6650",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-014",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "process_death",
+        "remaining_gap": "External force-stop and two named stages observed; automatic replay absence expressly not qualified."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "61d2b3fae50f80956b8d6d9ac18e9343e1469df671b8ccb5fe6a6efa064b8121",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-015",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "7dee7b200ae215e74c21a8b4d644c3aaf1b9a2fc4313d2762be5d106c51d5640",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-016",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "7f65aa8f2d20fc483def09f162f9a49d30de24c70fc61bac6d7b6835d1bdc121",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-017",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "screenshots",
+        "remaining_gap": "Requested light/dark images are byte-identical at each width; locale, RTL and accessibility unproved."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e026cf9684a89d04cbf0ffea1d3c503f335945e1c9673217bc94d8d0ed783985",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "EM-018",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "dffd6890ddb2af6ecb961e47131ff7fc620b8339588b34e0aac5271e6633aa29",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-019",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "tiles",
+        "remaining_gap": "15 exact tile methods plus real SystemUI callbacks; unavailable backend state full trace and physical OEM behavior not qualified."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "1c0bdbe769ed39cf7c1d154244078f2916171e64594faebedf38f150f2407d87",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-020",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "tiles",
+        "remaining_gap": "Durable pending blocks repeated tap across reload; actual rapid-tap and process recreation complete trace open."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "cfd132b799f56a5ce5467a294602c9c2816bc3f2efb4b353cb9448ab5b011c98",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-021",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "tiles",
+        "remaining_gap": "Separate confirmation and pending/recovery gates executed; unlock path not independently qualified."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "5dee99d4a3327880c59c18615d8be90dc2eea31ff12a191d96ca182425684ef4",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-022",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "screenshots",
+        "remaining_gap": "Four image files verified; only status/navigation bands redacted, nonunique theme content and full privacy scan open."
+      },
+      {
+        "accepted": false,
+        "artifact": "api26",
+        "assertion_sha256": "6c2368e02d19d4121009b786e9116736537bd4cd6c188d1ef1f4b47f9b830bbc",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-023",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "assertions",
+        "remaining_gap": "Four named lifecycle/smoke assertions; Tasker fallback and unsupported-call coverage incomplete."
+      },
+      {
+        "accepted": false,
+        "artifact": "api34",
+        "assertion_sha256": "3633171fa996e6fbb1c03acc1e758cc046cdcf5a21b965d225aea9e174d5f259",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "EM-024",
+        "lane": "ANDROID_EMULATOR_HOSTED",
+        "observation": "assertions",
+        "remaining_gap": "Five named Tasker/smoke assertions; foreground-service and API-specific exception coverage incomplete."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "913833b821173ca64d67144fc82e47fa7a862456bef2b915eef1ae8970204f7d",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-001",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "2a4e6a9fea8772ff169d9d5d3f8e93b9620064c4536261f5c5a07bbb7dbf7365",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-002",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "4714ec35f60678b53278a42e957863fb51d5fc1c99eb552f21859af5540b91f4",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-003",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "240b8247f102e79648fd05d2039f1bc491d444315cfc7d0ce940923aeebb627c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-004",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "fcaf059294fa9f01671078601136cd2bd61903cb3ac996008938522becf3cbb8",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-005",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "efc244fa70712042f8e119abeb1b6c4507e6c6a26949e4d2fac680fd63118383",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-006",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3b7d01e9339f8ae7268c31f0830e95dbe7c8e48f7a8897e182159305aa7a1a40",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-007",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "77491f94e4ca4a4b7c8b56f9fd025984cca3e6a170f05f9262394ec686baa55e",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-008",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0ddcd4fd16757059b36f6532c1d7a37132cd39a37f3e6b23837c7a3ee1b2fc46",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-009",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "69cbd47837ebf98c5d09307847e795afb1765683a25b0b31209775ca9bc44ee2",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-010",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0cf986d7a8cb8eab5a09636bbbbdd47d257bc7349b844b91a836adcd18bfef66",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-011",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "e9043ca8f778b776fbae88551a9acdb43be708e7728f9b5c71666a431084ae9c",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-012",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "246763771140b4f3e7087401bad3b3aadeec0e1e30acdadea15cd46291d63461",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "RD-013",
+        "lane": "ANDROID_PHYSICAL_OPT_IN",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "5613c394f5c7ea0caab28515227da0c2588545f72451e2cf52fe217f27327319",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-001",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "f7688dc613a8e266a7007d022548230f5095db1c9e1abf64d2264d2b0d144137",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-002",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "6304b0d1ac02e1b72b4d75b3fc7d4cf34c6ce9996b0dc0ae3ab58e4a7e2aab6e",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-003",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3c17be3da598d224125a03977209f17eb06b46fea066eb234550fd75880c90b7",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-004",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "7813463b0a6b5ebdbf0940e6519a3fd6b2bbfa69b06fc48160403e8a272f2dc1",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-005",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "0a760fe65788deb70b686b768c8ab589db49eb4b07d5e6677eab8382ad6a83c9",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-006",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "1825148312e2d6e3960e9c97851b42f2578a328f3a6f3369d9126973a052b5bb",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-007",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "2884b26b14a9ce48e85f5a72ded4bca381b7dc8a3cdfeaf4a0474ebe51f7feee",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-008",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "70ab21ed2d28b9c16df9a9a2d2d7efac72aa825f5646cfe29f8cea7c87f04613",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-009",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "a6773894a550abace66385d20544b00db8616d064d673966c5209ec796dedfea",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-010",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "8095599f9f80a36a042c5212585afc5471b8afb1bb6f12d1c7d3b1f3fcb438e5",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-011",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "1624c8918fa75cd00f47894f36a44bfc040eb6e56f0bf4f1def719a74fb79d76",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-012",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "325707f73d5110a049ee432815e03fcf934e283bb3ab90aef7522b6620d38381",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-013",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "5af548437520571af72ee4af9a9715763c52b96e3bc5a5d49a286c3c04fb819f",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-014",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "386acc048af291c6ccfe839b6edb6e840a24b04e5b2f897a9b6d4c96443d5d23",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-015",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "f63f31f37baf07a1599f8d10d73f77bba2ff92f0548567573a1b40df9bc10736",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "CI-016",
+        "lane": "CI_AND_MODULE_HOSTED",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "c3cbc637aaf57587a189d7dbf9a8cbebc31c645f38f943f140e39eaef7e31d49",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "PF-001",
+        "lane": "PERFORMANCE_REGRESSION",
+        "observation": "startup",
+        "remaining_gap": "Seven cold-start observations and memory budget pass; approved original baseline regression comparison missing."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "be1830e1d31ddb2a7d64b41eb7949547b1140fe453d4bdfbf418f493149581ff",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-002",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "3b182ffc3d436aed383d6a638f29efdb141a4d0fb0eeebfe159b48ddb0a989d8",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-003",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "2e84e1554425bda5c65634b0cdf4e3898d7982ecfa37891e63b8f2f485202bf7",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-004",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "28fe994f861f38bac887aa139680da55012c2a78a8e5263d2cc7df40d7e1e19d",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-005",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "f93dd6c8bbdd283df0d10a7143ee8904d76659cdd46d7e4c87d4c0b9a617cec5",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-006",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      },
+      {
+        "accepted": false,
+        "artifact": "api36",
+        "assertion_sha256": "153b3382a086e4af4b54902657bd5b13200074ca6cc8458b0ad2a49906f69386",
+        "disposition": "PARTIAL_HOSTED_EVIDENCE",
+        "historical_status": "NOT_RUN",
+        "id": "PF-007",
+        "lane": "PERFORMANCE_REGRESSION",
+        "observation": "screenshots",
+        "remaining_gap": "Dimensions and bytes verified; no clipping/overlap or theme uniqueness acceptance."
+      },
+      {
+        "accepted": false,
+        "assertion_sha256": "671d4b59d219afc8c714f51c8ad5955c0a4fdc2e9c1d443063ffd36877efbb5f",
+        "disposition": "OPEN_NOT_REQUALIFIED",
+        "historical_status": "NOT_RUN",
+        "id": "PF-008",
+        "lane": "PERFORMANCE_REGRESSION",
+        "remaining_gap": "Complete original assertion-to-execution and independent acceptance proof not established in this handback."
+      }
+    ],
+    "findings": [
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-01",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-02",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-03",
+        "phase": "R05"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-04",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-05",
+        "phase": "R04"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-06",
+        "phase": "R05"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-07",
+        "phase": "R03"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-08",
+        "phase": "R02"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-09",
+        "phase": "R02"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-10",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-11",
+        "phase": "R02"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-12",
+        "phase": "R04"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-13",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "IN_PROGRESS",
+        "id": "CODE-14",
+        "phase": "R02"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-15",
+        "phase": "R06"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-16",
+        "phase": "R04"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "CODE-17",
+        "phase": "R01"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-01",
+        "phase": "R00"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-02",
+        "phase": "R00"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-03",
+        "phase": "R07"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-04",
+        "phase": "R00"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-05",
+        "phase": "R06"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-06",
+        "phase": "R06"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "INFRA-07",
+        "phase": "R07"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "TEST-01",
+        "phase": "R10"
+      },
+      {
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_CLOSURE",
+        "historical_resolution": "OPEN",
+        "id": "TEST-02",
+        "phase": "R11"
+      }
+    ],
+    "protected_inputs": {
+      "docs/engineering/XBS_GX_TRACKER.json": "368b3ed3d7ce649e50ed7360cd376b367ef7cb74dae631971e87d7eaafb68080",
+      "docs/engineering/XBS_IMPLEMENTATION_LEDGER.json": "e60552b370b4b690ae2dca9fcc6c9d41042f8abceada87895970359bbb9fbbe0",
+      "docs/engineering/XBS_TEST_MATRIX.json": "6eabd951a1a358bf87a8c4655d0f4657650fb0d7f3e339139a165dce0963231f"
+    },
+    "tasks": [
+      {
+        "criterion_sha256": "2850e24bb3b93ce0b445d0fd92ccd67edf3e85caaf7189e009324169c03ceb70",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R00-01",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "bea1a87ca48960ee6717b4365123a73d6cb0ac278c40848e7c1b8245e50f1f9f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R00-02",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "8d78336100ac3df0878ec132696edd722fb61831ed2f1de08074f5f22b2a8c9f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-03",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "d14415f12cf31486ab63b3a1fe2472524d97186be053844cd97eb5ef9ec538a9",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-04",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "c98117f04be1e9f15da1cfcc853740d1dc06302db49f550b4246e60d253e5414",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-05",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "c4700acdad49884308db41c7f55c06a5efe8de04df22c1ec5bd9be0e0ea2c608",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-06",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "172be909982af5ca9cf67a2d1841ac23e89beaae4a635029251f58174da053cf",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-07",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "ff42a127560b8e4def89c0ac1c03d2f565348720d84e420dea2eec5f031eb78e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-08",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "1bc705ffc970d9471672d36cf6d55f86c2b6f36fadd041b316eca8070e2191e2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-09",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "3e6dbf866cbde79a4fc07be6b671f46caf1c3df3b337e558af8d30e9729a678a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-10",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "79b79691dfa38556bee308b8f7cf9e912e027613ad91a52b73fbd9237ea04243",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R00-11",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "6f75aa124ccd346ff602848f9c6c18af3874c697900bc8827296684a86dfbed2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R00-12",
+        "phase": "R00"
+      },
+      {
+        "criterion_sha256": "1809eb565e525774fca55a6b4387a9a1d0d5668c27d3b47134f19bfb30f2f241",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-01",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "5f829a54d6345f146e82a843796cf172e25b4626c22ccd8227bfd53aabe02628",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R01-02",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "4519cc63e42037218b41540cbbeed0356bf40eaf87e40ec5b1e4385c918b3e68",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-03",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "fb820951d401242654af7acfc8fabae1be388cc3db1db9fab8133d533ea60dfd",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-04",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "83c186ade6d05f7ba7aef7cf1cdc4b4bd2653c4a5056943681d718277e29cfb0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-05",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "cfea4eb16fa8957dd2f56fb61e5fb1c5882416831c42a41eff3a30c82744d4be",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-06",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "13ea834ba2950d0a66e6c6fd43453922a59c1b06fedd4fe14feaa49d76a27482",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-07",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "707f0b71d9a1aaf3daafa13efa267bdee2549e5b6516b3e68a5dae10990c96f4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-08",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "09cf2d75d76272fbb6ce4cd9e34ecb75ab35439868cd1121b4db19c7581e0b16",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-09",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "2a448a4b746c99cac815e6ed9419c48f5648e2fcdd9d2df3dcb2e590274d3513",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-10",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "c136d65529529ff9b76377a9ceb1d293695baef4d83408643c88f67fd60fab57",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-11",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "9a7f2e9944ac71bcff5f5542c00f3ab75d5ce7f6dd309a97536ec3cc32f046a8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-12",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "e45cb9106faa89463f2e2035717f19386c95e0fb09e4e8ab01e6a3c69e01532d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R01-13",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "ed9d73f59c4e886c12b03f1817aaef39a89f0c9303a594818cd9dc5bfcdfb93b",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-14",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "be07ea7099412d41104184831627a8fc43e8b953d5096a8843fbb2382c23a012",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R01-15",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "75b84890176b122f513bb9fbd41f1f35b08d40bb6ef990c799f60e44f5def4c8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R01-16",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "5420173adcc3fd3b9e0dc70da791f20629b1419fe6c1f7c02474499fe4e989a0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R01-17",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "6bfd36a9f3396614e5c33abc40241f56b4dec7ec50d97bfabdb204cbc01403cf",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R01-18",
+        "phase": "R01"
+      },
+      {
+        "criterion_sha256": "c98f16978e2e5ef75a1c88b44303ec7b23a4573a9f0597f0770e16b7e26b17e4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-01",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "db7e58aef02a739fb8bb729c8dbdce91098d0a823efb8afe13e62bf8406171e0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-02",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "e69d7ed62b55f5f3418ef05e6b91a50ada519b3434bf720a6177ff5aeffe8edb",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-03",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "04a7c69314adae3b59d53d8b9e7ad62ccbab5f644f5776948be15b2af05e5206",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-04",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "90c62d5197b05e4adb2f322b786a359e59a2c1ad5c58278468cc5d3864f678fc",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-05",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "9f9c968f36fdd528cd50b745bc6f304b1abf3a89f9b898d3a289e13007672f1b",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-06",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "81d81442b6fdd70176c02c68aabb445dd1f718e812b273f3ecf19b38ef477813",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-07",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "fbd34030dbbf6aa1c5b8f22fc3ce6608e1c6c599e7760deedb05463869c3e077",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-08",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "a00960091ed83fd01d7f6a8436f1942db38467451c8c30dc614e36942f053f34",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-09",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "08e0d21b00dca288f0c1e9b038d763a8fed3ac76b1082718e343b293ee859155",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-10",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "5c47bf5c290ea2e4b8394369c1363764943e81226b8931049d4c4c46ebebe534",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-11",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "d100bd591ed0abf52b5a40b9c0a526ea759d3ca6631d8768ab2b55db24bfd0c4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-12",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "c3c7172e84a051cd95149e9d810f399453c8de7368742d74481eeae097f75db5",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R02-13",
+        "phase": "R02"
+      },
+      {
+        "criterion_sha256": "4518b99c065584c7af43f7460464b19b5f0dad1a6584d3eb78f70c7ed21f6aa4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-01",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "dda91a203042c39b75f1407c8d4d68a0350568b0a9496ca4544810599c6878a7",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-02",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "75bbf092814089fca95727273c63062b508737b16dfd872956d5be686192e0d5",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-03",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "d6d298cd5f12a22e29728db9a24cc6a9e4b3dfce7e2dad3e954617208ace4743",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-04",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "d3f7064a48cd8b34d4794789de6457eb3ca859aaff61c2d514b93ee2fac294a2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-05",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "c1d67d13bd46d8a49899e28cee48e22d3b854da684657bfeb235413f43748e25",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-06",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "9b5169867bfe200fac5b2b7f9d88d543fac253125f73beeecd3d6895d1597400",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-07",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "53de0a53880711ecea6463aba9ef814fc6da9fb50bb47f0aecad27cbdc036bdb",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R03-08",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "52beeb995674d762a5d0531d0eff36983f14bdeb422c4731afd2bb7690b00fcf",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-09",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "06a23df6616633d329dbcce63ae4b167a0bae2bb9c07a48a515366ace3d40db3",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-10",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "632a1ac815352f431dc1c6deb77d698bc1bd89031b33082cfefc35d622410c27",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-11",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "129e4e733497e8db94d68260975b1ad617b91b661bf3e6db82c0a1ba4a7db22e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-12",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "3b6c7d822022c2c34306e2c8d4b0b10fd86c60a54e3abb5407d55ff38329ed67",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R03-13",
+        "phase": "R03"
+      },
+      {
+        "criterion_sha256": "a7428fe4e5ec0497b0625f63622b7cf70183f5e25cb92acc177906b8b240cd0b",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-01",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "3227de92351bc17b9feffdd12b0d8fcab18d61c0e0b31c770afdfad96ae295d0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-02",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "91a570e33c10bc113644a4e25a42d8580f4544614726e10be0f6cc0ee58dbaf1",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-03",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "7d40619511bba2db31324ff9b4bf29a5b29b280513104afffad4a95eb51f2c14",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-04",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "f45ad240b08701c44d0e22322e4530c4c9064b6ab908e4a8632258e164d19d59",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-05",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "cc78a2531e409e24e1adccaf88e9cb00a54a2d310c0080170f0dea652ab7dc3d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-06",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "0da4b38e1a0d25f341e17639b40eab858a9eda79c0bb17901d860b4adbc554e2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-07",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "106ea29e22e0ad1949018dcb9459e9bb90975a5b6222e7963ebf827672891519",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-08",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "69157c3078647c64e054d029bfbd747e278db4eae922969348c1e7f152c3ab23",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-09",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "51bb169130c51458be86add8f2dfd25584b4e1d042fddd24998d3b01b128b54a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R04-10",
+        "phase": "R04"
+      },
+      {
+        "criterion_sha256": "b94282c53aa4c1b327135d280ecbec65dacdf3cba72026f6880ba7be3647133a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-01",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "bb7c71c709c57a2afe22988ecc666cc6308c494ca7c7770efabcd4205ebad6b6",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-02",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "533c21c332b43d5f62838db73982a47159a6d9760e0946d86ef20060fd75e4f0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-03",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "3a2f6f2b6b4ecf90b5815dee787e946ad3e764c2a95f4392a62aac72023616a5",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-04",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "34b360f70648469e8c47312de2b1be14302e6273764b902b00815a439ed2a261",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-05",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "fc8cf2027b7b015b2858d5f4f5894b7d2ca90a8b00bcf77b53cbb706f74ad708",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-06",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "416da43717e3541950bb2a23492ee44dfdfcd9ce160314306f5aa983724588c1",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-07",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "f49b65620697eba5ea8c7004fdaaa93ca22719818cbc005412b6ddf3020da00e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-08",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "1f042526d95a398418f3d11afbb724f12d00842cdb67332a397759795d9117cf",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-09",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "f1c4782388634486721d96a09bf7f6a8c0280674dc61cc30be080abb5855b8dd",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-10",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "ce6e262d487c56a8b9f8dc0436173ebe13754fcd0f6c8e07f822ccf929751a16",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-11",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "0d7fa6f8de89b1ddc8db767457f7ae6712e7d0a5e17d667c37db5a6faa2736a8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-12",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "0c8ff3b9f178d04447c15aa15cae6f5989c7c3230300aa0cd21668d7d557bc8f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-13",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "392351376d866519de82ba2a6527f1f1599f5260e9f0ed7c5ec0a7011d5bac1f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R05-14",
+        "phase": "R05"
+      },
+      {
+        "criterion_sha256": "58a1a57ae9a141daca5ca2316c25cb60efefd1412bcd39b228566143e0eaacb5",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-01",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "44422af1568ac0a308d46a39859145c0e950d08a9cde9e03e9e9331f1d4080a4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-02",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "f5642853d189ae81f3d937c87d18abe3fb40efaa1a6fbdcc68b41ba6dc19b9dc",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-03",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "05451d6fa0cacdcf6e9e484d986cc96192aa78e564b63fd31a491768afe94b4d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-04",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "9c61bbad759797e6800d2e47e4e2cdae4c44ef2cdd40c25b1713d5e4c642f051",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-05",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "13c9c35a72cb1f10bebd3d48676db0d7c8372aa58e4fa26d53c68e4391692ae4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-06",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "fdc05dedf4147bfcc64509efeb49a24e01c4ce25de4d85951e0319c9f0fb539f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-07",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "8c9fd46232a6aef1c53b4d2ac248a572515bebbe29d74cd711fb2c12bc74868f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-08",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "a7f6b602805d580fbbd2cf4ef5778869b0a9baa44c97be8ce4c3797a05bf496c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-09",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "15764a46199793ac9e6ac9e80eaf4a371467da643f06d055b4a80c5bce961177",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-10",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "7cbd1edf238ca2c20eced752217dc8e7b57be7928de3499e8176e8cdf367188c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-11",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "c2410b0d18750c48a4342d5bdfceea1bf068a4a2bab0bef9239588252caa2912",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R06-12",
+        "phase": "R06"
+      },
+      {
+        "criterion_sha256": "666143260164b55077f3fea2bea4be8fc9e51d1b1ebdea38b5499558a561d03d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-01",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "33941dcfcd82129be7e141ea54af79897ba82ba0a48b316335c94aa433f7241a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-02",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "44a66ebf425f6715dc58283bf31194d5e77dc622a3141a2922a61e790b78c0f1",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-03",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "2f8a275c66f9f5df445939cff6c3d63072cd8f1c043e9ffaf8e2c904041cc522",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-04",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "98bb3b10c361aa7b56c5d95fe41a37cde3b7d08e1f880561b89ab63f2b1d77dc",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-05",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "f023dca962a2261ad630fae458b015829fb70226ef38e79fda3514772818b38d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-06",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "5e2faf094173e8216a405921ab60719b7a272e3c98a3675fe316cf3bcc6da61e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R07-07",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "acc46186fff67d8c94c6e7fe0003b9d46b7f8e5e55af9f89468c285a6ef5b5ff",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-08",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "e806991fcb8e0da80f069ca07938631de4a14a2b665d5cff6c82f62ce3f43fbe",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R07-09",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "f5af5c654d15b8bbbfacf35aca4f28425a73c90599eb382918368365292ed26e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-10",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "ebd52b9d3044cc0226159da11d26de1e6943311298469a74b45919fb5fae9955",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-11",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "d85532dc7a30208abd1bde1e8af68851d7f46ec4a6ec147d09a6e3235beb1aec",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-12",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "3821fb521357a7cd855dc8f3c74ab1127c2001797f3e83424ba29c8b0a260d81",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-13",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "10af02ddbf743bf117bef9ee93019e7a51cb9f2a17f5228912573a9673a56787",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R07-14",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "08094773554c44d540e668270118f001516cd3735bbbcbcda97bf2821f02b45d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R07-15",
+        "phase": "R07"
+      },
+      {
+        "criterion_sha256": "7dbbcee1a5ea2492d84330a074aa4651e1153b768c1d91a5e331fd32b460828e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-01",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "2c906041b01b39815f0ece5b65f1efdbff4317f66d84e710806fb4e39fbea14b",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-02",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "d0208754ea73927aa2355237b43120a7011800afa1d5d8ab19bead3543e55755",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-03",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "a885a864436c73f3009e020133ed30805a0d04a2bad235fce11e1256f4b4ff88",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-04",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "1156c5243d2bd8cc868bdbc2d882212209763dbb4424a390555ff9ee02f0422a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-05",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "3aeb1a0bef201764d069e004d6fad9e93df6d455879bb7f526e0eec6075670c9",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-06",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "0dd3ebaf99af6cf66b6313bca26fe17c0e81b5eba9558c5ed632e9cdd0eaca78",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-07",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "c857cdc955c1a2d22b51008df6a90028e0de7960219a2a75962e2bd948984db3",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-08",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "842be13a0872d8f638c51931ac7d6c1525d87c45cd2cab34d4964de57e6d8e25",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-09",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "6d874e8a5bda3a834be070ba7ea272ddbd68c984f1250d64a2db1552ff05234d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-10",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "d9d10287c129adc051048481619c6b689b13bc55e000e0ca0a4f03559513583f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-11",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "71f753e4c9fd0f60c10e8ac7d958f20429800410ca501f8f61fa113980755bae",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-12",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "4a8538371c865e37b47369f64b810d644a6138d80a9ef3566abcf1ce39cd5121",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-13",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "86fe57dea2413712975332959f7875809f949e534b80247d10cd1d06c0f906e8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R08-14",
+        "phase": "R08"
+      },
+      {
+        "criterion_sha256": "121a86188b3a6982d7bbaad6608d041a6a0ad078656fdaf3113b480329efa8b2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-01",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "0ee79f7bdaaf7b86fe3ea15964d355576a00b10fa1b819840ab0fc93453e99eb",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-02",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "e4767eec47f70eea272cdeb3991a079ea4dfa35b44e24d1391d0e3d2ea7a61f0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-03",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "176b5e1a32e76fc209efe5ff824ffb55b1dd7a498d58eba7a51c5af6f9f891ee",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-04",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "5bba03578ea9e46aafbd4b6c8e70653274ac2c9b88ba4299a8e281d1f68e8b66",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-05",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "72f576c2c90946b633c1161272a3e6513e03045ea311611e51b9c87f6ab5843c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-06",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "ffee050907bd039eb8bee38a3dfaa3bd6624f2fca517e865742943391142aa4c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-07",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "4403728467ff4d3def7a0704d2f0be75491d42f1ca82d2a332583c099519b432",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-08",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "bc65ada8d04123aafa89133f11b13d41ea8fa6ad14aa2adaee6b1f55c887cef7",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-09",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "414d0dbb36ebab12372ba45efcbc004571c382ef746ebc7fc31e6c1d7127f09f",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-10",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "9a4aea85e83e27dab59b09c2e718bfac8cbe7420fab5a02e9d6163c7d5e0ddab",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R09-11",
+        "phase": "R09"
+      },
+      {
+        "criterion_sha256": "621580dadfc4cdf7842a55a1b8f7a09931cecda1cf117d69509e480f0047afe6",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-01",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "e2f21a406f77aa3fc518dd1425f20d63f58852451a0738be6093c01a4afe8cee",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-02",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "f3fe7a120fb7d740457e51e11abe65bd7476b21dab19d65dc40d8abacdbc8faf",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-03",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "d91553d840d3c323e4e444e016ae216c12567fca57290ee2cdfdfa14d18c22c8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-04",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "a56f280ae56f8ec02d9a83adbfa8e036ac6fb04f77f5f85146ccefaf8dfe81be",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-05",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "ccd155d3f44b54b0231792156494c505608d2990601f7ed22fba593d74b6c4a4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-06",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "9cce302f111c3d86a95d7119d8ff49dc7a758c1c06af188e8c750549ea1e3323",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-07",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "b3ebf0d4d850754b1367672629b37e9491b2ff8888aff9c641f68124ffbe229c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-08",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "6d85f1ab13b9774e3a85faea6f5d04d9f54ab6ddef1ef478c1abb8e4f3ef34a0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-09",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "612848cffed0281ae3a5bd3e41d7b2280a7bcb62acd49a03a7446cb1572088a8",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-10",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "f2507ba0c0322411d88a316e398cde2fdd32199c84e99686c746f28efadfb857",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-11",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "7755b772adc41fbabb4f737a434ff5787adce5e60770fe0c71156f9209086bb1",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R10-12",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "2345ec8f325305942bf119f9740262c0282436ffc266929a7978fb2d0d672d23",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R10-13",
+        "phase": "R10"
+      },
+      {
+        "criterion_sha256": "5834aa04f8e9a1767a7874e6eb2d89aa3b06ef3104fd447a9326beefff88b8fc",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-01",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "7fce7d1c1be6af1310c723b9d697ca45caac7517c23b1e033b280be5797649f6",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-02",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "7d3e4840d0b0e731ad7b801c616931a8ff860086585e26a404cde0776001e771",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-03",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "21bcfedf9059343d2dd39c492f6b690e5b50e276635844a84ec3c711a7ed157d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-04",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "ec45634775777669e772788f79ca28bf07106e70779e5da73a3294812fc226f7",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-05",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "f3cc18316c59176938c02d4c402a0ed72908cbe5636c47b777e16a198150d9d0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-06",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "8d07eb82e5c6bd224710df7228eba32258110d820e9720e8a0853de9c52ca43c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-07",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "869347d73b5c0485300dbdd7394a8feb5bc3f674da823e5e55c6da1f2ec03d94",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-08",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "146fb36bc8a328b7d05643e952f3635500d8c6333c190031d68c54a90f9549a1",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-09",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "2502a0b5fd3fedb39d0825ff7e1846a8317362043e980c21b600f04674ade414",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R11-10",
+        "phase": "R11"
+      },
+      {
+        "criterion_sha256": "1ea6087881a9e66c61f209f87c08f10445fe45aa3e8a5bf423fb7d2903bf59d7",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-01",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "f43c031dccab79295fda746798dc6c14121e7df3429a8e2381508b5a1cf5ef52",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-02",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "955e3e897fad48a01c6c1de1099d5da12ed64b5a1e2abd0b82d60b43f986088c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R12-03",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "2cf9605960260c340ebadbd3a0c0d90a4d912761972b2370e233d73f694e1b9c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R12-04",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "b8a42a4edb9d66d0c528847823dac813085658df5075ed46a1f514b9b8a2348a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-05",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "456a4cd1afb2bb1100f51b0cc1c788cb409290afba78cd6f786da8d82f4dcfe4",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-06",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "c6f8116302f83a6ec198daf9d5320d0d438a74ea4e4849091084623171712c28",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-07",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "e434c35d939f771f7bd3f6d936a1c2620c54d0ca7229e123ed1264ad4a4b3d75",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-08",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "0621f323f93acfbb4ae86b03963be39e65d121169c1d68d1ef060268e1f69ef0",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R12-09",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "51553c0a75881481fbaf6ed188e6608896203f15db40f0aee82bebcf299f550c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R12-10",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "041eb275ae80950bb926c1821b9c71aca78919ba93cf5318c2584a7c5eb1c3f7",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R12-11",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "ba542a31eb85917e0ab7c9b06b90d01740671fa6f64a77b306e2f392ed22dc3e",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "IN_PROGRESS",
+        "id": "R12-12",
+        "phase": "R12"
+      },
+      {
+        "criterion_sha256": "f3062437c8b33611d8ff25f0119eb99b413bf8d66aa71f18cfb04c977db5687d",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-01",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "6260a33c02c9b46d0af9db75d672363bbc01b4158603d9b860e04daa6e8d66d2",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-02",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "daaaaf0c52709f3ea3fac2f45c528e00dfae37678509eb25fc5eefb9b8ee2c80",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-03",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "f5c3ded256b43e4f2f4eacbc1d46b2c05b6dac45ddd056e05edc57e4ecb68b2c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-04",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "75ce3e2db337100624d1fdfa968ea002750459f65673b4aa64deea8a4327212a",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-05",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "b1037845d757f5adbe1f49ef5931de871fc2353b8fbbf8318ff058312b37e851",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-06",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "f7ca5023cf20c230e0b06e9a9dca431d363a75f0dd12cb8b078f95c84aa10884",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-07",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "92bfce3447be4149ed877f1ac386da961ea0dd6ee36e437c060382c7ac0b4639",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-08",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "73fb9a2d55f51d9b827253e73028a7c6f370bafbf207a44bba866e9dbfa4541c",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-09",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "5570f321e52dcdaf70804ca1b9d05969fd76c011ffc4af2a480e60d5e175909b",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-10",
+        "phase": "R13"
+      },
+      {
+        "criterion_sha256": "d73b7d33ce1108363725f970855b92cce395a3c33e9b36f8d89cc1da7a5c2276",
+        "disposition": "OPEN_NO_INDEPENDENT_COMPLETE_ACCEPTANCE",
+        "historical_status": "NOT_STARTED",
+        "id": "R13-11",
+        "phase": "R13"
+      }
+    ]
+  },
+  "physical_root_qualified": false,
+  "release_qualified": false,
+  "repository": "Mikeyphw/xbsctl",
+  "schema": "xbs-agg-int01-historical-handback/v1",
+  "scope": "KNOWN_SUBSET_EXACT_ARCHIVES_AND_OPEN_INVENTORY"
+}

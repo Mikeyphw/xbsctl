@@ -32,10 +32,10 @@ def git(root,*args):
 
 def audit(root,hosted=False):
     root=Path(root).resolve(strict=True)
-    from gx06_stack_gate import reviewed_stage, stage_branch, stage_base_branch
-    branch=os.environ.get('GITHUB_HEAD_REF') if hosted else git(root,'symbolic-ref','--short','HEAD')
+    from gx06_stack_gate import reviewed_stage, stage_branch, stage_base_branch, hosted_branch, validate_hosted_context, HF01_TREE, MAIN_TREE
+    branch=hosted_branch(os.environ) if hosted else git(root,'symbolic-ref','--short','HEAD')
     stage=reviewed_stage(root)
-    need(stage in ('AGG','FIX','HF01') and branch==stage_branch(stage),'AGG_UNREVIEWED_BRANCH')
+    need(stage in ('AGG','FIX','HF01','INT01','INT01_MAIN') and branch==stage_branch(stage),'AGG_UNREVIEWED_BRANCH')
     head=git(root,'rev-parse','HEAD')
     need(re.fullmatch('[a-f0-9]{40}',head) is not None,'AGG_INVALID_HEAD')
     need(not git(root,'status','--porcelain','--untracked-files=all'),'AGG_DIRTY_WORKTREE')
@@ -48,14 +48,19 @@ def audit(root,hosted=False):
         ('Devtool XBS Go and Android candidates',386774409),
         ('XBS GX03 hosted API26 / API34 compatibility',419253895),
         ('Devtool S7 P05 XBS Android Consumer Adoption',418896455)},'AGG_REQUIRED_WORKFLOW_DRIFT')
+    if stage in ('INT01','INT01_MAIN'):
+        from gx06_stack_gate import HF01_HEAD
+        need(git(root,'rev-parse',MAIN_SHA+'^{tree}')==MAIN_TREE,'INT01_PINNED_MAIN_TREE_DRIFT')
+        need(git(root,'merge-tree','--write-tree',MAIN_SHA,HF01_HEAD)==HF01_TREE,'INT01_HF01_PREVIEW_DRIFT')
+        candidate=git(root,'rev-parse','HEAD^2') if stage=='INT01_MAIN' else head
+        preview=git(root,'merge-tree','--write-tree',MAIN_SHA,candidate)
+        need(preview==git(root,'rev-parse',candidate+'^{tree}'),'INT01_CANDIDATE_MERGE_PREVIEW_DRIFT')
+    else:
+        preview=MERGE_TREE
     if hosted:
-        need(os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('GITHUB_EVENT_NAME')=='pull_request' and
-             os.environ.get('XBS_EXPECTED_HEAD_SHA')==head,'AGG_HOSTED_SOURCE_UNVERIFIED')
-        run=os.environ.get('GITHUB_RUN_ID','');attempt=os.environ.get('GITHUB_RUN_ATTEMPT','')
-        need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
-             'AGG_HOSTED_RUN_IDENTITY_MISSING')
-    print('XBS_AGGREGATE_SOURCE_INTEGRITY_PASS sha='+head+' parent='+R08R10_HEAD+' main='+MAIN_SHA+' preview='+MERGE_TREE+' release=false',flush=True)
-    return {'head':head,'source':'SHA_AND_BLOB_PINNED','merge_applied':False,'aggregate_ci_qualified':False,
+        validate_hosted_context(root,os.environ,stage=stage,head=head)
+    print('XBS_AGGREGATE_SOURCE_INTEGRITY_PASS sha='+head+' parent='+R08R10_HEAD+' main='+MAIN_SHA+' preview='+preview+' release=false',flush=True)
+    return {'head':head,'source':'SHA_AND_BLOB_PINNED','merge_applied':stage=='INT01_MAIN','aggregate_ci_qualified':False,
             'release_qualified':False,'physical_root_qualified':False}
 
 def main():

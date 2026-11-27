@@ -39,7 +39,7 @@ def git(root,*args):
     return p.stdout.strip()
 
 def audit_source_and_receipts(root:Path, env:dict):
-    need(env.get('GITHUB_ACTIONS')=='true' and env.get('GITHUB_EVENT_NAME')=='pull_request',
+    need(env.get('GITHUB_ACTIONS')=='true' and env.get('GITHUB_EVENT_NAME') in ('pull_request','push','workflow_dispatch'),
          'HOSTED_PULL_REQUEST_RUN_REQUIRED')
     head=git(root,'rev-parse','HEAD')
     need(re.fullmatch('[0-9a-f]{40}',head) and head==env.get('XBS_EXPECTED_HEAD_SHA'),
@@ -47,6 +47,9 @@ def audit_source_and_receipts(root:Path, env:dict):
     run=env.get('GITHUB_RUN_ID','');attempt=env.get('GITHUB_RUN_ATTEMPT','')
     need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
          'GX02_GITHUB_RUN_ATTEMPT_MISSING')
+    if env.get('GITHUB_EVENT_NAME')!='pull_request':
+        from gx06_stack_gate import validate_hosted_context
+        validate_hosted_context(root,env,head=head)
     # Preserve the immutable GX02 introducing-commit proof on each descendant.
     # GX03 must be its direct child; its own exact-file policy is separately gated.
     frozen='ea46616247484edc26bcd9e47e0a5fd8f4565208'

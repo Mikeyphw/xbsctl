@@ -39,11 +39,14 @@ def adb(serial,*args,timeout=90,check=True,bytes_mode=False):
     return run(['adb','-s',serial,*args],timeout=timeout,check=check,bytes_mode=bytes_mode)
 
 def host_identity(api):
-    need(os.getenv('GITHUB_ACTIONS')=='true' and os.getenv('GITHUB_EVENT_NAME')=='pull_request',
+    need(os.getenv('GITHUB_ACTIONS')=='true' and (os.getenv('GITHUB_EVENT_NAME')=='pull_request' or (api==36 and os.getenv('GITHUB_EVENT_NAME') in ('push','workflow_dispatch'))),
          'HOSTED_PULL_REQUEST_ONLY')
     expected=os.environ.get('XBS_EXPECTED_HEAD_SHA','')
     head=run(['git','rev-parse','HEAD']).stdout.strip()
     need(head==expected,'CHECKOUT_SOURCE_SHA_MISMATCH')
+    if os.getenv('GITHUB_EVENT_NAME')!='pull_request':
+        from gx06_stack_gate import validate_hosted_context
+        validate_hosted_context(ROOT,os.environ,head=head)
     serials=[]
     for line in run(['adb','devices']).stdout.splitlines()[1:]:
         cols=line.split()
@@ -313,7 +316,7 @@ def execute(args):
             identity={'source_sha':identity['source_sha'],'run_id':identity['github_run_id'],
                       'run_attempt':identity['github_run_attempt'],'event':os.getenv('GITHUB_EVENT_NAME'),
                       'hosted':os.getenv('GITHUB_ACTIONS')=='true'},
-            performance=measured,artifacts=artifact_rows,
+            performance=measured,artifacts=artifact_rows,main_root=ROOT,
             security={'instrumented_count':security['required_testcases'],
                       'failed':security['failed_cases'],'skipped':security['skipped_cases'],
                       'exported_components_verified':True,'untrusted_receiver_tests':True})

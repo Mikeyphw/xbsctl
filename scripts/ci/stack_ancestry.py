@@ -23,9 +23,11 @@ def git(root: Path, *args: str) -> bytes:
         raise HistoryRefused('GIT_SOURCE_VERIFICATION_FAILED ' + repr(args)) from exc
 
 
-def verify_reviewed_history(root: Path, segments: tuple[Segment, ...]) -> str:
+def verify_reviewed_history(root: Path, segments: tuple[Segment, ...], *, head: str | None = None) -> str:
     """Check exact direct-parent and path inventories, one historical interval at a time."""
-    head = git(root, 'rev-parse', 'HEAD').decode('ascii').strip()
+    head = head or git(root, 'rev-parse', 'HEAD').decode('ascii').strip()
+    if not re.fullmatch(r'[0-9a-f]{40}', head):
+        raise HistoryRefused('INVALID_HEAD')
     lineage = git(root, 'rev-list', '--parents', '-n', '1', head).decode('ascii').split()
     if not re.fullmatch(r'[0-9a-f]{40}', head) or len(lineage) != 2 or lineage[0] != head:
         raise HistoryRefused('CURRENT_COMMIT_NOT_SINGLE_PARENT')
@@ -38,6 +40,8 @@ def verify_reviewed_history(root: Path, segments: tuple[Segment, ...]) -> str:
         tip = head if n == index else segment.pinned_tip
         if tip is None or not re.fullmatch(r'[0-9a-f]{40}', tip):
             raise HistoryRefused('UNPINNED_HISTORICAL_TIP ' + segment.name)
+        if segment.pinned_tip is not None and segment.pinned_tip != tip:
+            raise HistoryRefused('PINNED_TIP_DRIFT ' + segment.name)
         if n < index and segments[n + 1].parent != tip:
             raise HistoryRefused('DISCONTINUOUS_PIN_CHAIN ' + segment.name)
         observed = git(root, 'rev-list', '--parents', '-n', '1', tip).decode('ascii').split()

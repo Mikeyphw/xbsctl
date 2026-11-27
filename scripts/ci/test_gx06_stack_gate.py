@@ -164,7 +164,8 @@ class GX06AuditIntegrationTests(unittest.TestCase):
             ('docs/engineering/XBS_GX_TRACKER.json',tracker)]:
             f=self.root/name;f.parent.mkdir(parents=True,exist_ok=True)
             f.write_text(json.dumps(payload))
-        self.head='f'*40;self.tree='e'*40
+        from gx06_stack_gate import GX06_HEAD
+        self.head=GX06_HEAD;self.tree='e'*40
         self.changes=set(GX06_CHANGED_PATHS)
         self.wrong_parent=False
         self.gitcalls=[]

@@ -24,10 +24,10 @@ const (
 )
 
 type options struct {
-	jsonMode bool
-	wait     bool
-	timeout  time.Duration
-	ttl      time.Duration
+	jsonMode        bool
+	wait            bool
+	timeout         time.Duration
+	ttl             time.Duration
 	expectConfigSHA string
 }
 
@@ -135,9 +135,13 @@ func parse(args []string) (options, []string, error) {
 		case "--json":
 			opts.jsonMode = true
 		case "--expect-config-sha256":
-			if i+1 >= len(args) { return opts, clean, errors.New("--expect-config-sha256 requires 64 lowercase hex characters") }
+			if i+1 >= len(args) {
+				return opts, clean, errors.New("--expect-config-sha256 requires 64 lowercase hex characters")
+			}
 			i++
-			if !r05bValidGeneration(args[i]) { return opts, clean, errors.New("invalid --expect-config-sha256") }
+			if !r05bValidGeneration(args[i]) {
+				return opts, clean, errors.New("invalid --expect-config-sha256")
+			}
 			opts.expectConfigSHA = args[i]
 		case "--wait":
 			opts.wait = true
@@ -435,7 +439,9 @@ func emitControl(stdout io.Writer, opts options, status, message, completion, ac
 	snap, _, _ := readSnapshot()
 	if opts.jsonMode {
 		obj := map[string]any{"status": status, "message": message, "completion": completion, "requested_action": action, "event": event, "observed": snap}
-		if len(requestIDs)>0 { obj["request_id"]=requestIDs[0] }
+		if len(requestIDs) > 0 {
+			obj["request_id"] = requestIDs[0]
+		}
 		encoded, _ := json.Marshal(obj)
 		fmt.Fprintln(stdout, string(encoded))
 	} else {

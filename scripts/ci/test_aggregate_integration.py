@@ -105,4 +105,66 @@ class StagePolicyTests(unittest.TestCase):
             'scripts/ci/test_gx06_stack_gate.py',
         }))
 
+class MainMergeTests(unittest.TestCase):
+    git=HistoryTests.git
+    commit=HistoryTests.commit
+    at=HistoryTests.at
+    def setUp(self):
+        HistoryTests.setUp(self)
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        self.old_tip=self.tips[-1]
+        self.candidate=self.commit('INT01',{'int01':'integration'})
+        self.at(self.base);self.git('checkout','-qb','main-fixture')
+        # A separate main commit with an already-integrated change.
+        self.main=self.commit('main',{'GX06.py':'GX06'})
+        self.main_tree=self.git('rev-parse','HEAD^{tree}')
+        self.at(self.candidate)
+        pins={ 'GX05_HEAD':self.base,'GX06_HEAD':self.tips[0],'R08R10_HEAD':self.tips[1],
+            'AGG_HEAD':self.tips[2],'FIX_HEAD':self.tips[3],'HF01_HEAD':self.tips[4],
+            'AGG_MAIN_HEAD':self.main,'MAIN_TREE':self.main_tree,
+            'GX06_CHANGED_PATHS':self.segs[0].paths,'R08R10_CHANGED_PATHS':self.segs[1].paths,
+            'AGG_CHANGED_PATHS':self.segs[2].paths,'FIX_CHANGED_PATHS':self.segs[3].paths,
+            'HF01_CHANGED_PATHS':self.segs[4].paths,'INT01_CHANGED_PATHS':frozenset({'int01'}) }
+        ctx=patch.multiple(g,**pins);ctx.start();self.addCleanup(ctx.stop)
+    def merge(self,first,second,tree=None):
+        tree=tree or self.git('rev-parse',self.candidate+'^{tree}')
+        sha=self.git('commit-tree',tree,'-p',first,'-p',second,'-m','test-only merge')
+        self.at(sha);return sha
+    def test_reviewed_main_merge_and_push_context(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,INT01_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'INT01')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':INT01_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.candidate,'GITHUB_RUN_ID':'1','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('1','1'))
+        head=self.merge(self.main,self.candidate)
+        self.assertEqual(reviewed_stage(self.root),'INT01_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'1','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('1','1'))
+        env['GITHUB_REF']='refs/heads/other'
+        from gx06_stack_gate import Refused
+        with self.assertRaises(Refused):validate_hosted_context(self.root,env)
+    def test_main_wrong_parent_order(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.candidate,self.main)
+        with self.assertRaisesRegex(Refused,'INT01_MAIN_PARENT_DRIFT'):reviewed_stage(self.root)
+    def test_main_wrong_tree(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.main,self.candidate,self.main_tree)
+        with self.assertRaisesRegex(Refused,'INT01_MAIN_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+    def test_main_unreviewed_second_parent(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.main,self.old_tip)
+        with self.assertRaisesRegex(Refused,'INT01_MAIN_CANDIDATE_NOT_REVIEWED'):reviewed_stage(self.root)
+    def test_wrong_pr_base(self):
+        from gx06_stack_gate import validate_hosted_context,INT01_BRANCH,Refused
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':INT01_BRANCH,
+             'GITHUB_BASE_REF':'other','XBS_EXPECTED_HEAD_SHA':self.candidate,'GITHUB_RUN_ID':'1','GITHUB_RUN_ATTEMPT':'1'}
+        with self.assertRaisesRegex(Refused,'INT01_PR_BASE_DRIFT'):validate_hosted_context(self.root,env)
+    def test_squash_rejected(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.main);self.commit('squash',{'int01':'integration'})
+        with self.assertRaisesRegex(Refused,'UNREVIEWED_PARENT'):reviewed_stage(self.root)
+
 if __name__=='__main__':unittest.main(verbosity=2)

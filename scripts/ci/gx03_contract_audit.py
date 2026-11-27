@@ -28,11 +28,14 @@ def git(root,*args):
     return p.stdout.strip()
 
 def verify_source(root:Path):
-    need(os.getenv('GITHUB_ACTIONS')=='true' and os.getenv('GITHUB_EVENT_NAME')=='pull_request',
+    need(os.getenv('GITHUB_ACTIONS')=='true' and os.getenv('GITHUB_EVENT_NAME') in ('pull_request','push','workflow_dispatch'),
          'GX03_HOSTED_PR_SOURCE_ONLY')
     head=git(root,'rev-parse','HEAD')
     need(head==os.getenv('XBS_EXPECTED_HEAD_SHA'),
          'GX03_RUN_SOURCE_SHA_MISMATCH')
+    if os.getenv('GITHUB_EVENT_NAME')!='pull_request':
+        from gx06_stack_gate import validate_hosted_context
+        validate_hosted_context(root,os.environ,head=head)
     # Preserve the exact GX03 introducing commit and allow precisely one
     # reviewed descendant patch. Arbitrary history, paths and rewrites refuse.
     introduction='78475b2d1634711d7d615210479befedf3d14417'
@@ -156,7 +159,7 @@ def verify_local(root:Path):
          'R05C source and workflow contracts' in workflow,'R05C_ORIGINAL_GATE_REMOVED')
     need(workflow.count('          ref: ${{ github.event.pull_request.head.sha || github.sha }}')==4,
          'EXACT_SHA_CHECKOUT_QUANTITY_CHANGED')
-    need(workflow.count('          fetch-depth: 24')==1,'STACKED_CHECKOUT_HISTORY_TOO_SHALLOW')
+    need(workflow.count('          fetch-depth: 0')==2,'STACKED_CHECKOUT_HISTORY_TOO_SHALLOW')
     need('needs: [go-contract, android-companion-jvm]' in workflow,
          'API36_REQUIRED_JOB_DEPENDENCIES_CHANGED')
     need('GX03 actual app/test APKs and redacted screenshots' in workflow and

@@ -21,7 +21,7 @@ def fixture_sources():
     host=("gradle_test('io.github.mikeceead.xbscompanion.Gx04TilesInstrumentedTest')\n"
           "report['gx04_tile_assertions']=junit_receipt(RESULTS,{\n  'Gx04TilesInstrumentedTest':{\n"+
           '\n'.join("'"+method+"'" for method in HISTORICAL_TILE_METHODS + METHODS)+'\n  }\n})')
-    flow='          fetch-depth: 24\npython3 -B scripts/ci/test_r08_r10_acceptance.py\n'
+    flow='          fetch-depth: 0\n          fetch-depth: 0\npython3 -B scripts/ci/test_r08_r10_acceptance.py\n'
     gradle="""tasks.register('verifyStableToolchainBaseline') {
     doLast {
         def devtoolManifest = rootProject.file('../.devtool.toml')
@@ -147,7 +147,7 @@ class R08R10AcceptanceTests(unittest.TestCase):
             policy_path=base/POLICY
             policy=json.loads(policy_path.read_text())
             for branch in ('feature/xbs-r08-r10-acceptance-rebuild-20261118',
-                           'feature/xbs-aggregate-r08-r10-main-20261118'):
+                           'feature/xbs-aggregate-r08-r10-main-20261118','main'):
                 with self.subTest(branch=branch):
                     policy['base_branch']=branch
                     policy['required_workflows']=policy['required_workflows'][:2]
@@ -160,7 +160,7 @@ class R08R10AcceptanceTests(unittest.TestCase):
                     policy_path.write_text(json.dumps(policy))
                     self.assertEqual(audit_source(base,expected_base=branch)['total_tile_instrumentation'],15)
             with self.assertRaisesRegex(Refused,'UNKNOWN_REQUIRED_CI_BASE'):
-                audit_source(base,expected_base='main')
+                audit_source(base,expected_base='unreviewed')
 
 
     def test_25_original_source_is_not_silently_updated(self):

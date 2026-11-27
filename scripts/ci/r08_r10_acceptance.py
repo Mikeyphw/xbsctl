@@ -125,7 +125,7 @@ def validate_native_test_source(java: str, host: str, workflow: str) -> None:
              'HOSTED_JUNIT_METHOD_NOT_REQUIRED ' + method)
     need('python3 -B scripts/ci/test_r08_r10_acceptance.py' in workflow,
          'HOSTED_SOURCE_NEGATIVE_TESTS_NOT_RUN')
-    need('continue-on-error' not in workflow and '          fetch-depth: 24' in workflow,
+    need('continue-on-error' not in workflow and workflow.count('          fetch-depth: 0')==2,
          'HOSTED_WORKFLOW_WEAKENED')
 
 def validate_gradle_merge_compatibility(text: str) -> None:
@@ -143,7 +143,7 @@ def validate_gradle_merge_compatibility(text: str) -> None:
 
 def audit_source(root: Path, expected_base: str = BASE_BRANCH) -> dict:
     need(expected_base in (BASE_BRANCH, 'feature/xbs-r08-r10-acceptance-rebuild-20261118',
-                           'feature/xbs-aggregate-r08-r10-main-20261118'), 'UNKNOWN_REQUIRED_CI_BASE')
+                           'feature/xbs-aggregate-r08-r10-main-20261118', 'main'), 'UNKNOWN_REQUIRED_CI_BASE')
     root = Path(root).resolve(strict=True)
     mapping = json.loads(read_regular(root, MAP))
     validate_mapping(mapping)

@@ -81,12 +81,19 @@ def verify_artifacts(items,*,source,run,attempt):
         d.append(name)
     return d
 
-def evidence(*,identity,performance,artifacts,security):
+def evidence(*,identity,performance,artifacts,security,main_root=None):
     require(type(identity) is dict and set(identity)=={'source_sha','run_id','run_attempt','event','hosted'},'IDENTITY_SHAPE')
     sha,run,attempt=identity['source_sha'],identity['run_id'],identity['run_attempt']
     require(isinstance(sha,str) and HEX40.fullmatch(sha),'INVALID_SOURCE')
     require(isinstance(run,str) and SAFE_RUN.fullmatch(run) and isinstance(attempt,str) and SAFE_RUN.fullmatch(attempt),'INVALID_RUN_ATTEMPT')
-    require(identity['event']=='pull_request' and identity['hosted'] is True,'HOSTED_PR_REQUIRED')
+    require(identity['hosted'] is True,'HOSTED_PR_REQUIRED')
+    if identity['event']!='pull_request':
+        require(main_root is not None and identity['event'] in ('push','workflow_dispatch'),'HOSTED_PR_REQUIRED')
+        import os
+        from gx06_stack_gate import validate_hosted_context, git
+        require(identity['event']==os.environ.get('GITHUB_EVENT_NAME') and
+                git(main_root,'rev-parse','HEAD')==sha,'MAIN_HOSTED_IDENTITY_DRIFT')
+        require(validate_hosted_context(main_root,os.environ)==(run,attempt),'MAIN_HOSTED_RUN_DRIFT')
     require(type(security) is dict and set(security)=={'instrumented_count','failed','skipped','exported_components_verified','untrusted_receiver_tests'},'SECURITY_CASE_SHAPE')
     require(type(security['instrumented_count']) is int and security['instrumented_count']>=7,'ZERO_SECURITY_TESTS')
     require(security['failed']==0 and security['skipped']==0,'FAILED_OR_SKIPPED_SECURITY_TESTS')

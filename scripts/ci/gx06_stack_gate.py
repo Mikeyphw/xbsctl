@@ -28,6 +28,44 @@ AGG_MERGE_TREE = 'ae7292929149833cbecd65667d9a4f7b0588697d'
 AGG_HEAD = 'b693612fc76bef3bd4d7fb8375861a990180fd0a'
 FIX_BRANCH = 'feature/xbs-aggregate-r07a-ci-repair-20261118'
 FIX_HEAD = '5cfa4e6e846263d85338b5d394e201fd6ac4f6c1'
+HF01_HEAD = '455c7493ee3b14e7ac5d0595d82daf2f69983e0f'
+HF01_TREE = 'ec485329264b86501fd70e76accc8e37ac060071'
+INT01_BRANCH = 'feature/xbs-aggregate-main-qualification-20261127'
+MAIN_TREE = 'f5d7788728ec808e4ba883519ac75d0c54d98858'
+INT01_CHANGED_PATHS = frozenset({
+    'cmd/xbsrepo/main.go',
+    'internal/config/r05b_source_digest.go',
+    'internal/config/r05b_source_digest_test.go',
+    'internal/config/r09a_fuzz_test.go',
+    'internal/control/control.go',
+    'internal/control/r05a_observation.go',
+    'internal/control/r05a_observation_test.go',
+    'internal/control/r05b_cli_integration_test.go',
+    'internal/control/r05b_generation.go',
+    'internal/control/r05b_generation_test.go',
+    'internal/control/r09a_fuzz_test.go',
+    'internal/eventbridge/r09a_fuzz_test.go',
+    'internal/module/module_test.go',
+    'internal/module/r06a_handoff_test.go',
+    'scripts/ci/test_r05a_source_contract.py',
+    '.github/workflows/devtool-xbs-ci.yml',
+    'config/delivery-required-ci.json',
+    'docs/engineering/XBS_AGG_INT01_HANDOFF.md',
+    'docs/engineering/XBS_AGG_INT01_EVIDENCE.json',
+    'scripts/ci/aggregate_handback.py',
+    'scripts/ci/gx05_preflight.py',
+    'scripts/ci/aggregate_integration.py',
+    'scripts/ci/gx02_ci_verify.py',
+    'scripts/ci/gx03_contract_audit.py',
+    'scripts/ci/gx03_emulator_host.py',
+    'scripts/ci/gx06_stack_gate.py',
+    'scripts/ci/r08_r10_acceptance.py',
+    'scripts/ci/stack_ancestry.py',
+    'scripts/ci/test_aggregate_handback.py',
+    'scripts/ci/test_aggregate_integration.py',
+    'scripts/ci/test_gx06_stack_gate.py',
+    'scripts/ci/test_r08_r10_acceptance.py',
+})
 GX05_BRANCH = 'feature/xbs-gx05-security-performance-readiness-20261116'
 LOCK = 'docs/engineering/XBS_GX06_STACK_LOCK.json'
 GATES = 'docs/engineering/XBS_GX06_COVERAGE.json'
@@ -128,9 +166,22 @@ def reviewed_stage(root: Path) -> str:
         Segment('R08R10', GX06_HEAD, R08R10_HEAD, R08R10_CHANGED_PATHS),
         Segment('AGG', R08R10_HEAD, AGG_HEAD, AGG_CHANGED_PATHS),
         Segment('FIX', AGG_HEAD, FIX_HEAD, FIX_CHANGED_PATHS),
-        Segment('HF01', FIX_HEAD, None, HF01_CHANGED_PATHS),
+        Segment('HF01', FIX_HEAD, HF01_HEAD, HF01_CHANGED_PATHS),
+        Segment('INT01', HF01_HEAD, None, INT01_CHANGED_PATHS),
     )
     try:
+        head = git(root, 'rev-parse', 'HEAD')
+        parents = git(root, 'rev-list', '--parents', '-n', '1', head).split()
+        if len(parents) == 3:
+            need(parents[:2] == [head, AGG_MAIN_HEAD], 'INT01_MAIN_PARENT_DRIFT')
+            candidate = parents[2]
+            need(verify_reviewed_history(root, segments, head=candidate) == 'INT01',
+                 'INT01_MAIN_CANDIDATE_NOT_REVIEWED')
+            need(git(root, 'rev-parse', AGG_MAIN_HEAD+'^{tree}') == MAIN_TREE,
+                 'INT01_MAIN_TREE_DRIFT')
+            need(git(root, 'rev-parse', head+'^{tree}') == git(root, 'rev-parse', candidate+'^{tree}'),
+                 'INT01_MAIN_MERGE_TREE_DRIFT')
+            return 'INT01_MAIN'
         return verify_reviewed_history(root, segments)
     except HistoryRefused as exc:
         raise Refused('GX06_REVIEWED_HISTORY_REFUSED ' + str(exc)) from exc
@@ -138,12 +189,42 @@ def reviewed_stage(root: Path) -> str:
 
 def stage_branch(stage: str) -> str:
     return {'GX06': GX06_BRANCH, 'R08R10': R08R10_BRANCH, 'AGG': AGG_BRANCH,
-            'FIX': FIX_BRANCH, 'HF01': FIX_BRANCH}[stage]
+            'FIX': FIX_BRANCH, 'HF01': FIX_BRANCH, 'INT01': INT01_BRANCH, 'INT01_MAIN': 'main'}[stage]
 
 
 def stage_base_branch(stage: str) -> str:
     return {'GX06': GX05_BRANCH, 'R08R10': GX06_BRANCH, 'AGG': R08R10_BRANCH,
-            'FIX': AGG_BRANCH, 'HF01': AGG_BRANCH}[stage]
+            'FIX': AGG_BRANCH, 'HF01': AGG_BRANCH, 'INT01': 'main', 'INT01_MAIN': 'main'}[stage]
+
+
+def hosted_branch(env):
+    if env.get('GITHUB_EVENT_NAME') == 'pull_request':
+        return env.get('GITHUB_HEAD_REF')
+    if env.get('GITHUB_EVENT_NAME') in ('push', 'workflow_dispatch') and env.get('GITHUB_REF') == 'refs/heads/main':
+        return 'main'
+    return None
+
+
+def validate_hosted_context(root, env, *, stage=None, head=None):
+    """A direct-main merge is observed, never authorized, by this source gate."""
+    need(env.get('GITHUB_ACTIONS') == 'true', 'HOSTED_CONTEXT_REQUIRED')
+    stage = stage or reviewed_stage(root)
+    head = head or git(root, 'rev-parse', 'HEAD')
+    event = env.get('GITHUB_EVENT_NAME')
+    need(env.get('XBS_EXPECTED_HEAD_SHA') == head, 'GX06_HOSTED_SOURCE_SHA_DRIFT')
+    need(hosted_branch(env) == stage_branch(stage), 'GX06_HOSTED_BRANCH_DRIFT')
+    if stage == 'INT01_MAIN':
+        need(event in ('push', 'workflow_dispatch') and env.get('GITHUB_SHA') == head
+             and not env.get('GITHUB_HEAD_REF') and not env.get('GITHUB_BASE_REF'),
+             'INT01_MAIN_EVENT_REFUSED')
+    else:
+        need(event == 'pull_request', 'GX06_HOSTED_PR_SOURCE_IDENTITY_REFUSED')
+        if stage == 'INT01':
+            need(env.get('GITHUB_BASE_REF') == 'main', 'INT01_PR_BASE_DRIFT')
+    run, attempt = env.get('GITHUB_RUN_ID', ''), env.get('GITHUB_RUN_ATTEMPT', '')
+    need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
+         'GX06_HOSTED_RUN_ATTEMPT_MISSING')
+    return run, attempt
 
 
 def validated_lock(lock):
@@ -240,11 +321,11 @@ def audit_local(root: Path, *, env: dict|None=None):
     tree=git(root,'rev-parse','HEAD^{tree}')
     need(SHA.fullmatch(head) is not None and SHA.fullmatch(tree) is not None,
          'GX06_HEAD_OR_TREE_INVALID')
-    branch=(env.get('GITHUB_HEAD_REF') if env.get('GITHUB_ACTIONS')=='true'
+    branch=(hosted_branch(env) if env.get('GITHUB_ACTIONS')=='true'
             else git(root,'symbolic-ref','--short','HEAD'))
     stage=reviewed_stage(root)
     need(branch==stage_branch(stage),'GX06_UNREVIEWED_BRANCH')
-    aggregate=stage in ('AGG','FIX','HF01')
+    aggregate=stage in ('AGG','FIX','HF01','INT01','INT01_MAIN')
     continuation=stage!='GX06'
     need(git(root,'rev-parse',GX05_HEAD+'^{tree}')==GX05_TREE,'GX06_GX05_TREE_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),
@@ -275,21 +356,18 @@ def audit_local(root: Path, *, env: dict|None=None):
          {(v.get('name'),v.get('workflow_id')) for v in policy.get('required_workflows',[])}==required_workflows,
          'GX06_DELIVERY_CI_POLICY_INVALID_FOR_TARGET_BRANCH')
     if env.get('GITHUB_ACTIONS')=='true':
-        need(env.get('GITHUB_EVENT_NAME')=='pull_request' and
-             env.get('GITHUB_HEAD_REF')==branch and
-             env.get('XBS_EXPECTED_HEAD_SHA')==head,
-             'GX06_HOSTED_PR_SOURCE_IDENTITY_REFUSED')
-        run,attempt=env.get('GITHUB_RUN_ID',''),env.get('GITHUB_RUN_ATTEMPT','')
-        need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
-             'GX06_HOSTED_RUN_ATTEMPT_MISSING')
+        run,attempt=validate_hosted_context(root,env,stage=stage,head=head)
     else: run=attempt=''
+    if stage in ('INT01','INT01_MAIN'):
+        from aggregate_handback import validate_documents
+        validate_documents(root)
     out=dict(original, schema='xbs-gx06-local-audit/v1', source_sha=head,
              source_tree=tree, base_sha=GX05_HEAD, branch=branch,
              github_run_id=run, github_run_attempt=attempt,
              inspected_prs=[p['pr'] for p in stack],
              prior_hosted_status='HISTORICAL_RUN_IDS_SOURCE_BOUND_LIVE_RECHECK_REQUIRED',
              gx06_hosted_status='CURRENT_WORKFLOW_TESTS_MUST_PASS',
-             main_merge_status='NOT_PROVEN_REQUIRES_EXACT_MERGE_TREE_REVIEW',
+             main_merge_status=('EXACT_MAIN_MERGE_OBSERVED' if stage=='INT01_MAIN' else 'NOT_MERGED'),
              physical_qualified=False, release_qualified=False,
              automatic_merge=False)
     return out

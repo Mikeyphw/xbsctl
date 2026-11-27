@@ -11,12 +11,12 @@ class R05aSourceContracts(unittest.TestCase):
         return (ROOT/relative).read_text(encoding='utf-8')
     def test_controller_request_receipts_are_id_bound(self):
         control=self.text('internal/control/control.go')
-        self.assertIn('obj["request_id"]=requestIDs[0]',control)
+        self.assertRegex(control, r'\bobj\["request_id"\]\s*=\s*requestIDs\[0\]')
         self.assertIn('waitForObservedState(action, event, before, opts.timeout)',control)
         self.assertIn('waitForObservedState(action, "", before, opts.timeout)',control)
     def test_observation_is_not_just_ack(self):
         go=self.text('internal/control/r05a_observation.go')
-        self.assertIn('after.LastReloadTime!=before.LastReloadTime',go)
+        self.assertRegex(go, r'\bafter\.LastReloadTime\s*!=\s*before\.LastReloadTime\b')
         self.assertIn('if !after.Available',go)
     def test_control_dispatch_waits(self):
         runner=(ANDROID/'RootCommandRunner.java').read_text()
