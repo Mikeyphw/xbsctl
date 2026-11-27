@@ -253,6 +253,63 @@ class Gx04TileContracts(unittest.TestCase):
         self.assertIn('shell_exit_alone_never_proves_callback',host)
         self.assertIn('root_execution_asserted',host)
 
+
+class ActiveTileLifecycleProbeTests(unittest.TestCase):
+    def exercise(self, *, omit=(), stale=False, duplicate=False, refuse=None):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import gx03_emulator_host as host
+        counters={name+'_PAUSE':7 for name in ('added','listening','clicked','stopped','removed')} if stale else {}
+        commands=[]
+        def bump(name):
+            if name not in omit:
+                key=name+'_PAUSE';counters[key]=counters.get(key,0)+1
+        def adb(serial,*args,**kw):
+            self.assertEqual(serial,'emulator-5554')
+            self.assertEqual(args[:3],('shell','cmd','statusbar'))
+            command=args[3];commands.append(command)
+            if command==refuse:return SimpleNamespace(returncode=1,stdout='',stderr='refused')
+            if command=='add-tile':bump('added')
+            # ACTIVE_TILE panel opening does not trigger a listening callback.
+            if command=='click-tile':
+                bump('listening');bump('clicked');bump('stopped')
+                if duplicate:bump('clicked')
+            if command=='remove-tile':bump('removed')
+            return SimpleNamespace(returncode=0,stdout='true' if command=='check-support' else '',stderr='')
+        self.commands=commands
+        with patch.object(host,'adb',side_effect=adb),patch.object(host,'gx04_systemui_counts',side_effect=lambda _:dict(counters)),patch('time.sleep'):
+            return host.gx04_systemui_probe('emulator-5554')
+
+    def test_active_tile_click_triggers_listening_not_panel(self):
+        proof=self.exercise(stale=True)
+        self.assertEqual(self.commands,['check-support','add-tile','expand-settings','click-tile','collapse','remove-tile','collapse'])
+        self.assertTrue(all(proof[k] for k in ('add_callback','click_callback','remove_callback','start_listening_callback','stop_listening_callback')))
+        self.assertEqual(proof['fresh_click_callback_deltas'],{'listening_PAUSE':1,'clicked_PAUSE':1,'stopped_PAUSE':1})
+        self.assertEqual(proof['click_dispatch_count'],1)
+        self.assertFalse(proof['root_execution_asserted'])
+
+    def test_each_callback_must_be_fresh_even_with_stale_counters(self):
+        from gx03_evidence import Refused
+        for marker,message in [('added','CALLBACK_MISSING added'),('listening','START_LISTENING_CALLBACK_MISSING'),('clicked','CALLBACK_MISSING clicked'),('stopped','STOP_LISTENING_CALLBACK_MISSING'),('removed','REMOVE_CALLBACK_MISSING')]:
+            with self.subTest(marker=marker),self.assertRaisesRegex(Refused,message):
+                self.exercise(omit=(marker,),stale=True)
+            self.assertEqual(self.commands.count('remove-tile'),1)
+            self.assertLessEqual(self.commands.count('click-tile'),1)
+
+    def test_duplicate_click_is_not_accepted_or_retried(self):
+        from gx03_evidence import Refused
+        with self.assertRaisesRegex(Refused,'DUPLICATE_CALLBACK'):
+            self.exercise(duplicate=True)
+        self.assertEqual(self.commands.count('click-tile'),1)
+        self.assertIn('remove-tile',self.commands)
+
+    def test_command_refusal_cleans_up_without_claiming_callbacks(self):
+        from gx03_evidence import Refused
+        with self.assertRaisesRegex(Refused,'COMMAND_REFUSED click-tile'):
+            self.exercise(refuse='click-tile')
+        self.assertEqual(self.commands.count('click-tile'),1)
+        self.assertIn('remove-tile',self.commands)
+
 def harness_copy(temp,path):
     target=Path(temp)/'Gx04DecisionHarness.java'
     target.write_bytes(path.read_bytes())

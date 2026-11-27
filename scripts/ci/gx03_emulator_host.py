@@ -460,16 +460,16 @@ def gx04_systemui_counts(serial):
     return values
 
 def gx04_systemui_probe(serial):
-    """Rootless SystemUI add/click/remove: verify callbacks, never shell exit alone.
+    """Observe five real callbacks for an ACTIVE_TILE, not passive panel opening.
 
-    A freshly installed app has no authenticated XBS daemon; its tile must
-    remain visually non-active yet allow an app-diagnostic click. This is not
-    evidence that any privileged command was executed.
+    Android active-mode tiles receive a listening window on click (or explicit
+    requestListeningState), ending after their update. Expanding QS alone is
+    not a trigger. Use one click and fresh pre-click counters; never dispatch a
+    second click to compensate for missing asynchronous callback evidence.
     """
     import time
     service=PKG+'/.XbsPauseTileService'
     before=gx04_systemui_counts(serial)
-    observed={}
     commands=[]
     last_counts=dict(before)
     def statusbar(command,component=False):
@@ -477,13 +477,14 @@ def gx04_systemui_probe(serial):
         result=adb(serial,*args,check=False)
         need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-300:])
         commands.append(command)
-    def wait_delta(marker,intervals=80):
+    def wait_delta(marker,baseline,intervals=80,*,exactly_one=False):
         nonlocal last_counts
         for _ in range(intervals):
             last_counts=gx04_systemui_counts(serial)
-            if last_counts.get(marker,0)>before.get(marker,0):
-                observed[marker]=last_counts[marker]
-                return True
+            delta=last_counts.get(marker,0)-baseline.get(marker,0)
+            need(delta>=0,'GX04_SYSTEMUI_COUNTER_REGRESSED '+marker)
+            if exactly_one:need(delta<=1,'GX04_SYSTEMUI_DUPLICATE_CALLBACK '+marker)
+            if delta>0:return True
             time.sleep(0.25)
         return False
     added=False
@@ -492,37 +493,43 @@ def gx04_systemui_probe(serial):
         need(check.returncode==0 and check.stdout.strip()=='true','GX04_SYSTEMUI_NOT_SUPPORTED')
         statusbar('add-tile',True)
         added=True
-        need(wait_delta('added_PAUSE'),
+        need(wait_delta('added_PAUSE',before),
              'GX04_SYSTEMUI_CALLBACK_MISSING added_PAUSE counts='+repr(last_counts))
-        # SystemUI may not dispatch clicks until QS is expanded/listening;
-        # do not infer a click from exit code 0 (shell call is asynchronous).
         statusbar('expand-settings')
-        need(wait_delta('listening_PAUSE'), 'GX04_SYSTEMUI_START_LISTENING_CALLBACK_MISSING')
+        # Allow the asynchronous initial tile publication/panel transition to
+        # settle. Neither delay nor shell exit constitutes callback evidence.
+        time.sleep(1)
+        click_before=gx04_systemui_counts(serial)
         statusbar('click-tile',True)
-        if not wait_delta('clicked_PAUSE',intervals=64):
-            # Bound one fresh UI activation/retry; no root operation is permitted
-            # because a fresh emulator lacks an authenticated daemon snapshot.
-            statusbar('collapse')
-            statusbar('expand-settings')
-            time.sleep(1)
-            statusbar('click-tile',True)
-            need(wait_delta('clicked_PAUSE',intervals=64),
-                 'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts)+
-                 ' commands='+repr(commands))
+        need(wait_delta('listening_PAUSE',click_before),
+             'GX04_SYSTEMUI_START_LISTENING_CALLBACK_MISSING counts='+repr(last_counts))
+        need(wait_delta('clicked_PAUSE',click_before,exactly_one=True),
+             'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts))
+        # The active-mode update may have already ended its listening window;
+        # observe its fresh stop rather than attributing it to panel collapse.
         statusbar('collapse')
-        need(wait_delta('stopped_PAUSE'), 'GX04_SYSTEMUI_STOP_LISTENING_CALLBACK_MISSING')
+        need(wait_delta('stopped_PAUSE',click_before),
+             'GX04_SYSTEMUI_STOP_LISTENING_CALLBACK_MISSING counts='+repr(last_counts))
+        click_after=gx04_systemui_counts(serial)
+        need(click_after.get('clicked_PAUSE',0)==click_before.get('clicked_PAUSE',0)+1,
+             'GX04_SYSTEMUI_DUPLICATE_OR_LOST_CLICK')
+        remove_before=click_after
     finally:
         if added:
             statusbar('remove-tile',True)
         statusbar('collapse')
-    need(wait_delta('removed_PAUSE'),
+    need(wait_delta('removed_PAUSE',remove_before),
          'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING counts='+repr(last_counts))
-    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true',flush=True)
+    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true listening=true stopped=true',flush=True)
     return {'real_systemui_shell':True,'add_callback':True,'click_callback':True,
             'remove_callback':True,'start_listening_callback':True,'stop_listening_callback':True,'api':36,'user_data_recorded':False,
             'physical_oem_qualified':False,'root_execution_asserted':False,
             'shell_exit_alone_never_proves_callback':True,
-            'diagnostic_states_remain_non_active':True}
+            'diagnostic_states_remain_non_active':True,
+            'tile_mode':'active','listening_trigger':'systemui_click',
+            'click_dispatch_count':commands.count('click-tile'),
+            'fresh_click_callback_deltas':{key:click_after.get(key,0)-click_before.get(key,0)
+                 for key in ('listening_PAUSE','clicked_PAUSE','stopped_PAUSE')}}
 
 
 if __name__=='__main__':

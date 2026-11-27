@@ -69,8 +69,8 @@ class FixtureEvidenceTests(unittest.TestCase):
             self.assertIn(s,java)
         host=(ROOT/'scripts/ci/gx03_emulator_host.py').read_text()
         self.assertIn("report['gx10_tasker_host']=collect_tasker",host)
-        self.assertIn("wait_delta('listening_PAUSE')",host)
-        self.assertIn("wait_delta('stopped_PAUSE')",host)
+        self.assertIn("wait_delta('listening_PAUSE',click_before)",host)
+        self.assertIn("wait_delta('stopped_PAUSE',click_before)",host)
         process=(ROOT/'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx03ProcessDeathInstrumentedTest.java').read_text()
         for s in ('assertNotEquals("Process was not externally killed','XbsTileDecision.Phase.PENDING','XbsTileDecision.Phase.RECOVERY_REQUIRED','XbsTileDecision.Phase.FAILED','XbsTileController.requestToggle','EventBridgeStore.save'):
             self.assertIn(s,process)
