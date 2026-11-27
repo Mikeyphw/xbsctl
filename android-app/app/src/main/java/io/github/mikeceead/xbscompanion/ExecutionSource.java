@@ -6,6 +6,7 @@ enum ExecutionSource {
     NOTIFICATION("notification"),
     TASKER("tasker"),
     BOOT("boot"),
+    TILE("tile"),
     UNKNOWN("unknown");
 
     final String label;

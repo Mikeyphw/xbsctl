@@ -1,0 +1,118 @@
+{
+  "schema": "xbs-gx06-stack-lock/v1",
+  "repository": "Mikeyphw/xbsctl",
+  "branch": "feature/xbs-gx06-stack-integration-20261118",
+  "base_head": "1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf",
+  "base_tree": "45daa340788913aa1b626a3f3f96b6c20f141391",
+  "main_at_inspection": "c52561dfa203090befb680a058aa5e5e79870f1b",
+  "stack": [
+    {
+      "milestone": "GX01",
+      "pr": 27,
+      "branch": "feature/xbs-gx01-evidence-reconciliation-20261114",
+      "head": "568ba5dd140164bf179b91dd24c2557f114f0aa6",
+      "base_branch": "feature/xbs-r09f-adversarial-final-ledger-20261114",
+      "base_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+      "runs": [
+        {
+          "workflow": "Devtool XBS Go and Android candidates",
+          "workflow_id": 386774409,
+          "id": 43662889628
+        }
+      ]
+    },
+    {
+      "milestone": "GX02",
+      "pr": 28,
+      "branch": "feature/xbs-gx02-devtool-ci-reliability-20261114",
+      "head": "ea46616247484edc26bcd9e47e0a5fd8f4565208",
+      "base_branch": "feature/xbs-gx01-evidence-reconciliation-20261114",
+      "base_sha": "568ba5dd140164bf179b91dd24c2557f114f0aa6",
+      "runs": [
+        {
+          "workflow": "Devtool XBS Go and Android candidates",
+          "workflow_id": 386774409,
+          "id": 43675851257
+        }
+      ]
+    },
+    {
+      "milestone": "GX03",
+      "pr": 30,
+      "branch": "feature/xbs-gx03-hosted-android-journeys-20261115",
+      "head": "aab3ff6d9e6cd9c343218606a5d8c6c619f1c487",
+      "base_branch": "feature/xbs-gx02-devtool-ci-reliability-20261114",
+      "base_sha": "ea46616247484edc26bcd9e47e0a5fd8f4565208",
+      "runs": [
+        {
+          "workflow": "Devtool XBS Go and Android candidates",
+          "workflow_id": 386774409,
+          "id": 43759038070
+        },
+        {
+          "workflow": "XBS GX03 hosted API26 / API34 compatibility",
+          "workflow_id": 419253895,
+          "id": 43759038185
+        }
+      ]
+    },
+    {
+      "milestone": "GX04",
+      "pr": 31,
+      "branch": "feature/xbs-gx04-native-tiles-p01-20261115",
+      "head": "be9fad6af9ae622c1a3dcb64eb968f4278dfb6c1",
+      "base_branch": "feature/xbs-gx03-hosted-android-journeys-20261115",
+      "base_sha": "aab3ff6d9e6cd9c343218606a5d8c6c619f1c487",
+      "runs": [
+        {
+          "workflow": "Devtool XBS Go and Android candidates",
+          "workflow_id": 386774409,
+          "id": 43772490865
+        },
+        {
+          "workflow": "XBS GX03 hosted API26 / API34 compatibility",
+          "workflow_id": 419253895,
+          "id": 43772490868
+        }
+      ]
+    },
+    {
+      "milestone": "GX05",
+      "pr": 32,
+      "branch": "feature/xbs-gx05-security-performance-readiness-20261116",
+      "head": "1b5fbcd42bd39956c5251ea8f43eadbddf7aefcf",
+      "base_branch": "feature/xbs-gx04-native-tiles-p01-20261115",
+      "base_sha": "be9fad6af9ae622c1a3dcb64eb968f4278dfb6c1",
+      "runs": [
+        {
+          "workflow": "Devtool XBS Go and Android candidates",
+          "workflow_id": 386774409,
+          "id": 43943686673
+        },
+        {
+          "workflow": "XBS GX03 hosted API26 / API34 compatibility",
+          "workflow_id": 419253895,
+          "id": 43943686705
+        }
+      ]
+    }
+  ],
+  "expected_changed_paths": [
+    ".github/workflows/devtool-xbs-ci.yml",
+    "config/delivery-required-ci.json",
+    "docs/engineering/XBS_GX06_COVERAGE.json",
+    "docs/engineering/XBS_GX06_HANDOFF.md",
+    "docs/engineering/XBS_GX06_STACK_LOCK.json",
+    "scripts/ci/gx02_ci_verify.py",
+    "scripts/ci/gx03_contract_audit.py",
+    "scripts/ci/gx06_live_audit.py",
+    "scripts/ci/gx06_stack_gate.py",
+    "scripts/ci/test_gx06_live_audit.py",
+    "scripts/ci/test_gx06_stack_gate.py"
+  ],
+  "policy": "Historical run IDs are candidates; live GitHub checks must reattest current PR heads, workflow IDs, attempts, required jobs, artifact digests and availability.",
+  "r10a": "SIDE_TRACK_PREFLIGHT_ONLY_NOT_ORIGINAL_R10_APPLIED",
+  "auto_merge": false,
+  "physical_root_qualified": false,
+  "release_qualified": false
+}

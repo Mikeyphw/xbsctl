@@ -1,0 +1,53 @@
+package io.github.mikeceead.xbscompanion;
+
+public final class Gx04DecisionHarness {
+    private static int checks;
+    private static void need(boolean good) { checks++; if (!good) throw new AssertionError("GX04 policy check " + checks); }
+    public static void main(String[] unused) {
+        for (XbsTileDecision.Kind k : XbsTileDecision.Kind.values()) {
+            need(XbsTileDecision.evaluate(k,false,false,false,false,false,false).phase
+                 != XbsTileDecision.Phase.ACTIVE);
+            need(XbsTileDecision.evaluate(k,true,true,true,true,false,false).phase
+                 == XbsTileDecision.Phase.PENDING);
+            need(XbsTileDecision.evaluate(k,true,true,true,false,true,false).phase
+                 == XbsTileDecision.Phase.FAILED);
+            need(XbsTileDecision.evaluate(k,true,true,true,false,true,true).phase
+                 == XbsTileDecision.Phase.RECOVERY_REQUIRED);
+        }
+        XbsTileDecision pause = XbsTileDecision.evaluate(XbsTileDecision.Kind.PAUSE,true,false,false,false,false,false);
+        need(pause.phase==XbsTileDecision.Phase.INACTIVE && "pause".equals(pause.action));
+        pause = XbsTileDecision.evaluate(XbsTileDecision.Kind.PAUSE,true,true,false,false,false,false);
+        need(pause.phase==XbsTileDecision.Phase.ACTIVE && "resume".equals(pause.action));
+        XbsTileDecision safe = XbsTileDecision.evaluate(XbsTileDecision.Kind.SAFE,true,false,false,false,false,false);
+        need(safe.phase==XbsTileDecision.Phase.INACTIVE && "safe_on".equals(safe.action));
+        safe = XbsTileDecision.evaluate(XbsTileDecision.Kind.SAFE,true,false,true,false,false,false);
+        need(safe.phase==XbsTileDecision.Phase.ACTIVE && "safe_off".equals(safe.action));
+        for (XbsTileDecision.Kind k : new XbsTileDecision.Kind[] {XbsTileDecision.Kind.SAVER,
+               XbsTileDecision.Kind.PROFILES, XbsTileDecision.Kind.RESTORE})
+            need(XbsTileDecision.evaluate(k,true,true,true,false,false,false).action==null);
+        need(XbsTileDecision.evaluate(XbsTileDecision.Kind.RESTORE,true,false,false,false,false,false).phase
+             == XbsTileDecision.Phase.INACTIVE);
+        for(XbsTileDecision.Kind k:new XbsTileDecision.Kind[] {XbsTileDecision.Kind.SAVER,XbsTileDecision.Kind.PROFILES}) {
+            XbsTileDecision event=XbsTileDecision.event(k,true,true,false,false,false,false,false);
+            need(event.phase==XbsTileDecision.Phase.INACTIVE && "event_run".equals(event.action));
+            event=XbsTileDecision.event(k,true,true,true,false,false,false,false);
+            need(event.phase==XbsTileDecision.Phase.ACTIVE && "event_stop".equals(event.action));
+            need(XbsTileDecision.event(k,true,true,true,true,false,false,false).phase==XbsTileDecision.Phase.UNAVAILABLE);
+            need(XbsTileDecision.event(k,true,false,false,false,false,false,false).action==null);
+            need(XbsTileDecision.event(k,true,true,false,false,true,false,false).phase==XbsTileDecision.Phase.PENDING);
+            need(XbsTileDecision.event(k,true,true,false,false,false,true,true).phase==XbsTileDecision.Phase.RECOVERY_REQUIRED);
+        }
+        // Completion requires a successful *terminal* run record AND later authenticated daemon evidence.
+        need(XbsTileCompletionPolicy.evaluate(null,true,true,true)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("running",true,true,true)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("pending",true,true,true)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("ok",false,true,true)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("ok",true,false,true)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("ok",true,true,false)==XbsTileCompletionPolicy.Outcome.WAIT);
+        need(XbsTileCompletionPolicy.evaluate("ok",true,true,true)==XbsTileCompletionPolicy.Outcome.CONFIRMED);
+        need(XbsTileCompletionPolicy.evaluate("failed",true,true,true)==XbsTileCompletionPolicy.Outcome.FAILED);
+        need(XbsTileCompletionPolicy.evaluate("cancelled",true,true,true)==XbsTileCompletionPolicy.Outcome.FAILED);
+        need(XbsTileCompletionPolicy.evaluate("recovery_required",true,true,true)==XbsTileCompletionPolicy.Outcome.RECOVERY_REQUIRED);
+        System.out.println("GX04_NATIVE_PURE_JAVA_POLICY_PASS checks="+checks);
+    }
+}

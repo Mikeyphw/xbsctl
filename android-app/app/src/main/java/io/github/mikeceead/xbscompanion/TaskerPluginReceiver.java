@@ -15,7 +15,13 @@ public final class TaskerPluginReceiver extends BroadcastReceiver {
         if(intent==null||!TaskerProtocol.ACTION_FIRE_SETTING.equals(intent.getAction()))return;
         final boolean ordered=isOrderedBroadcast();final String sender=TaskerConfigCodec.sentFromPackage(this);final int senderUid=TaskerConfigCodec.sentFromUid(this);final PendingResult pending=goAsync();final Context app=context.getApplicationContext();final Intent request=new Intent(intent);
         try {
-            EXECUTOR.execute(()->{try{handle(app,request,pending,ordered,sender,senderUid);}finally{pending.finish();}});
+            EXECUTOR.execute(()->{
+                try { handle(app,request,pending,ordered,sender,senderUid); }
+                catch(RuntimeException malformed) {
+                    fail(pending,ordered,"Tasker action rejected: malformed input");
+                    ExternalEntryStore.record(app,"tasker_action","malformed_input_rejected","",false,false);
+                } finally { pending.finish(); }
+            });
         } catch (RuntimeException rejected) {
             fail(pending,ordered,"Tasker action queue is busy");
             ExternalEntryStore.record(app,"tasker_action","queue_rejected","",false,!sender.isEmpty());
@@ -39,7 +45,16 @@ public final class TaskerPluginReceiver extends BroadcastReceiver {
         TaskerConfigCodec.ParseResult parsed=TaskerConfigCodec.parseCliValues(config.getString(TaskerProtocol.KEY_CLI_VALUES,""),command);
         if(!parsed.valid){fail(pending,ordered,"Tasker fields rejected: "+parsed.code);ExternalEntryStore.record(context,"tasker_action",parsed.code,host,false,senderVerified);return;}
         final String shell;try{shell=command.build(parsed.values);}catch(IllegalArgumentException error){fail(pending,ordered,error.getMessage());ExternalEntryStore.record(context,"tasker_action","field_validation_failed",host,false,senderVerified);return;}
+        // A second delivery of the same signed action within 1.5 seconds is not
+        // another intentional command; prevent it from reaching the root queue.
+        String dedupKey=senderUid+":"+config.getString(TaskerRequestPolicy.KEY_SIGNATURE,"")+":"+command.id+":"+config.getString(TaskerProtocol.KEY_CLI_VALUES,"");
+        if (!R05aActionDedup.claim(dedupKey,System.nanoTime())) {
+            fail(pending,ordered,"Duplicate Tasker action suppressed");
+            ExternalEntryStore.record(context,"tasker_action","duplicate_suppressed",host,false,senderVerified);
+            return;
+        }
         CommandLaunchResult result=RootCommandRunner.runCommand(context,"tasker_"+command.id,command.title,command.description,shell,command.destructive,intent);
+        if (!result.started) R05aActionDedup.release(dedupKey);
         if(result.started){if(ordered)pending.setResultCode(TaskerProtocol.RESULT_PENDING);ExternalEntryStore.record(context,"tasker_action","accepted",host,true,senderVerified);}
         else{fail(pending,ordered,result.error);ExternalEntryStore.record(context,"tasker_action","launch_failed",host,false,senderVerified);}
     }

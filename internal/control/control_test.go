@@ -130,18 +130,22 @@ func TestInboxRecoversClaimAndSkipsAcknowledgedRequest(t *testing.T) {
 	if err != nil || got.ID != r.ID || !strings.HasSuffix(work, ".work") {
 		t.Fatalf("claim=%+v path=%q err=%v", got, work, err)
 	}
-	// Simulate daemon restart before completion: the .work claim is recoverable.
-	got, work2, err := NextRequest(ctl)
-	if err != nil || got.ID != r.ID || work2 != work {
-		t.Fatalf("recovered=%+v path=%q err=%v", got, work2, err)
+	// The first daemon may have applied effects before the crash.
+	// Its .work claim MUST NOT be handed to a second executor.
+	got, interrupted, err := NextRequest(ctl)
+	if err == nil || got.ID != "" || !strings.HasSuffix(interrupted, ".interrupted") {
+		t.Fatalf("interrupted claim replayed: %+v path=%q err=%v", got, interrupted, err)
 	}
-	if err := CompleteRequest(ctl, got, nil); err != nil {
-		t.Fatal(err)
+	ack, found := ReadAck(ctl, r.ID)
+	if !found || ack.State != "failed" || !strings.Contains(ack.Error, "not replayed") {
+		t.Fatalf("missing interrupted receipt: %+v found=%v", ack, found)
 	}
-	// Simulate crash after ack but before deleting .work: it must not re-execute.
+	if _, err := os.Stat(interrupted); err != nil {
+		t.Fatalf("interrupted evidence missing: %v", err)
+	}
 	got, path, err := NextRequest(ctl)
 	if err != nil || path != "" || got.ID != "" {
-		t.Fatalf("acknowledged request replayed: %+v %q %v", got, path, err)
+		t.Fatalf("interrupted request returned twice: %+v %q %v", got, path, err)
 	}
 }
 

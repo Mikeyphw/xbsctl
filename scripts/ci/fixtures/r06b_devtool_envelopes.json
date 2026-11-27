@@ -1,0 +1,265 @@
+{
+  "envelopes": {
+    "AFFECTED": {
+      "command": "affected",
+      "data": {
+        "changed_paths": [
+          "cmd/r06b-fixture.go"
+        ],
+        "schema_version": 1,
+        "targets": [
+          "xbs",
+          "xbs_android"
+        ],
+        "uncertain_paths": []
+      },
+      "duration_seconds": 0.1,
+      "events": [],
+      "exit_code": 0,
+      "ipc_protocol_version": 2,
+      "machine": {
+        "actions": [],
+        "capabilities": {},
+        "diagnostics": {},
+        "federation": {},
+        "navigation": [],
+        "notifications": [],
+        "operation": {},
+        "presentation": {},
+        "producer": "devtool",
+        "progress": {},
+        "responsive": {},
+        "run_id": "",
+        "schema_version": 2,
+        "selection": {},
+        "test_selection": {},
+        "workflow": {},
+        "workspace": {}
+      },
+      "machine_schema_version": 2,
+      "ok": true,
+      "repo": "/fixture/xbsctl",
+      "result": {
+        "exit_code": 0,
+        "success": true
+      },
+      "schema_version": 1,
+      "started_at": "2026-11-13T00:00:00Z",
+      "stderr": "",
+      "stdout": ""
+    },
+    "PLAN": {
+      "command": "plan",
+      "data": {
+        "action": "ci-module",
+        "commands": [
+          {
+            "argv": [
+              "test",
+              "-f",
+              "go.mod"
+            ],
+            "workflow_ref": "job:xbs-go-mod-present"
+          },
+          {
+            "argv": [
+              "go",
+              "test",
+              "-json",
+              "-p",
+              "2",
+              "./..."
+            ],
+            "workflow_ref": "job:xbs-go-test"
+          },
+          {
+            "argv": [
+              "go",
+              "vet",
+              "./..."
+            ],
+            "workflow_ref": "job:xbs-go-vet"
+          },
+          {
+            "argv": [
+              "go",
+              "run",
+              "./cmd/xbs",
+              "contracts",
+              "check"
+            ],
+            "workflow_ref": "job:xbs-contract-check"
+          },
+          {
+            "argv": [
+              "go",
+              "run",
+              "./cmd/xbsrepo",
+              "final-seal"
+            ],
+            "workflow_ref": "job:xbs-final-seal"
+          },
+          {
+            "argv": [
+              "go",
+              "run",
+              "./cmd/xbsrepo",
+              "build-module",
+              "--out",
+              "dist/XtremeBS-go.zip"
+            ],
+            "workflow_ref": "job:xbs-build-module"
+          }
+        ],
+        "graph": {
+          "nodes": [
+            {
+              "depends_on": [],
+              "id": "source",
+              "key": "xbs.ci-module.source",
+              "ref": "job:xbs-go-mod-present"
+            },
+            {
+              "depends_on": [
+                "xbs.ci-module.source"
+              ],
+              "id": "tests",
+              "key": "xbs.ci-module.tests",
+              "ref": "job:xbs-go-test"
+            },
+            {
+              "depends_on": [
+                "xbs.ci-module.source"
+              ],
+              "id": "vet",
+              "key": "xbs.ci-module.vet",
+              "ref": "job:xbs-go-vet"
+            },
+            {
+              "depends_on": [
+                "xbs.ci-module.tests",
+                "xbs.ci-module.vet"
+              ],
+              "id": "contracts",
+              "key": "xbs.ci-module.contracts",
+              "ref": "job:xbs-contract-check"
+            },
+            {
+              "depends_on": [
+                "xbs.ci-module.contracts"
+              ],
+              "id": "seal",
+              "key": "xbs.ci-module.seal",
+              "ref": "job:xbs-final-seal"
+            },
+            {
+              "depends_on": [
+                "xbs.ci-module.seal"
+              ],
+              "id": "module",
+              "key": "xbs.ci-module.module",
+              "ref": "job:xbs-build-module"
+            }
+          ],
+          "order": [
+            "xbs.ci-module.source",
+            "xbs.ci-module.tests",
+            "xbs.ci-module.vet",
+            "xbs.ci-module.contracts",
+            "xbs.ci-module.seal",
+            "xbs.ci-module.module"
+          ]
+        },
+        "schema_version": 2,
+        "targets": [
+          "xbs"
+        ]
+      },
+      "duration_seconds": 0.1,
+      "events": [],
+      "exit_code": 0,
+      "ipc_protocol_version": 2,
+      "machine": {
+        "actions": [],
+        "capabilities": {},
+        "diagnostics": {},
+        "federation": {},
+        "navigation": [],
+        "notifications": [],
+        "operation": {},
+        "presentation": {},
+        "producer": "devtool",
+        "progress": {},
+        "responsive": {},
+        "run_id": "",
+        "schema_version": 2,
+        "selection": {},
+        "test_selection": {},
+        "workflow": {},
+        "workspace": {}
+      },
+      "machine_schema_version": 2,
+      "ok": true,
+      "repo": "/fixture/xbsctl",
+      "result": {
+        "exit_code": 0,
+        "success": true
+      },
+      "schema_version": 1,
+      "started_at": "2026-11-13T00:00:00Z",
+      "stderr": "",
+      "stdout": ""
+    },
+    "PREFLIGHT": {
+      "command": "preflight",
+      "data": {
+        "checks": [],
+        "healthy": true,
+        "runners": [
+          "go",
+          "command"
+        ],
+        "schema_version": 2,
+        "targets": [
+          "xbs"
+        ]
+      },
+      "duration_seconds": 0.1,
+      "events": [],
+      "exit_code": 0,
+      "ipc_protocol_version": 2,
+      "machine": {
+        "actions": [],
+        "capabilities": {},
+        "diagnostics": {},
+        "federation": {},
+        "navigation": [],
+        "notifications": [],
+        "operation": {},
+        "presentation": {},
+        "producer": "devtool",
+        "progress": {},
+        "responsive": {},
+        "run_id": "",
+        "schema_version": 2,
+        "selection": {},
+        "test_selection": {},
+        "workflow": {},
+        "workspace": {}
+      },
+      "machine_schema_version": 2,
+      "ok": true,
+      "repo": "/fixture/xbsctl",
+      "result": {
+        "exit_code": 0,
+        "success": true
+      },
+      "schema_version": 1,
+      "started_at": "2026-11-13T00:00:00Z",
+      "stderr": "",
+      "stdout": ""
+    }
+  },
+  "producer": "devtool/api_output.py invocation_envelope + devtool/cli.py native payloads; source-derived wire fixtures; live CI is required",
+  "upstream_commit": "44eb17bbbd63194aa67cde0f7b63d5ada44fb96e"
+}

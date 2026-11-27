@@ -42,10 +42,13 @@ final class EventBridgeStore {
     }
 
     /** Synchronous commit is required before authenticated data can be returned to callers. */
-    static boolean accept(Context context, String keyId, long sequence, String digest) {
+    static synchronized boolean accept(Context context, String keyId, long sequence, String digest) {
         String safeKey = normalizedHex(keyId, 16);
         String safeDigest = normalizedHex(digest, 64);
         if (safeKey.isEmpty() || safeDigest.isEmpty() || sequence < 1L) return false;
+        Cursor previous = cursor(context);
+        if (!R05cReplayCursorPolicy.mayCommit(previous.keyId, previous.sequence, previous.digest,
+                safeKey, sequence, safeDigest)) return false;
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putString(KEY_ID, safeKey)
             .putLong(SEQUENCE, sequence)

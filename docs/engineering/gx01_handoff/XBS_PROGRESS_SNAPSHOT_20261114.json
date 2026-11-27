@@ -1,0 +1,301 @@
+{
+  "schema": "xbs-handoff-v3-progress-snapshot/v1",
+  "observed_date": "2026-11-14",
+  "repo": "Mikeyphw/xbsctl",
+  "main_sha": "f048d2d5526a3d0d7632e477b6b4f052e41e30df",
+  "implementation_stack_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+  "original_roadmap_sha256": "14f0a03f193c418faecfdcf9f04b05036073109d5053dce4a442209750fafa39",
+  "prior_repo_ledger_blob_sha": "155596d40de3acca86764dc9a0534969d4f5e4cf",
+  "prior_repo_matrix_blob_sha": "23a357298ccdc9fa545d300201e777ee9802f1eb",
+  "original_phase_count": 14,
+  "original_task_count": 178,
+  "original_case_count": 131,
+  "task_tracking_counts": {
+    "IN_PROGRESS": 106,
+    "NOT_STARTED": 65,
+    "HOSTED_VERIFIED": 7
+  },
+  "roadmap_task_accepted": 0,
+  "roadmap_case_accepted": 0,
+  "hosted_runs_exact_sha": [
+    {
+      "pr_number": 17,
+      "run_id": 43495194055,
+      "attempt": 1,
+      "source_sha": "133f1923bb4ea501ed8caf074d5dac30464fbecb",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43495194055",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 18,
+      "run_id": 43500262306,
+      "attempt": 1,
+      "source_sha": "b87d1bf18fd20b18c4d76d4c9b8890af24e9a104",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43500262306",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 19,
+      "run_id": 43554367907,
+      "attempt": 1,
+      "source_sha": "1f646ce260f38128d409e01319d7e20db00c4368",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43554367907",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 20,
+      "run_id": 43603270776,
+      "attempt": 1,
+      "source_sha": "0e3de1e2f2281c404743574058d44d826d7c55eb",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43603270776",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 21,
+      "run_id": 43606856091,
+      "attempt": 1,
+      "source_sha": "401d972c1c85ca429bf6676d2987cae437c07338",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43606856091",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 22,
+      "run_id": 43610030758,
+      "attempt": 1,
+      "source_sha": "6d23d6adc9054d2ee16d42173ccb94702dc59dcf",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43610030758",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 23,
+      "run_id": 43616766849,
+      "attempt": 1,
+      "source_sha": "ffe8bc2c2efb28126e57d973dee7620245fb47e9",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43616766849",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 24,
+      "run_id": 43646824836,
+      "attempt": 1,
+      "source_sha": "f8218222993940688df715d0ee32b353ff8092b5",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43646824836",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 25,
+      "run_id": 43648376860,
+      "attempt": 1,
+      "source_sha": "9f6e58473fcad26b26ca07eb1a7ec6927fde63b0",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43648376860",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    },
+    {
+      "pr_number": 26,
+      "run_id": 43650947189,
+      "attempt": 1,
+      "source_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+      "url": "https://github.com/Mikeyphw/xbsctl/actions/runs/43650947189",
+      "scope": "github_hosted_go_jvm_api36_no_physical_root_no_release"
+    }
+  ],
+  "original_phase_assessments": [
+    {
+      "phase": "R00",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Original baseline and historic test inventory not fully reconciled."
+    },
+    {
+      "phase": "R01",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Rootless simulation and ownership improvements exist; full physical invariants not accepted."
+    },
+    {
+      "phase": "R02",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Durable queue/recovery hosted tests exist; original case mapping and physical crash acceptance remain."
+    },
+    {
+      "phase": "R03",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Automatic event logic and chronology probes exist; physical automatic transitions not qualified."
+    },
+    {
+      "phase": "R04",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Module ZIP, staging and host-safety tests exist; actual root install and upgrade not qualified."
+    },
+    {
+      "phase": "R05",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Hosted Android JVM/API36 partial journeys qualify; full original Tasker and lifecycle matrix not closed."
+    },
+    {
+      "phase": "R06",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "R06A/B hosted implementation verified; phase acceptance awaits original task/case mapping and Devtool parity audit."
+    },
+    {
+      "phase": "R07",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "R07A hosted immutable required gates and evidence verified; full optimization parity and case mapping still open."
+    },
+    {
+      "phase": "R08",
+      "status": "NOT_STARTED",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "No native TileService/manifest tiles found; in-app QuickActionsSheet is not SystemUI Quick Settings."
+    },
+    {
+      "phase": "R09",
+      "status": "HOSTED_VERIFIED",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "R09A-F hosted Go/race/fuzz/crash/coverage gates green; original 11 tasks/BE-FX mappings require reconciliation."
+    },
+    {
+      "phase": "R10",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Hosted API36 instrumentation exists, but R10 original 13-task journey suite and API26/API34 shards incomplete."
+    },
+    {
+      "phase": "R11",
+      "status": "NOT_STARTED",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "No physical source-bound, consented root/device acceptance established."
+    },
+    {
+      "phase": "R12",
+      "status": "IN_PROGRESS",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Rootless adversarial/negative cases exist; performance, battery, redaction and device-dependent scope open."
+    },
+    {
+      "phase": "R13",
+      "status": "NOT_STARTED",
+      "original_exit_gate": "NOT_ACCEPTED",
+      "notes": "Not release qualified; signed-candidate, physical and full matrix gate remain blocked."
+    }
+  ],
+  "r09f_hosted": {
+    "pr": 26,
+    "sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+    "run_id": 43650947189,
+    "attempt": 1,
+    "status": "success",
+    "go_contract": "success",
+    "android_jvm": "success",
+    "api36": "success",
+    "full_internal_go_coverage_percent": 72.09,
+    "seven_risk_packages_below_50pct": 0,
+    "r09f_named_test_count": 6,
+    "r09f_subtest_count": 88,
+    "repeat_root_events": 18,
+    "repeat_subtest_events": 264,
+    "race_root_events": 6,
+    "race_subtest_events": 88,
+    "physical_root_verified": false,
+    "release_signed": false
+  },
+  "android_inventory": {
+    "api36_instrumentation_source_files": 11,
+    "native_quick_settings_tiles_source_files_found": 0,
+    "api26_api34_compatibility_workflows_found": 0,
+    "canonical_github_workflow_files_found": 1
+  },
+  "r10a_stack_integration": {
+    "status": "PREPARED_ONLY_NOT_APPLIED",
+    "artifact_name": "XBS_R10A_CONSOLIDATED_STACK_INTEGRATION.zip",
+    "remote_branch_or_pr_confirmed": false,
+    "must_not_count_as_original_R10": true
+  },
+  "side_roadmap_status": "PLANNED_NOT_IMPLEMENTED",
+  "physical_device_acceptance": "NOT_PERFORMED",
+  "signed_release_acceptance": "NOT_PERFORMED",
+  "source_scope": "current repo/GitHub CI plus historic original handoff; no physical/device observation",
+  "side_track": {
+    "id": "GX",
+    "phase_count": 6,
+    "task_count": 40,
+    "status": "PLANNED",
+    "not_part_of_original_178_or_131": true,
+    "gates": [
+      {
+        "id": "GX01",
+        "name": "Evidence truth and ledger reconciliation",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R00",
+          "R06",
+          "R07",
+          "R09",
+          "R13"
+        ]
+      },
+      {
+        "id": "GX02",
+        "name": "Control-plane and CI reliability improvements",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R06",
+          "R07",
+          "R12"
+        ]
+      },
+      {
+        "id": "GX03",
+        "name": "Hosted Android journey and compatibility gap closure",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R05",
+          "R08",
+          "R10"
+        ]
+      },
+      {
+        "id": "GX04",
+        "name": "Native Quick Settings and cross-surface UX closure",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R03",
+          "R05",
+          "R08",
+          "R10"
+        ]
+      },
+      {
+        "id": "GX05",
+        "name": "Adversarial, privacy, performance and physical-readiness preflight",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R01",
+          "R04",
+          "R11",
+          "R12",
+          "R13"
+        ]
+      },
+      {
+        "id": "GX06",
+        "name": "Stack integration, hardening signoff and original-roadmap handback",
+        "status": "PLANNED",
+        "mapped_original_phases": [
+          "R00",
+          "R07",
+          "R10",
+          "R11",
+          "R12",
+          "R13"
+        ]
+      }
+    ]
+  }
+}

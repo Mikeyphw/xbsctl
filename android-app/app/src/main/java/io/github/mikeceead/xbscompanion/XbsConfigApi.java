@@ -108,7 +108,7 @@ final class XbsConfigApi {
             if(out.exitCode!=0){
                 String detail=out.error.isEmpty()?out.stdout:out.error;
                 if(context!=null)XbsConfigTransactionStore.save(context,XbsConfigTransaction.latest());
-                return Result.error("Configuration transaction failed safely: "+detail);
+                return Result.error("Configuration transaction is not confirmed; inspect the durable recovery journal: "+detail);
             }
             if (context != null) {
                 XbsCache.put(context, CONFIG_CACHE, config.toString());

@@ -112,7 +112,7 @@ func TestRuntimeAndEventCommandsDelegateToGoController(t *testing.T) {
 		t.Fatalf("unexpected runtime payload: %#v", payload)
 	}
 	ctl := filepath.Join(root, "runtime", "xbs.ctl")
-	req, _, qerr := control.NextRequest(ctl)
+	req, firstClaim, qerr := control.NextRequest(ctl)
 	if qerr != nil || req.Command != "reload" {
 		t.Fatalf("reload request=%+v err=%v", req, qerr)
 	}
@@ -122,9 +122,27 @@ func TestRuntimeAndEventCommandsDelegateToGoController(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("event run exit = %d stdout=%s stderr=%s", code, out.String(), err.String())
 	}
-	req, _, qerr = control.NextRequest(ctl)
-	if qerr != nil || req.Command != "reload" { // first request remains until daemon acknowledges it
-		t.Fatalf("queued request order lost: %+v err=%v", req, qerr)
+	// Simulate the daemon durably acknowledging the first command before
+	// cleaning up its .work claim. R01B must skip this acknowledged claim,
+	// not replay it or mistake a new queued event for interrupted work.
+	if err := control.CompleteRequest(ctl, req, nil); err != nil {
+		t.Fatalf("complete reload request: %v", err)
+	}
+	req, nextClaim, qerr := control.NextRequest(ctl)
+	if qerr != nil || req.Command != "start" || req.Event != "manual" {
+		t.Fatalf("queued event order lost after completed reload: %+v err=%v", req, qerr)
+	}
+	if _, err := os.Stat(firstClaim); !os.IsNotExist(err) {
+		t.Fatalf("acknowledged claim not removed: %q err=%v", firstClaim, err)
+	}
+	if err := control.CompleteRequest(ctl, req, nil); err != nil {
+		t.Fatalf("complete event request: %v", err)
+	}
+	if err := os.Remove(nextClaim); err != nil {
+		t.Fatalf("remove event claim: %v", err)
+	}
+	if leftover, path, err := control.NextRequest(ctl); err != nil || path != "" || leftover.ID != "" {
+		t.Fatalf("queue not drained: %+v path=%q err=%v", leftover, path, err)
 	}
 }
 

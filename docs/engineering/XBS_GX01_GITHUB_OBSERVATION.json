@@ -1,0 +1,218 @@
+{
+  "schema": "xbs-gx01-github-observation/v1",
+  "observation_date_utc": "2026-11-15",
+  "repository": "Mikeyphw/xbsctl",
+  "main_sha": "f048d2d5526a3d0d7632e477b6b4f052e41e30df",
+  "stack_head_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+  "stack_branch": "feature/xbs-r09f-adversarial-final-ledger-20261114",
+  "stack_base_branch": "feature/xbs-r09e-seven-package-boundaries-20261114",
+  "stack_base_sha": "9f6e58473fcad26b26ca07eb1a7ec6927fde63b0",
+  "devtool_main_sha": "44eb17bbbd63194aa67cde0f7b63d5ada44fb96e",
+  "live_files": {
+    "docs/engineering/XBS_IMPLEMENTATION_LEDGER.json": "155596d40de3acca86764dc9a0534969d4f5e4cf",
+    "docs/engineering/XBS_TEST_MATRIX.json": "23a357298ccdc9fa545d300201e777ee9802f1eb",
+    "docs/engineering/XBS_FINAL_ROADMAP_v2.md": "d37b56322f67bd2eb2b45744c2de0df3603456e8"
+  },
+  "history": [
+    {
+      "pr_number": 17,
+      "head": "feature/xbs-r05c-api36-companion-acceptance-20261113",
+      "head_sha": "133f1923bb4ea501ed8caf074d5dac30464fbecb",
+      "run_id": 43495194055,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 18,
+      "head": "feature/xbs-r06a-native-devtool-dag-20261113",
+      "head_sha": "b87d1bf18fd20b18c4d76d4c9b8890af24e9a104",
+      "run_id": 43500262306,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 19,
+      "head": "feature/xbs-r06b-native-devtool-runtime-20261113",
+      "head_sha": "1f646ce260f38128d409e01319d7e20db00c4368",
+      "run_id": 43554367907,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 20,
+      "head": "feature/xbs-r07a-ci-policy-20261114",
+      "head_sha": "0e3de1e2f2281c404743574058d44d826d7c55eb",
+      "run_id": 43603270776,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 21,
+      "head": "feature/xbs-r09a-backend-fuzz-evidence-20261114",
+      "head_sha": "401d972c1c85ca429bf6676d2987cae437c07338",
+      "run_id": 43606856091,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 22,
+      "head": "feature/xbs-r09b-backend-fault-matrix-20261114",
+      "head_sha": "6d23d6adc9054d2ee16d42173ccb94702dc59dcf",
+      "run_id": 43610030758,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 23,
+      "head": "feature/xbs-r09c-fake-android-cli-20261114",
+      "head_sha": "ffe8bc2c2efb28126e57d973dee7620245fb47e9",
+      "run_id": 43616766849,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 24,
+      "head": "feature/xbs-r09d-risk-coverage-20261114",
+      "head_sha": "f8218222993940688df715d0ee32b353ff8092b5",
+      "run_id": 43646824836,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 25,
+      "head": "feature/xbs-r09e-seven-package-boundaries-20261114",
+      "head_sha": "9f6e58473fcad26b26ca07eb1a7ec6927fde63b0",
+      "run_id": 43648376860,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    },
+    {
+      "pr_number": 26,
+      "head": "feature/xbs-r09f-adversarial-final-ledger-20261114",
+      "head_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+      "run_id": 43650947189,
+      "run_attempt": 1,
+      "workflow": "Devtool XBS Go and Android candidates",
+      "run_status": "completed",
+      "run_conclusion": "success",
+      "event": "pull_request",
+      "pr_status": "open",
+      "merged": false,
+      "source": "GitHub get_pr_info + fetch_commit_workflow_runs 2026-11-15 UTC"
+    }
+  ],
+  "latest_run": {
+    "run_id": 43650947189,
+    "attempt": 1,
+    "head_sha": "e8647e8f80833d26fe6a6164725ae493f4a37301",
+    "workflow": "Devtool XBS Go and Android candidates",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "go-contract",
+        "status": "completed",
+        "conclusion": "success",
+        "id": 132619067946
+      },
+      {
+        "name": "android-companion-jvm",
+        "status": "completed",
+        "conclusion": "success",
+        "id": 132619067711
+      },
+      {
+        "name": "android-companion-api36",
+        "status": "completed",
+        "conclusion": "success",
+        "id": 132619623799
+      },
+      {
+        "name": "android-companion-debug",
+        "status": "completed",
+        "conclusion": "skipped",
+        "id": 132619625573
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 14136361851,
+        "name": "xbs-companion-r05c-api36-43650947189-1",
+        "reported_digest_sha256": "9ae1ec5546e1ecd7ea39f7c615f455f6cff6ea5f0a51072470da5f94eda73038"
+      },
+      {
+        "id": 14135778139,
+        "name": "xbs-android-jvm-counts-43650947189-1",
+        "reported_digest_sha256": "9847916bed0af533bed22b5d7e92345e0af7cc82e6ee069070d723f9adcc11ae"
+      },
+      {
+        "id": 14134964333,
+        "name": "xbs-android-module-43650947189-1",
+        "reported_digest_sha256": "0de0e460f09190cd2069f8cd6ac13733cd6db152fe1186007765db871ccb06e9"
+      }
+    ],
+    "artifact_digest_scope": "GITHUB_REPORTED_DIGEST_NOT_INDEPENDENT_DOWNLOADED_BYTE_REHASH",
+    "source": "GitHub fetch_workflow_run_jobs + fetch_workflow_run_artifacts"
+  },
+  "unqualified_lanes": [
+    "PHYSICAL_READ_ONLY",
+    "PHYSICAL_REVERSIBLE_AUTHORIZED",
+    "SIGNED_RELEASE"
+  ],
+  "no_remote_repo_write_performed_by_packager": true
+}

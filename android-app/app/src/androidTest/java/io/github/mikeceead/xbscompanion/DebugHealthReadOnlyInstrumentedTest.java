@@ -2,7 +2,11 @@ package io.github.mikeceead.xbscompanion;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.test.AndroidTestCase;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,9 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Device regression proving Debug Health does not mutate source evidence. */
-public final class DebugHealthReadOnlyInstrumentedTest extends AndroidTestCase {
-    public void testEvaluationDoesNotMutateHistoryLegacyPayloadTransactionCacheOrDatabase() throws Exception {
-        Context app = getContext().getApplicationContext();
+@RunWith(AndroidJUnit4.class)
+public final class DebugHealthReadOnlyInstrumentedTest {
+    @Test public void testEvaluationDoesNotMutateHistoryLegacyPayloadTransactionCacheOrDatabase() throws Exception {
+        Context app = ApplicationProvider.getApplicationContext();
         Thread.sleep(250L);
         SharedPreferences legacy = app.getSharedPreferences("suite_runs", Context.MODE_PRIVATE);
         String legacyPayload = "[{\"run_id\":\"passive-sentinel\",\"status\":\"running\"}]";

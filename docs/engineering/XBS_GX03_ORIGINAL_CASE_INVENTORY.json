@@ -1,0 +1,60 @@
+{
+  "schema": "xbs-gx03-original-r10-inventory/v1",
+  "original_case_count": 21,
+  "original_case_ids": [
+    "EM-001",
+    "EM-002",
+    "EM-003",
+    "EM-004",
+    "EM-005",
+    "EM-006",
+    "EM-007",
+    "EM-008",
+    "EM-009",
+    "EM-010",
+    "EM-011",
+    "EM-012",
+    "EM-013",
+    "EM-014",
+    "EM-015",
+    "EM-016",
+    "EM-017",
+    "EM-018",
+    "EM-022",
+    "EM-023",
+    "EM-024"
+  ],
+  "original_cases_accepted": [],
+  "original_task_count": 178,
+  "original_all_test_cases": 131,
+  "audit_findings": 26,
+  "physical_root_qualified": false,
+  "signed_release": false,
+  "emulator_scope_only": true,
+  "partial_assertion_candidates": {
+    "EM-003": [
+      "Gx03JourneyInstrumentedTest.realMainActivityRendersAndNavigatesFiveTabs"
+    ],
+    "EM-004": [
+      "Gx03JourneyInstrumentedTest.allFivePagesHaveRealNonemptyViewTrees"
+    ],
+    "EM-014": [
+      "Gx03ProcessDeathInstrumentedTest.stageAWriteDurablePendingOwnership",
+      "Gx03ProcessDeathInstrumentedTest.stageBInspectRecoveryAfterExternalForceStop"
+    ],
+    "EM-023": [
+      "R05cUiSmokeInstrumentedTest.launcherActivityReachesResumedWithoutTaskerOrRoot"
+    ],
+    "EM-024": [
+      "R05cTaskerBoundaryInstrumentedTest.unsignedActionFailsWithoutStartingRoot"
+    ]
+  },
+  "unverified_requirements": [
+    "Config/event/essentials CRUD",
+    "Complete Tasker editor return journeys",
+    "Notification cancellation",
+    "Locale/RTL and accessibility full screen coverage",
+    "Exact original 21 case acceptance"
+  ],
+  "note": "Candidate assertions are NOT a completed original test case."
+}

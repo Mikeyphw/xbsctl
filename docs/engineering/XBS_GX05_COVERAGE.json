@@ -1,0 +1,45 @@
+{
+  "changed_paths": [
+    "android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx05PreflightInstrumentedTest.java",
+    "config/delivery-required-ci.json",
+    "docs/engineering/XBS_GX05_CONSENT_MATRIX.json",
+    "docs/engineering/XBS_GX05_COVERAGE.json",
+    "docs/engineering/XBS_GX05_HANDOFF.md",
+    "scripts/ci/gx02_ci_verify.py",
+    "scripts/ci/gx03_contract_audit.py",
+    "scripts/ci/gx03_emulator_host.py",
+    "scripts/ci/gx05_hosted_measure.py",
+    "scripts/ci/gx05_preflight.py",
+    "scripts/ci/test_gx05_hosted_measure.py",
+    "scripts/ci/test_gx05_preflight.py"
+  ],
+  "hosted_rootless_security": {
+    "physical": false,
+    "planned_cases": 7,
+    "required_passes": 7
+  },
+  "measured_alarm_wakeups": false,
+  "measured_battery_savings": false,
+  "original_cases_accepted": [],
+  "original_cases_preserved": 131,
+  "original_findings_preserved": 26,
+  "original_tasks_preserved": 178,
+  "parent": "be9fad6af9ae622c1a3dcb64eb968f4278dfb6c1",
+  "physical_root_qualified": false,
+  "schema": "xbs-gx05-coverage/v1",
+  "signed_release_qualified": false,
+  "startup": {
+    "max_pss_kib": 524288,
+    "p50_ms_max": 8000,
+    "p95_ms_max": 15000,
+    "samples": 7
+  },
+  "unresolved": [
+    "Physical API/ABI/KernelSU/Magisk/Kernel overlays",
+    "R11 consent and real device receipts",
+    "Alarm/wakeup rates on real device",
+    "Power/battery-savings measurements",
+    "Release signing",
+    "Original R12 regression mapping and separate GX06 signoff"
+  ]
+}

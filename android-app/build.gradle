@@ -10,6 +10,8 @@ tasks.register('verifyStableToolchainBaseline') {
     group = 'verification'
     description = 'Verify the fleet-standard stable Android toolchain for XBS Companion.'
     doLast {
+        def devtoolManifest = rootProject.file('../.devtool.toml')
+        if (!devtoolManifest.isFile()) throw new GradleException('Standalone XBS Devtool manifest missing at repository root: ' + devtoolManifest)
         def rootBuild = rootProject.file('build.gradle').text
         def appBuild = rootProject.file('app/build.gradle').text
         def benchmarkBuild = rootProject.file('benchmark/build.gradle').text

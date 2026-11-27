@@ -1,0 +1,27 @@
+{
+  "schema": "xbs-gx01-legacy-exclusions/v1",
+  "phase31": {
+    "historic_reported_files": 918,
+    "historic_reported_contracts": 237,
+    "state": "ARCHIVED_LEGACY_NOT_NEW_RELEASE_PROOF",
+    "original_source": "archive/v2_original/",
+    "credit_for_original_cases": 0,
+    "credit_for_physical": 0,
+    "credit_for_signed_release": 0,
+    "counts_are_historical_claims_not_revalidated": true
+  },
+  "retired_audit_claims": [
+    {
+      "id": "HIST-01",
+      "claim": "Go daemon has no tuning engine",
+      "disposition": "RETIRED",
+      "basis": "internal/daemon/daemon.go calls tuning.Engine.Apply/Restore/Maintain; physical correctness remains unqualified."
+    },
+    {
+      "id": "HIST-02",
+      "claim": "Empty .devtool-wrapper.lock means missing version pin",
+      "disposition": "RETIRED",
+      "basis": "Devtool wrapper_launcher.py uses .devtool-wrapper.lock as file lock; hosted source pin is separate."
+    }
+  ]
+}

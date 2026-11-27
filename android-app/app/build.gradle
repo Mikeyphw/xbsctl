@@ -39,7 +39,8 @@ android {
         }
     }
 
-    testBuildType 'release'
+    // Emulator-only source qualification; preserve release instrumentation by default.
+    testBuildType (project.hasProperty('xbsR05cEmulator') ? 'debug' : 'release')
 
     if (releaseSigningReady) {
         signingConfigs {

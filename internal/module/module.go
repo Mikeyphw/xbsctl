@@ -193,7 +193,7 @@ func StageModule(root string, runtimeBin string, dest string) error {
 			return err
 		}
 	}
-	for _, rel := range []string{"action.sh", "customize.sh", "service.sh", "system/bin/xbs", "system/bin/XBSctl", "system/bin/XtremeBSd"} {
+	for _, rel := range []string{"action.sh", "customize.sh", "service.sh", "META-INF/com/google/android/update-binary", "system/bin/xbs", "system/bin/XBSctl", "system/bin/XtremeBSd"} {
 		p := filepath.Join(tmp, rel)
 		if exists(p) {
 			_ = os.Chmod(p, 0o755)
@@ -202,9 +202,14 @@ func StageModule(root string, runtimeBin string, dest string) error {
 	if err := ValidateModule(tmp); err != nil {
 		return err
 	}
-	_ = os.RemoveAll(dest)
-	if err := os.Rename(tmp, dest); err != nil {
-		return err
+	if err := WriteR04Checksums(tmp); err != nil {
+		return fmt.Errorf("R04 checksum staging: %w", err)
+	}
+	if err := VerifyR04Stage(tmp); err != nil {
+		return fmt.Errorf("R04 stage qualification: %w", err)
+	}
+	if err := CommitR04Stage(tmp, dest); err != nil {
+		return fmt.Errorf("R04 transactional stage replacement: %w", err)
 	}
 	ok = true
 	return nil
@@ -272,6 +277,10 @@ func Zip(root string, out string) error {
 		}
 		if d.IsDir() {
 			return nil
+		}
+		// R04: reject device files, FIFOs and sockets BEFORE opening a zip source.
+		if !d.Type().IsRegular() {
+			return fmt.Errorf("refusing nonregular module zip source: %s", path)
 		}
 		rel, err := filepath.Rel(absRoot, path)
 		if err != nil {
@@ -352,6 +361,10 @@ func Zip(root string, out string) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
+	// Check exact module ZIP bytes before publishing the artifact.
+	if err := VerifyModuleZip(tmpName); err != nil {
+		return fmt.Errorf("R04 ZIP source and layout safety: %w", err)
+	}
 	if err := os.Rename(tmpName, absOut); err != nil {
 		return err
 	}
@@ -364,19 +377,9 @@ func Zip(root string, out string) error {
 }
 
 func Install(zipPath string) error {
-	abs, err := filepath.Abs(zipPath)
-	if err != nil {
-		return err
-	}
-	if !exists(abs) {
-		return fmt.Errorf("module zip not found: %s", abs)
-	}
-	cmd := exec.Command("su", "-c", installShell(abs))
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("module install failed: %w: %s", err, strings.TrimSpace(string(out)))
-	}
-	return nil
+	// Source/CI operation must never launch a live root installer.
+	// Prepare an offline exact-hash candidate with xbsrepo install-command.
+	return errors.New("R04 refuses implicit live module installation; use install-command for a verified operator-reviewed candidate")
 }
 
 func installShell(abs string) string {
@@ -464,7 +467,29 @@ func VerifyRepositoryHandoff(root string) error {
 			strings.Contains(text, "\"job:xbs-go-test\"") &&
 			strings.Contains(text, "[jobs.xbs-go-test]") &&
 			strings.Contains(text, "command = [\"go\", \"test\", \"./...\"]")
-		if !hasCommandTarget || (!hasLegacyGoTest && !hasWorkflowGoTest) {
+		hasNativeGoTarget := strings.Contains(text, `[targets.xbs]
+root = "."
+runner = "go"`)
+		hasNativeGoTest := strings.Contains(text, `[jobs.xbs-go-test]
+runner = "go"
+root = "."
+action = "test"`)
+		hasNativeGoVet := strings.Contains(text, `[jobs.xbs-go-vet]
+runner = "go"
+root = "."
+action = "lint"`)
+		hasNativeGoSeal := strings.Contains(text, `[jobs.xbs-final-seal]
+runner = "command"
+root = "."
+command = ["go", "run", "./cmd/xbsrepo", "final-seal"]`)
+		hasNativeGoWorkflows := strings.Contains(text, "[targets.xbs.workflows]") &&
+			strings.Contains(text, "job:xbs-go-test") &&
+			strings.Contains(text, "job:xbs-go-vet") &&
+			strings.Contains(text, "job:xbs-final-seal") &&
+			strings.Contains(text, "job:xbs-build-module")
+		legacyHandoff := hasCommandTarget && (hasLegacyGoTest || hasWorkflowGoTest)
+		nativeHandoff := hasNativeGoTarget && hasNativeGoTest && hasNativeGoVet && hasNativeGoSeal && hasNativeGoWorkflows
+		if !legacyHandoff && !nativeHandoff {
 			return fmt.Errorf("Devtool xbs target is not sealed as a Go execution target")
 		}
 	}

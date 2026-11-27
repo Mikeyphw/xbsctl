@@ -271,7 +271,7 @@ func runtimeCommand(args []string, stdout io.Writer, stderr io.Writer, g globals
 		return usage(stderr, g, "runtime", "runtime subcommand is required")
 	}
 	switch args[0] {
-	case "reload", "pause", "resume":
+	case "reload", "pause", "resume", "cancel", "recovery":
 		ctl := []string{}
 		if g.jsonMode {
 			ctl = append(ctl, "--json")

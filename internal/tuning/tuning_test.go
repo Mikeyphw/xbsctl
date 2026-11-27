@@ -23,6 +23,8 @@ func (f *fakeRunner) Run(n string, a ...string) (string, error) {
 	switch c {
 	case "pm list packages -3":
 		return "package:app.one\npackage:app.keep\n", nil
+	case "dumpsys package app.one":
+		return "Packages:\n  User 0: installed=true suspended=false hidden=false\n", nil
 	case "pidof app.one":
 		return "101", nil
 	case "pidof com.google.android.gms":
@@ -31,6 +33,10 @@ func (f *fakeRunner) Run(n string, a ...string) (string, error) {
 		return "303", nil
 	case "getprop ro.config.low_ram":
 		return "false", nil
+	case "pm list packages -e com.google.android.gms":
+		return "package:com.google.android.gms\n", nil
+	case "dumpsys deviceidle get force":
+		return "false", nil
 	case "cmd wifi status":
 		return "Wi-Fi is enabled", nil
 	}
@@ -38,7 +44,7 @@ func (f *fakeRunner) Run(n string, a ...string) (string, error) {
 }
 func (f *fakeRunner) Read(p string) (string, error) {
 	if strings.HasPrefix(p, "/proc/") && strings.HasSuffix(p, "/stat") {
-		return "1 (proc) S 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", nil
+		return "1 (proc) S " + strings.Repeat("0 ", 18) + "12345", nil
 	}
 	v, ok := f.files[p]
 	if !ok {

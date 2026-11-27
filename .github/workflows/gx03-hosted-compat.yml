@@ -1,0 +1,107 @@
+name: XBS GX03 hosted API26 / API34 compatibility
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-api26:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
+        with:
+          gradle-version: '9.7.1'
+      - name: GX03 API26 KVM availability
+        run: |
+          set -euo pipefail
+          test -c /dev/kvm
+          sudo chmod 0666 /dev/kvm
+          test -w /dev/kvm
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: 'platform-tools'
+      - name: GX03 API26 Android build tools
+        run: |
+          set -euo pipefail
+          sdkmanager 'build-tools;36.0.0'
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
+      - name: GX03 API26 real emulator smoke and APK pair
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 26
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -eu
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode preflight --api 26
+            gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.R05cLifecycleInstrumentedTest' :app:connectedDebugAndroidTest
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode compat --api 26
+      - name: Publish GX03 API26 exact APK-pair evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: xbs-gx03-api26-${{ github.run_id }}-${{ github.run_attempt }}
+          path: android-evidence/gx03/api26/
+          if-no-files-found: error
+          retention-days: 14
+  android-api34:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
+        with:
+          gradle-version: '9.7.1'
+      - name: GX03 API34 KVM availability
+        run: |
+          set -euo pipefail
+          test -c /dev/kvm
+          sudo chmod 0666 /dev/kvm
+          test -w /dev/kvm
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: 'platform-tools'
+      - name: GX03 API34 Android build tools
+        run: |
+          set -euo pipefail
+          sdkmanager 'build-tools;36.0.0'
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
+      - name: GX03 API34 real emulator smoke and APK pair
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -eu
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode preflight --api 34
+            gradle -p android-app --no-daemon --console=plain -PxbsR05cEmulator=true '-Pandroid.testInstrumentationRunnerArguments.class=io.github.mikeceead.xbscompanion.R05cUiSmokeInstrumentedTest,io.github.mikeceead.xbscompanion.R05cTaskerBoundaryInstrumentedTest' :app:connectedDebugAndroidTest
+            XBS_EXPECTED_HEAD_SHA='${{ github.event.pull_request.head.sha || github.sha }}' python3 scripts/ci/gx03_emulator_host.py --mode compat --api 34
+      - name: Publish GX03 API34 exact APK-pair evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: xbs-gx03-api34-${{ github.run_id }}-${{ github.run_attempt }}
+          path: android-evidence/gx03/api34/
+          if-no-files-found: error
+          retention-days: 14
