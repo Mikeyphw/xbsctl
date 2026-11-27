@@ -29,7 +29,7 @@ public final class XbsConfigTransactionTest {
         Set<String> deletes = new LinkedHashSet<>();
         deletes.add(managed);
         try {
-            XbsConfigTransaction.create(new JSONObject(), writes, deletes, true);
+            XbsConfigTransaction.create(new JSONObject(), writes, deletes, true,repeat('a',64),Collections.singletonMap(managed,"-"));
             fail("Expected write/delete conflict");
         } catch (IllegalArgumentException expected) {
             assertTrue(expected.getMessage().contains("written and deleted"));
@@ -38,7 +38,7 @@ public final class XbsConfigTransactionTest {
         writes.clear();
         writes.put("/data/local/tmp/external", "x\n");
         try {
-            XbsConfigTransaction.create(new JSONObject(), writes, Collections.emptySet(), false);
+            XbsConfigTransaction.create(new JSONObject(), writes, Collections.emptySet(), false,repeat('a',64),Collections.emptyMap());
             fail("Expected external path rejection");
         } catch (IllegalArgumentException expected) {
             assertTrue(expected.getMessage().contains("outside the managed"));
@@ -52,7 +52,7 @@ public final class XbsConfigTransactionTest {
                 XbsConfigTransaction.Entry.write(XbsConfigApi.CONFIG, "{}"),
                 XbsConfigTransaction.Entry.write(XbsConfigApi.LIST_DIR + "/gaming.allowlist", "com.example.game\n"),
                 XbsConfigTransaction.Entry.delete(XbsConfigApi.LIST_DIR + "/old.proc")
-            )
+            ), Map.of(XbsConfigApi.CONFIG,repeat('a',64),XbsConfigApi.LIST_DIR+"/gaming.allowlist","-",XbsConfigApi.LIST_DIR+"/old.proc","-")
         );
         String shell = XbsConfigTransaction.buildExecuteShellForTest(plan);
         assertTrue(shell.contains("acquire_lock"));

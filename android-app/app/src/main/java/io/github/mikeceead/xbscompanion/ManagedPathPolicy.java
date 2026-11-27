@@ -12,7 +12,7 @@ final class ManagedPathPolicy {
     static boolean isDirectChild(String root, String path) {
         String base = clean(root);
         String value = clean(path);
-        if (base.isEmpty() || value.isEmpty() || value.length() > MAX_PATH) return false;
+        if (base.isEmpty() || value.isEmpty() || value.length() > MAX_PATH || !value.equals(path) || !base.equals(root)) return false;
         if (!base.startsWith("/") || base.endsWith("/") || unsafe(value)) return false;
         String prefix = base + "/";
         if (!value.startsWith(prefix) || value.indexOf('/', prefix.length()) >= 0) return false;

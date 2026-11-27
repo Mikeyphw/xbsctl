@@ -13,7 +13,7 @@ public final class R05bTransactionGenerationTest {
     }
     @Test public void stageReloadRequiresMatchingGenerationAndExplicitAck() {
         XbsConfigTransaction.Plan p=new XbsConfigTransaction.Plan("tx-one",123,true,
-            Collections.singletonList(XbsConfigTransaction.Entry.write(XbsConfigApi.CONFIG,"{}")));
+            Collections.singletonList(XbsConfigTransaction.Entry.write(XbsConfigApi.CONFIG,"{}")),Collections.singletonMap(XbsConfigApi.CONFIG,hex('b')));
         String shell=XbsConfigTransaction.buildExecuteShellForTest(p);
         assertTrue(shell.contains("--expect-config-sha256 "+p.entries.get(0).newDigest));
         assertTrue(shell.contains("--wait --timeout 12"));

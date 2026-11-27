@@ -50,14 +50,15 @@ public final class Gx10EditorInstrumentedTest {
             JSONObject sample=new JSONObject();EditorSession.put(sample,"allowlist",XbsConfigApi.LIST_DIR+"/sample.allowlist");
             EditorSession.put(events,"sample",sample);EditorSession.put(config,"header",header);EditorSession.put(config,"events",events);
         }
-        public synchronized XbsConfigApi.Result load(Context c,boolean force){return XbsConfigApi.Result.ok(EditorSession.copy(config));}
-        public synchronized String readText(Context c,String path,boolean force){reads.incrementAndGet();return path.endsWith("/essentials.allowlist")?essentials:"";}
+        public synchronized XbsConfigApi.Result load(Context c,boolean force){return XbsConfigApi.Result.loaded(EditorSession.copy(config),generation(config));}
+        private static String generation(JSONObject config){return RootFileSnapshot.digest(config.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));}
+        public synchronized RootFileSnapshot readList(Context c,String path){reads.incrementAndGet();return path.endsWith("/essentials.allowlist")?RootFileSnapshot.present(essentials.getBytes(java.nio.charset.StandardCharsets.UTF_8),RootFileSnapshot.LIST_LIMIT):RootFileSnapshot.absent();}
         public XbsConfigTransaction.Record latest(Context c){return XbsConfigTransaction.Record.unavailable("fixture");}
-        public XbsConfigApi.Result save(Context c,JSONObject proposed,Map<String,String> files){
+        public XbsConfigApi.Result save(Context c,JSONObject proposed,Map<String,String> files,String expectedConfig,Map<String,String> expectedLists){
             saves.incrementAndGet();entered.countDown();
             if(hold.get())try{if(!release.await(20,TimeUnit.SECONDS))return XbsConfigApi.Result.error("fixture timeout");}catch(InterruptedException e){Thread.currentThread().interrupt();return XbsConfigApi.Result.error("fixture interrupted");}
             if(fail.get())return XbsConfigApi.Result.error("fixture refused write");
-            synchronized(this){config=EditorSession.copy(proposed);String text=files.get(XbsConfigApi.LIST_DIR+"/essentials.allowlist");if(text!=null)essentials=text;return XbsConfigApi.Result.ok(EditorSession.copy(config),"fixture receipt");}
+            synchronized(this){if(!generation(config).equals(expectedConfig)||!expectedLists.keySet().equals(files.keySet()))return XbsConfigApi.Result.error("fixture stale preimage");for(String path:files.keySet())if(!expectedLists.get(path).equals(readList(c,path).generation))return XbsConfigApi.Result.error("fixture stale list");config=EditorSession.copy(proposed);String text=files.get(XbsConfigApi.LIST_DIR+"/essentials.allowlist");if(text!=null)essentials=text;return XbsConfigApi.Result.ok(EditorSession.copy(config),"fixture receipt");}
         }
         public XbsConfigApi.Result delete(Context c,String n,boolean f){throw new AssertionError("unexpected delete");}
         public XbsConfigApi.Result transaction(Context c,XbsConfigTransaction.Record r,boolean recover){throw new AssertionError("unexpected transaction");}
@@ -92,7 +93,7 @@ public final class Gx10EditorInstrumentedTest {
         fixture.hold.set(true);
         try(ActivityScenario<XbsConfigActivity> s=ActivityScenario.launch(XbsConfigActivity.class)){
             visible(s,R.id.xbs_config_delay);s.onActivity(a->((EditText)a.findViewById(R.id.xbs_config_delay)).setText("23"));click(s,"Validate and save settings");
-            await("save entered",()->fixture.saves.get()==1);s.recreate();assertEquals(1,fixture.saves.get());fixture.release.countDown();await("save complete",()->fixture.delay()==23);visible(s,R.id.xbs_config_delay);text(s,R.id.xbs_config_delay,"23");assertEquals(1,fixture.saves.get());
+            await("save entered",()->fixture.saves.get()==1);s.onActivity(a->{Button b=button(a.getWindow().getDecorView(),"Validate and save settings");assertNotNull(b);b.performClick();b.performClick();});assertEquals(1,fixture.saves.get());s.recreate();assertEquals(1,fixture.saves.get());fixture.release.countDown();await("save complete",()->fixture.delay()==23);visible(s,R.id.xbs_config_delay);text(s,R.id.xbs_config_delay,"23");assertEquals(1,fixture.saves.get());
         }finally{fixture.release.countDown();}
     }
     @Test public void essentialsRejectsProtectedPathsAndRetainsDraftOnFailure(){

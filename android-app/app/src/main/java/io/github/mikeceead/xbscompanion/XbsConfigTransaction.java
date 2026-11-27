@@ -36,7 +36,8 @@ final class XbsConfigTransaction {
 
     private XbsConfigTransaction() {}
 
-    static Plan create(JSONObject config, Map<String, String> writes, Set<String> deletes, boolean reload) {
+    static Plan create(JSONObject config, Map<String, String> writes, Set<String> deletes, boolean reload,
+                       String expectedConfig, Map<String,String> expectedLists) {
         if (config == null) throw new IllegalArgumentException("Config is missing");
         Map<String, String> safeWrites = writes == null ? Collections.emptyMap() : writes;
         Set<String> safeDeletes = deletes == null ? Collections.emptySet() : deletes;
@@ -77,7 +78,13 @@ final class XbsConfigTransaction {
         long createdAt = System.currentTimeMillis();
         String seed = json + '\n' + entries.toString() + '\n' + createdAt;
         String id = createdAt + "-" + sha256(seed).substring(0, 12);
-        return new Plan(id, createdAt, reload, Collections.unmodifiableList(entries));
+        Map<String,String> preimages=new LinkedHashMap<>();
+        preimages.put(XbsConfigApi.CONFIG,expectedConfig);
+        if(expectedLists==null)throw new IllegalArgumentException("Managed-list preimages are missing");
+        for(Map.Entry<String,String> before:expectedLists.entrySet()){
+            requireManagedListPath(before.getKey());preimages.put(before.getKey(),before.getValue());
+        }
+        return new Plan(id, createdAt, reload, entries, preimages);
     }
 
     static String buildExecuteShellForTest(Plan plan) { return buildExecuteShell(plan); }
@@ -160,6 +167,8 @@ final class XbsConfigTransaction {
             .append("LOCKED=false; TX_READY=false; PROMOTION_STARTED=false; RELOAD_STARTED=false; COMMITTED=false; ALLOW_PENDING=true; ")
             .append(managedDirectoryFunctions())
             .append(hashFunction())
+            .append(safeReplacementFunctions())
+            .append(preimageFunction(plan))
             .append(lockFunctions())
             .append(previousGuardFunction())
             .append(statusFunction(plan.createdAt, plan.reload, plan.entries.size()))
@@ -167,7 +176,7 @@ final class XbsConfigTransaction {
             .append(verifyOriginalFunction(plan.entries, original))
             .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; ")
             .append("if [ \"$RELOAD_STARTED\" = true ] && [ \"$COMMITTED\" != true ]; then write_status recovery_required 'Daemon reload outcome uncertain; preserve files and journal' >/dev/null 2>&1 || true; release_lock; exit \"$RC\"; fi; ")
-            .append("if [ \"$TX_READY\" = true ] && [ \"$COMMITTED\" != true ]; then ")
+            .append("if [ \"$TX_READY\" = true ] && [ \"$COMMITTED\" != true ] && [ \"$PROMOTION_STARTED\" != true ]; then write_status rolled_back 'Transaction stopped before any managed-file promotion' >/dev/null 2>&1 || true; release_lock; exit \"$RC\"; fi; if [ \"$TX_READY\" = true ] && [ \"$COMMITTED\" != true ]; then ")
             .append("ROLLBACK_OK=true; assert_managed_dirs >/dev/null 2>&1 || ROLLBACK_OK=false; ")
             .append("restore_original >/dev/null 2>&1 || ROLLBACK_OK=false; verify_original >/dev/null 2>&1 || ROLLBACK_OK=false; ");
         // No daemon reload is attempted from automatic rollback. Once a reload
@@ -176,22 +185,22 @@ final class XbsConfigTransaction {
             .append("else write_status rollback_failed 'Automatic rollback could not verify the complete old file set' >/dev/null 2>&1 || true; fi; fi; ")
             .append("release_lock; exit \"$RC\"; }; ")
             .append("trap 'on_exit $?' EXIT; trap 'exit 130' HUP INT TERM; ")
-            .append("assert_managed_dirs; acquire_lock; guard_previous; ")
+            .append("assert_managed_dirs; acquire_lock; guard_previous; verify_preimages; ")
             .append("if [ -e \"$TX\" ] || [ -L \"$TX\" ]; then printf 'Configuration transaction identifier already exists\\n' >&2; exit 74; fi; ")
-            .append("mkdir -p \"$STAGE\" \"$ORIGINAL\"; TX_READY=true; : > \"$MANIFEST\"; : > \"$SNAPSHOTS\"; sync >/dev/null 2>&1 || true; ");
+            .append("mkdir \"$TX\"; mkdir \"$STAGE\" \"$ORIGINAL\"; TX_READY=true; : > \"$MANIFEST\"; : > \"$SNAPSHOTS\"; sync >/dev/null 2>&1 || true; ");
 
         for (Entry entry : plan.entries) appendPlanManifest(shell, entry, manifest);
 
         shell.append("write_status preparing 'Staging configuration transaction'; ")
-            .append("printf '%s\\n' \"$ID\" > ").append(XbsConfigApi.q(LATEST_FILE + ".tmp")).append("; mv -f ")
-            .append(XbsConfigApi.q(LATEST_FILE + ".tmp")).append(' ').append(XbsConfigApi.q(LATEST_FILE)).append("; sync >/dev/null 2>&1 || true; ");
+            .append("printf '%s\\n' \"$ID\" | safe_write ").append(XbsConfigApi.q(LATEST_FILE)).append("; sync >/dev/null 2>&1 || true; ");
 
         for (int index = 0; index < plan.entries.size(); index++) {
             appendSnapshotAndStage(shell, plan.entries.get(index), index, original, stage, snapshots);
+            shell.append("test \"$OLD_HASH\" = ").append(XbsConfigApi.q(plan.preimages.get(plan.entries.get(index).path))).append(" || exit 77; ");
         }
 
-        shell.append(": > \"$SNAPSHOTS.complete\"; sync >/dev/null 2>&1 || true; ALLOW_PENDING=false; write_status prepared 'All files staged and validated'; PROMOTION_STARTED=true; ")
-            .append("write_status promoting 'Promoting staged files'; ");
+        shell.append(": > \"$SNAPSHOTS.complete\"; sync >/dev/null 2>&1 || true; ALLOW_PENDING=false; write_status prepared 'All files staged and validated'; verify_preimages; ")
+            .append("write_status promoting 'Promoting staged files'; PROMOTION_STARTED=true; ");
 
         for (int index = 0; index < plan.entries.size(); index++) {
             appendPromote(shell, plan.entries.get(index), index, stage);
@@ -228,6 +237,28 @@ final class XbsConfigTransaction {
             + "if [ -L \"$D\" ]; then printf 'Managed XBS directory must not be a symbolic link: %s\\n' \"$D\" >&2; return 73; fi; done; "
             + "mkdir -p " + dirs + "; for D in " + dirs + "; do "
             + "if [ ! -d \"$D\" ] || [ -L \"$D\" ]; then printf 'Managed XBS directory is unsafe: %s\\n' \"$D\" >&2; return 73; fi; done; }; ";
+    }
+
+    private static String safeReplacementFunctions() {
+        return "safe_target(){ if [ -L \"$1\" ] || { [ -e \"$1\" ] && [ ! -f \"$1\" ]; }; then printf 'Refusing symbolic-link target or nonregular file: %s\\n' \"$1\" >&2; return 73; fi; }; "
+            + "safe_regular(){ [ -f \"$1\" ] && [ ! -L \"$1\" ]; }; "
+            + "safe_write(){ DST=$1; safe_target \"$DST\" || return $?; TMP=$(mktemp \"${DST%/*}/.xbsapp.XXXXXXXX\") || return $?; "
+            + "if ! cat > \"$TMP\" || ! safe_regular \"$TMP\" || ! safe_target \"$DST\" || ! mv -f \"$TMP\" \"$DST\"; then rm -f \"$TMP\"; return 73; fi; }; "
+            + "replace_file(){ SRC=$1; DEST=$2; safe_regular \"$SRC\" || return 73; safe_target \"$DEST\" || return $?; "
+            + "TMP=$(mktemp \"${DEST%/*}/.xbsapp.XXXXXXXX\") || return $?; "
+            + "if ! cp -p \"$SRC\" \"$TMP\" || ! safe_regular \"$TMP\" || ! safe_target \"$DEST\" || ! mv -f \"$TMP\" \"$DEST\"; then rm -f \"$TMP\"; return 73; fi; }; ";
+    }
+
+    private static String preimageFunction(Plan plan) {
+        StringBuilder shell=new StringBuilder("verify_preimages(){ assert_managed_dirs || return $?; ");
+        for(Entry entry:plan.entries){
+            String expected=plan.preimages.get(entry.path), path=XbsConfigApi.q(entry.path);
+            shell.append("safe_target ").append(path).append(" || return $?; ");
+            if("-".equals(expected))shell.append("if [ -e ").append(path).append(" ]; then printf 'Managed file appeared before promotion\\n' >&2; return 77; fi; ");
+            else shell.append("if [ ! -f ").append(path).append(" ] || [ \"$(hash_file ").append(path).append(")\" != ").append(XbsConfigApi.q(expected))
+                .append(" ]; then printf 'Managed file generation changed before promotion\\n' >&2; return 77; fi; ");
+        }
+        return shell.append("}; ").toString();
     }
 
     private static String hashFunction() {
@@ -276,7 +307,7 @@ final class XbsConfigTransaction {
             + "CLEAN_MESSAGE=$(printf '%s' \"$M\" | tr '\r\n\t' '   ' | cut -c1-512); "
             + "{ printf 'id=%s\n' \"$ID\"; printf 'created_at=" + createdAt + "\n'; printf 'updated_at=%s\n' \"$NOW\"; "
             + "printf 'status=%s\n' \"$S\"; printf 'reload=" + reload + "\n'; printf 'entry_count=" + entries + "\n'; "
-            + "printf 'snapshots_complete=%s\n' \"$SNAPSHOTS_COMPLETE\"; printf 'message=%s\n' \"$CLEAN_MESSAGE\"; } > \"$STATUS.tmp\"; mv -f \"$STATUS.tmp\" \"$STATUS\"; sync >/dev/null 2>&1 || true; }; ";
+            + "printf 'snapshots_complete=%s\n' \"$SNAPSHOTS_COMPLETE\"; printf 'message=%s\n' \"$CLEAN_MESSAGE\"; } | safe_write \"$STATUS\" || return $?; sync >/dev/null 2>&1 || true; }; ";
     }
 
     private static void appendPlanManifest(StringBuilder shell, Entry entry, String manifest) {
@@ -313,16 +344,14 @@ final class XbsConfigTransaction {
     }
 
     private static String restoreFunction(List<Entry> entries, String original) {
-        StringBuilder shell = new StringBuilder("restore_original(){ assert_managed_dirs; ");
+        StringBuilder shell = new StringBuilder("restore_original(){ assert_managed_dirs || return $?; ");
         for (int index = 0; index < entries.size(); index++) {
-            String target = entries.get(index).path;
-            String backup = original + "/" + index;
-            shell.append("if [ -f ").append(XbsConfigApi.q(backup + ".present")).append(" ]; then test -f ")
-                .append(XbsConfigApi.q(backup)).append("; mkdir -p ").append(XbsConfigApi.q(parent(target))).append("; cp -f ")
-                .append(XbsConfigApi.q(backup)).append(' ').append(XbsConfigApi.q(target + ".xbsapp.rollback"))
-                .append("; mv -f ").append(XbsConfigApi.q(target + ".xbsapp.rollback")).append(' ').append(XbsConfigApi.q(target))
-                .append("; sync >/dev/null 2>&1 || true; elif [ -f ").append(XbsConfigApi.q(backup + ".absent")).append(" ]; then rm -f ")
-                .append(XbsConfigApi.q(target)).append("; sync >/dev/null 2>&1 || true; else if [ \"$ALLOW_PENDING\" != true ]; then printf 'Missing transaction snapshot marker for %s\\n' ")
+            String target=entries.get(index).path, backup=original+"/"+index;
+            shell.append("safe_target ").append(XbsConfigApi.q(target)).append(" || return $?; ")
+                .append("if [ -L ").append(XbsConfigApi.q(backup+".present")).append(" ] || [ -L ").append(XbsConfigApi.q(backup+".absent")).append(" ]; then return 73; fi; ")
+                .append("if [ -f ").append(XbsConfigApi.q(backup+".present")).append(" ]; then replace_file ").append(XbsConfigApi.q(backup)).append(' ').append(XbsConfigApi.q(target))
+                .append(" || return $?; sync >/dev/null 2>&1 || true; elif [ -f ").append(XbsConfigApi.q(backup+".absent")).append(" ]; then rm -f ").append(XbsConfigApi.q(target))
+                .append(" || return $?; sync >/dev/null 2>&1 || true; else if [ \"$ALLOW_PENDING\" != true ]; then printf 'Missing transaction snapshot marker for %s\\n' ")
                 .append(XbsConfigApi.q(target)).append(" >&2; return 81; fi; fi; ");
         }
         return shell.append("}; ").toString();
@@ -333,6 +362,7 @@ final class XbsConfigTransaction {
         for (int index = 0; index < entries.size(); index++) {
             String target = entries.get(index).path;
             String backup = original + "/" + index;
+            shell.append("safe_target ").append(XbsConfigApi.q(target)).append(" || return $?; ");
             shell.append("if [ -f ").append(XbsConfigApi.q(backup + ".present")).append(" ]; then cmp -s ")
                 .append(XbsConfigApi.q(backup)).append(' ').append(XbsConfigApi.q(target))
                 .append(" || return 82; elif [ -f ").append(XbsConfigApi.q(backup + ".absent")).append(" ]; then test ! -e ")
@@ -342,20 +372,15 @@ final class XbsConfigTransaction {
     }
 
     private static void appendPromote(StringBuilder shell, Entry entry, int index, String stage) {
-        String target = entry.path;
-        shell.append("if [ -L ").append(XbsConfigApi.q(target)).append(" ]; then printf 'Refusing symbolic-link target during promotion: %s\\n' ")
-            .append(XbsConfigApi.q(target)).append(" >&2; exit 73; fi; ");
-        if (entry.delete) {
-            shell.append("rm -f ").append(XbsConfigApi.q(target)).append("; sync >/dev/null 2>&1 || true; ");
-        } else {
-            String temp = target + ".xbsapp.tx";
-            shell.append("mkdir -p ").append(XbsConfigApi.q(parent(target))).append("; cp -f ")
-                .append(XbsConfigApi.q(stage + "/" + index)).append(' ').append(XbsConfigApi.q(temp))
-                .append("; mv -f ").append(XbsConfigApi.q(temp)).append(' ').append(XbsConfigApi.q(target)).append("; sync >/dev/null 2>&1 || true; ");
-        }
+        String target=entry.path;
+        shell.append("assert_managed_dirs; safe_target ").append(XbsConfigApi.q(target)).append("; ");
+        if(entry.delete)shell.append("rm -f ").append(XbsConfigApi.q(target)).append("; ");
+        else shell.append("replace_file ").append(XbsConfigApi.q(stage+"/"+index)).append(' ').append(XbsConfigApi.q(target)).append("; ");
+        shell.append("sync >/dev/null 2>&1 || true; ");
     }
 
     private static void appendVerifyCommitted(StringBuilder shell, Entry entry, int index, String stage) {
+        shell.append("safe_target ").append(XbsConfigApi.q(entry.path)).append("; ");
         if (entry.delete) {
             shell.append("test ! -e ").append(XbsConfigApi.q(entry.path)).append("; ");
         } else {
@@ -367,7 +392,7 @@ final class XbsConfigTransaction {
     }
 
     private static String buildReadLatestShell() {
-        return "safe_cat(){ FILE=\"$1\"; LABEL=\"$2\"; LIMIT=\"$3\"; "
+        return RootFileSnapshot.directoryGuard(parent(XbsConfigApi.CONFIG),XbsConfigApi.LIST_DIR)+"if [ -L "+XbsConfigApi.q(XbsConfigApi.BACKUP_DIR)+" ] || [ -L "+XbsConfigApi.q(TRANSACTION_DIR)+" ]; then exit 73; fi; "+"safe_cat(){ FILE=\"$1\"; LABEL=\"$2\"; LIMIT=\"$3\"; "
             + "if [ -L \"$FILE\" ]; then printf 'status=invalid\nmessage=%s is a symbolic link\n' \"$LABEL\"; exit 0; fi; "
             + "if [ ! -f \"$FILE\" ]; then return 1; fi; SIZE=$(wc -c < \"$FILE\" 2>/dev/null || printf 0); "
             + "case \"$SIZE\" in ''|*[!0-9]*) SIZE=0;; esac; if [ \"$SIZE\" -gt \"$LIMIT\" ]; then printf 'status=invalid\nmessage=%s exceeds bounded journal size\n' \"$LABEL\"; exit 0; fi; cat \"$FILE\"; }; "
@@ -475,6 +500,20 @@ final class XbsConfigTransaction {
         );
     }
 
+    private static String journalIntegrityFunction(Record record,String original,String stage) {
+        StringBuilder shell=new StringBuilder("verify_journal_files(){ assert_managed_dirs || return $?; ");
+        for(int index=0;index<record.entries.size();index++){
+            Entry entry=record.entries.get(index);String backup=XbsConfigApi.q(original+"/"+index),staged=XbsConfigApi.q(stage+"/"+index);
+            String present=XbsConfigApi.q(original+"/"+index+".present"),absent=XbsConfigApi.q(original+"/"+index+".absent");
+            shell.append("if [ -L ").append(present).append(" ] || [ -L ").append(absent).append(" ]; then return 73; fi; ");
+            if("present".equals(entry.oldState))shell.append("safe_regular ").append(present).append(" && safe_regular ").append(backup).append(" && [ ! -e ").append(absent).append(" ] && [ \"$(hash_file ").append(backup).append(")\" = ").append(XbsConfigApi.q(entry.oldDigest)).append(" ] || return 78; ");
+            else if("absent".equals(entry.oldState))shell.append("safe_regular ").append(absent).append(" && [ ! -e ").append(present).append(" ] && [ ! -L ").append(backup).append(" ] && [ ! -e ").append(backup).append(" ] || return 78; ");
+            else shell.append("[ \"$ALLOW_PENDING\" = true ] && [ ! -e ").append(present).append(" ] && [ ! -e ").append(absent).append(" ] || return 78; ");
+            if(!entry.delete)shell.append("if [ \"$ALLOW_PENDING\" != true ] || [ -e ").append(staged).append(" ] || [ -L ").append(staged).append(" ]; then safe_regular ").append(staged).append(" && [ \"$(hash_file ").append(staged).append(")\" = ").append(XbsConfigApi.q(entry.newDigest)).append(" ] || return 78; fi; ");
+        }
+        return shell.append("}; ").toString();
+    }
+
     private static String buildRollbackShell(Record record) {
         String tx = TRANSACTION_DIR + "/" + record.id;
         String stage = tx + "/stage";
@@ -486,9 +525,10 @@ final class XbsConfigTransaction {
         shell.append("set -eu; umask 077; ")
             .append(commonVariables(record.id, tx, stage, original, manifest, snapshots, status))
             .append("LOCKED=false; ROLLBACK_STARTED=false; RELOAD_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
-            .append(managedDirectoryFunctions()).append(hashFunction()).append(lockFunctions())
+            .append(managedDirectoryFunctions()).append(hashFunction()).append(safeReplacementFunctions()).append(lockFunctions())
             .append(statusFunction(record.createdAt, record.reload, record.entries.size()))
             .append(latestGuardFunction(record.id))
+            .append(journalIntegrityFunction(record,original,stage))
             .append(restoreFunction(record.entries, original))
             .append(verifyOriginalFunction(record.entries, original))
             .append(reapplyCommittedFunction(record.entries, stage))
@@ -503,7 +543,7 @@ final class XbsConfigTransaction {
             .append("release_lock; exit \"$RC\"; }; trap 'on_exit $?' EXIT; trap 'exit 130' HUP INT TERM; ")
             .append("assert_managed_dirs; acquire_lock; guard_latest; ACTUAL_STATUS=$(sed -n 's/^status=//p' \"$STATUS\" | head -n1); ")
             .append("if [ \"$ACTUAL_STATUS\" != committed ]; then printf 'Latest transaction is no longer committed\\n' >&2; exit 76; fi; ")
-            .append("verify_committed || { printf 'Managed files changed after commit; refusing stale rollback\\n' >&2; exit 77; }; ")
+            .append("verify_journal_files; verify_committed || { printf 'Managed files changed after commit; refusing stale rollback\\n' >&2; exit 77; }; ")
             .append("ROLLBACK_STARTED=true; write_status rolling_back 'Restoring pre-transaction files'; restore_original; verify_original; ");
         if (record.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting original daemon generation'; ")
             .append(confirmedReload(originalConfigDigest(record))).append(" >/dev/null; ");
@@ -523,9 +563,10 @@ final class XbsConfigTransaction {
         shell.append("set -eu; umask 077; ")
             .append(commonVariables(record.id, tx, stage, original, manifest, snapshots, status))
             .append("LOCKED=false; RECOVERY_STARTED=false; RELOAD_STARTED=false; DONE=false; ALLOW_PENDING=false; ")
-            .append(managedDirectoryFunctions()).append(lockFunctions())
+            .append(managedDirectoryFunctions()).append(hashFunction()).append(safeReplacementFunctions()).append(lockFunctions())
             .append(statusFunction(record.createdAt, record.reload, record.entries.size()))
             .append(latestGuardFunction(record.id))
+            .append(journalIntegrityFunction(record,original,stage))
             .append(restoreFunction(record.entries, original))
             .append(verifyOriginalFunction(record.entries, original))
             .append("on_exit(){ RC=$1; trap - EXIT HUP INT TERM; "
@@ -537,7 +578,7 @@ final class XbsConfigTransaction {
             .append("case \"$ACTUAL_STATUS\" in preparing|prepared|promoting|promoted|reload_pending|recovery_required|rolling_back|recovering|rollback_failed|recovery_failed) ;; ")
             .append("*) printf 'Latest transaction no longer requires recovery\\n' >&2; exit 76;; esac; ")
             .append("if [ -f \"$SNAPSHOTS.complete\" ]; then ALLOW_PENDING=false; else case \"$ACTUAL_STATUS\" in preparing|recovering|recovery_failed) ALLOW_PENDING=true;; *) printf 'Completed transaction is missing its snapshot-complete marker\\n' >&2; exit 78;; esac; fi; ")
-            .append("RECOVERY_STARTED=true; write_status recovering 'Recovering interrupted configuration transaction'; restore_original; verify_original; ");
+            .append("verify_journal_files; RECOVERY_STARTED=true; write_status recovering 'Recovering interrupted configuration transaction'; restore_original; verify_original; ");
         if (record.reload) shell.append("RELOAD_STARTED=true; write_status reload_pending 'Awaiting recovered daemon generation'; ")
             .append(confirmedReload(originalConfigDigest(record))).append(" >/dev/null; ");
         shell.append("write_status recovered 'Interrupted configuration transaction recovered'; DONE=true; release_lock; ")
@@ -578,7 +619,7 @@ final class XbsConfigTransaction {
     }
 
     private static String latestGuardFunction(String id) {
-        return "guard_latest(){ if [ -L " + XbsConfigApi.q(LATEST_FILE) + " ]; then printf 'Latest transaction pointer is unsafe\\n' >&2; return 73; fi; "
+        return "guard_latest(){ if [ -L " + XbsConfigApi.q(LATEST_FILE) + " ] || [ ! -f " + XbsConfigApi.q(LATEST_FILE) + " ]; then printf 'Latest transaction pointer is unsafe\\n' >&2; return 73; fi; "
             + "CURRENT=$(cat " + XbsConfigApi.q(LATEST_FILE) + " 2>/dev/null || true); if [ \"$CURRENT\" != " + XbsConfigApi.q(id)
             + " ]; then printf 'Transaction is no longer the latest configuration save\\n' >&2; return 76; fi; "
             + "if [ -L \"$TX\" ] || [ ! -d \"$TX\" ] || [ -L \"$STATUS\" ] || [ ! -f \"$STATUS\" ] "
@@ -588,17 +629,13 @@ final class XbsConfigTransaction {
     }
 
     private static String reapplyCommittedFunction(List<Entry> entries, String stage) {
-        StringBuilder shell = new StringBuilder("reapply_committed(){ assert_managed_dirs; ");
-        for (int index = 0; index < entries.size(); index++) {
-            Entry entry = entries.get(index);
-            if (entry.delete) {
-                shell.append("rm -f ").append(XbsConfigApi.q(entry.path)).append("; sync >/dev/null 2>&1 || true; ");
-            } else {
-                shell.append("test -f ").append(XbsConfigApi.q(stage + "/" + index)).append("; mkdir -p ")
-                    .append(XbsConfigApi.q(parent(entry.path))).append("; cp -f ")
-                    .append(XbsConfigApi.q(stage + "/" + index)).append(' ').append(XbsConfigApi.q(entry.path + ".xbsapp.reapply"))
-                    .append("; mv -f ").append(XbsConfigApi.q(entry.path + ".xbsapp.reapply")).append(' ').append(XbsConfigApi.q(entry.path)).append("; sync >/dev/null 2>&1 || true; ");
-            }
+        StringBuilder shell=new StringBuilder("reapply_committed(){ assert_managed_dirs || return $?; ");
+        for(int index=0;index<entries.size();index++){
+            Entry entry=entries.get(index);String target=XbsConfigApi.q(entry.path);
+            shell.append("safe_target ").append(target).append(" || return $?; ");
+            if(entry.delete)shell.append("rm -f ").append(target).append(" || return $?; ");
+            else shell.append("replace_file ").append(XbsConfigApi.q(stage+"/"+index)).append(' ').append(target).append(" || return $?; ");
+            shell.append("sync >/dev/null 2>&1 || true; ");
         }
         return shell.append("}; ").toString();
     }
@@ -607,6 +644,7 @@ final class XbsConfigTransaction {
         StringBuilder shell = new StringBuilder("verify_committed(){ ");
         for (int index = 0; index < entries.size(); index++) {
             Entry entry = entries.get(index);
+            shell.append("safe_target ").append(XbsConfigApi.q(entry.path)).append(" || return $?; ");
             if (entry.delete) {
                 shell.append("test ! -e ").append(XbsConfigApi.q(entry.path)).append(" || return 83; ");
             } else {
@@ -722,12 +760,21 @@ final class XbsConfigTransaction {
         final long createdAt;
         final boolean reload;
         final List<Entry> entries;
+        final Map<String,String> preimages;
 
-        Plan(String id, long createdAt, boolean reload, List<Entry> entries) {
-            this.id = id;
-            this.createdAt = createdAt;
-            this.reload = reload;
-            this.entries = entries;
+        Plan(String id, long createdAt, boolean reload, List<Entry> entries, Map<String,String> preimages) {
+            if(id==null||!id.matches("[A-Za-z0-9_-]{1,128}")||entries==null||entries.isEmpty()||entries.size()>MAX_ENTRIES||preimages==null)
+                throw new IllegalArgumentException("Invalid transaction identity or missing preimages");
+            Set<String> paths=new LinkedHashSet<>();
+            for(Entry entry:entries){
+                if(!entry.hasPlanMetadata()||!paths.add(entry.path)||!RootFileSnapshot.validPreimage(preimages.get(entry.path)))
+                    throw new IllegalArgumentException("Missing or invalid managed-file preimage: "+entry.path);
+            }
+            if(!XbsConfigApi.CONFIG.equals(entries.get(0).path)||entries.get(0).delete||!RootFileSnapshot.validGeneration(preimages.get(XbsConfigApi.CONFIG))||!paths.equals(preimages.keySet()))
+                throw new IllegalArgumentException("Exact configuration generation and complete list preimages are required");
+            this.id=id;this.createdAt=createdAt;this.reload=reload;
+            this.entries=Collections.unmodifiableList(new ArrayList<>(entries));
+            this.preimages=Collections.unmodifiableMap(new LinkedHashMap<>(preimages));
         }
     }
 

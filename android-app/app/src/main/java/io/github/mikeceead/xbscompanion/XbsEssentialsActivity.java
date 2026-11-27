@@ -28,7 +28,7 @@ public final class XbsEssentialsActivity extends XbsActivity {
     private UiKit ui; private LinearLayout content; private EditText path,list;
     private TextView statusView;
     private EditorSession session;private EditorBackend backend;
-    private JSONObject config; private String originalPath="",originalText="",pendingSelection;
+    private JSONObject config; private String originalPath="",originalText="",originalGeneration="",pendingSelection;
     private boolean loading;
 
     @Override protected void onCreate(Bundle state){
@@ -37,7 +37,7 @@ public final class XbsEssentialsActivity extends XbsActivity {
         JSONObject draft=session.snapshot();
         try{
             if(draft.has("config")){
-                config=new JSONObject(draft.getString("config"));originalPath=draft.getString("originalPath");originalText=draft.getString("originalText");
+                config=new JSONObject(draft.getString("config"));originalPath=draft.getString("originalPath");originalText=draft.getString("originalText");originalGeneration=draft.getString("originalGeneration");
                 pendingSelection=draft.has("pendingSelection")?draft.getString("pendingSelection"):null;
                 render(draft.getString("path"),draft.getString("text"));
             }else if(session.blocked())showError(session.problem());else load();
@@ -49,7 +49,7 @@ public final class XbsEssentialsActivity extends XbsActivity {
     private boolean live(){return !isDestroyed()&&!isFinishing();}
     private JSONObject snapshot(){
         JSONObject d=session.snapshot();if(config!=null&&path!=null&&list!=null){
-            EditorSession.put(d,"config",config.toString());EditorSession.put(d,"originalPath",originalPath);EditorSession.put(d,"originalText",originalText);
+            EditorSession.put(d,"config",config.toString());EditorSession.put(d,"originalPath",originalPath);EditorSession.put(d,"originalText",originalText);EditorSession.put(d,"originalGeneration",originalGeneration);
             EditorSession.put(d,"path",path.getText().toString());EditorSession.put(d,"text",list.getText().toString());
         }
         if(pendingSelection!=null)EditorSession.put(d,"pendingSelection",pendingSelection);else d.remove("pendingSelection");return d;
@@ -72,8 +72,10 @@ public final class XbsEssentialsActivity extends XbsActivity {
             if(!r.ok){runOnUiThread(()->{if(live()){loading=false;showError(r.message);}});return;}
             String target=configuredPath(r.config);String error=pathError(r.config,target);
             // A malicious configured path is never read through the privileged backend.
-            String text=error.isEmpty()?backend.readText(app,target,true):"";
-            runOnUiThread(()->{if(!live())return;loading=false;config=r.config;originalPath=target;originalText=text;render(target,text);status(error);});
+            RootFileSnapshot before=error.isEmpty()?backend.readList(app,target):RootFileSnapshot.error(error);
+            if(!before.ok&&error.isEmpty()){runOnUiThread(()->{if(live()){loading=false;showError(before.message);}});return;}
+            String text=before.ok?before.text:"";
+            runOnUiThread(()->{if(!live())return;loading=false;config=r.config;originalPath=target;originalText=text;originalGeneration=before.generation;render(target,text);status(error);});
         });
     }
     private void status(String message){statusView.setText(message);statusView.setVisibility(message.isEmpty()?View.GONE:View.VISIBLE);}
@@ -93,15 +95,16 @@ public final class XbsEssentialsActivity extends XbsActivity {
         final String target=path.getText().toString().trim();String error=pathError(config,target);if(!error.isEmpty()){path.setError(error);status(error);return;}
         if(!target.equals(originalPath)&&!target.equals(DEFAULT)){status("Only the configured path or the canonical essentials path may be selected");return;}
         final String normalized;try{normalized=EssentialsDraftPolicy.normalize(list.getText().toString());}catch(IllegalArgumentException e){list.setError(e.getMessage());status(e.getMessage());return;}
-        Context app=getApplicationContext();EditorBackend b=backend;String baselinePath=originalPath,baselineText=originalText;
+        Context app=getApplicationContext();EditorBackend b=backend;String baselinePath=originalPath,baselineGeneration=originalGeneration;
         if(session.start(snapshot(),()->{
             XbsConfigApi.Result fresh=b.load(app,true);if(!fresh.ok)return fresh;
             String invalid=pathError(fresh.config,target);if(!invalid.isEmpty())return XbsConfigApi.Result.error(invalid);
-            if(!target.equals(baselinePath)&&!b.readText(app,target,true).isEmpty())return XbsConfigApi.Result.error("The new essentials path already contains data; review it before replacing it.");
+            RootFileSnapshot before=b.readList(app,target);if(!before.ok)return XbsConfigApi.Result.error(before.message);
+            if(!target.equals(baselinePath)&&before.present)return XbsConfigApi.Result.error("The new essentials path already exists; review it before replacing it.");
             if(!baselinePath.equals(configuredPath(fresh.config)))return XbsConfigApi.Result.error("Essentials location changed; review current configuration before saving.");
-            if(pathError(fresh.config,baselinePath).isEmpty()&&!baselineText.equals(b.readText(app,baselinePath,true)))return XbsConfigApi.Result.error("Essentials changed externally; review current configuration before saving.");
+            if(target.equals(baselinePath)&&!baselineGeneration.equals(before.generation))return XbsConfigApi.Result.error("Essentials changed externally; review current configuration before saving.");
             JSONObject proposed=EditorSession.copy(fresh.config);proposed.getJSONObject("header").put("essentials_allowlist",target);
-            java.util.Map<String,String> files=new LinkedHashMap<>();files.put(target,normalized);return b.save(app,proposed,files);
+            java.util.Map<String,String> files=new LinkedHashMap<>();files.put(target,normalized);return b.save(app,proposed,files,fresh.generation,java.util.Collections.singletonMap(target,before.generation));
         }))setBusy(true);else status(session.problem());
     }
     private void setBusy(boolean busy){if(busy){content.setVisibility(View.INVISIBLE);status("Saving essentials; wait for the transaction…");}else{content.setVisibility(View.VISIBLE);if(session.blocked()){content.setVisibility(View.INVISIBLE);status(session.problem());}}}

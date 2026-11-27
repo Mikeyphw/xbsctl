@@ -1,0 +1,74 @@
+{
+  "schema": "xbs-r08r10-ui03-handoff/v1",
+  "source_commit": "043b1851d31fef0601e76443f47b88e59f3ca373",
+  "source_tree": "5638a149d150991d3b5fc93c6070bacc8106c35e",
+  "main_workflow": {
+    "id": 386774409,
+    "run_id": 46005931468,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "artifacts": [
+    {
+      "artifact_id": 15202451004,
+      "sha256": "20d3bb605f186797a627420232827c5e524e821c1a82d0753cfb2bc66da245d1",
+      "bytes": 6533669,
+      "members": 13
+    },
+    {
+      "artifact_id": 15202272821,
+      "sha256": "0c426df0edbc1a21e3f7cd2430bc984fdeee55c45fe2a37395f79bd8249a9551",
+      "bytes": 5655207,
+      "members": 3
+    },
+    {
+      "artifact_id": 15202006312,
+      "sha256": "b008fa1570b18b7869e1b5065e63e9d9510c9d705cb286c63da302ce2f8e9a2e",
+      "bytes": 376,
+      "members": 1
+    },
+    {
+      "artifact_id": 15201943086,
+      "sha256": "521eee2093f5adf8c2ee6810d45a084ab22acba4ff9844beafb31f561ce52fc7",
+      "bytes": 9064142,
+      "members": 9
+    }
+  ],
+  "case_links": {
+    "EM-005": {
+      "required_assertion": "Save, error and reload outcome visible",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-006": {
+      "required_assertion": "Correct persistence/validation and no dropped changes",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-007": {
+      "required_assertion": "Reject unsafe input and explain why",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-011": {
+      "required_assertion": "Valid bounded config and correct return/result",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-015": {
+      "required_assertion": "No data loss/duplicate mutation",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-016": {
+      "required_assertion": "No clipping or obscured buttons/insets",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-017": {
+      "required_assertion": "No clipped inaccessible controls, correct translations",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    },
+    "EM-018": {
+      "required_assertion": "Actual focus/labels/targets pass",
+      "acceptance": "PARTIAL_CANDIDATE_ONLY"
+    }
+  },
+  "original_cases_accepted": [],
+  "physical_qualified": false,
+  "release_qualified": false
+}
