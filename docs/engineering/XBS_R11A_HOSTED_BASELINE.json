@@ -1,0 +1,735 @@
+{
+  "artifact_metadata": [
+    {
+      "attempt": 1,
+      "id": 15224605408,
+      "name": "xbs-s7-p05-debug-46049889282-1",
+      "role": "s7",
+      "run_id": 46049889282,
+      "sha256": "bf5446325d9da478c29f954e2c95fc3c26608f3d6966aacfbe8701520a75a795",
+      "size_bytes": 5660428,
+      "workflow_id": 418896455
+    },
+    {
+      "attempt": 1,
+      "id": 15224231984,
+      "name": "xbs-gx03-api34-46049889311-1",
+      "role": "api34",
+      "run_id": 46049889311,
+      "sha256": "1e080c66fd22e46c1d337b9f7c672a811aa23c89615b982ee50128c2e203c269",
+      "size_bytes": 8605840,
+      "workflow_id": 419253895
+    },
+    {
+      "attempt": 1,
+      "id": 15223812354,
+      "name": "xbs-gx03-api26-46049889311-1",
+      "role": "api26",
+      "run_id": 46049889311,
+      "sha256": "a7d5af83b30103b94e15cabc59a976178b17aabbe1e6e18d9c20744613e067ea",
+      "size_bytes": 8605827,
+      "workflow_id": 419253895
+    },
+    {
+      "attempt": 1,
+      "id": 15224647146,
+      "name": "xbs-companion-r05c-api36-46049889390-1",
+      "role": "debug",
+      "run_id": 46049889390,
+      "sha256": "91a0d8938ac739558df91fe13cdeefe68c8f241dcf63cea4d2110f9b15bc7323",
+      "size_bytes": 5660485,
+      "workflow_id": 386774409
+    },
+    {
+      "attempt": 1,
+      "id": 15224615348,
+      "name": "xbs-android-module-46049889390-1",
+      "role": "module",
+      "run_id": 46049889390,
+      "sha256": "293b1d67740582f95fccea5930235f96a50a577058c7f86a8a6aa2fb778c3c3a",
+      "size_bytes": 6533676,
+      "workflow_id": 386774409
+    },
+    {
+      "attempt": 1,
+      "id": 15224607305,
+      "name": "xbs-gx03-api36-46049889390-1",
+      "role": "api36",
+      "run_id": 46049889390,
+      "sha256": "b451b409ee357590697202d726720df9f4acebfa0a9f3f1e7bec4425c1b53df1",
+      "size_bytes": 9581911,
+      "workflow_id": 386774409
+    },
+    {
+      "attempt": 1,
+      "id": 15223608192,
+      "name": "xbs-android-jvm-counts-46049889390-1",
+      "role": "jvm",
+      "run_id": 46049889390,
+      "sha256": "a4d4fa91974259dc3b95adc998c43d98a52d1effca7f66d170871a8fb5562b31",
+      "size_bytes": 376,
+      "workflow_id": 386774409
+    }
+  ],
+  "case_map": [
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "BR-009",
+      "lane": "GO_BRIDGE_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Only permitted availability reason uses fallback",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Android verifier legacy fallback policy"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "AJ-009",
+      "lane": "ANDROID_JVM_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Platform-specific trust rules enforced",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Tasker sender identity API26/API34"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "AJ-014",
+      "lane": "ANDROID_JVM_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "No data loss, stable indexes and cleanup",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Room schema and history retention"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "AJ-017",
+      "lane": "ANDROID_JVM_HOSTED",
+      "phases": [
+        "R08"
+      ],
+      "required_assertion": "Single desired state transition and correct last status",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS controller rapid tap reducer"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "AJ-018",
+      "lane": "ANDROID_JVM_HOSTED",
+      "phases": [
+        "R08"
+      ],
+      "required_assertion": "Proper tile state/subtitle and no false applied",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS tile state model and id mapping"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-001",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "Disconnected/nonemulator/wrong API safely refused",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Emulator identity refuses physical"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-002",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "Exactly one matching package and source/run/attempt",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "App APK and instrumentation pair identity"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-003",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "MainActivity renders offline and actionable guidance",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "App starts on fresh offline API36 device"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-004",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "Each screen interactive and correct back stack",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Complete app navigation and back"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-005",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Save, error and reload outcome visible",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Configuration create/edit/validate journey"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-006",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R03",
+        "R10"
+      ],
+      "required_assertion": "Correct persistence/validation and no dropped changes",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Custom event editor journey"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-007",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R01",
+        "R10"
+      ],
+      "required_assertion": "Reject unsafe input and explain why",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Essentials editor protected path journey"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-008",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "UI does not report queued as applied",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Command center pending/failed/ok journey"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-009",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Recovery/error message displayed without ANR",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Foreground service denial and recovery"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-010",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "No root execution or premature Tasker success",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Tasker action intent hostile fixture"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-011",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Valid bounded config and correct return/result",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Tasker edit/activity return path"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-012",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Cancel status and notification consistent",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Notification cancel action and service lifecycle"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-013",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Data and index preserved",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Room real v1-to-v2 migration"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-014",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R02",
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "Journal persists; no duplicate command after restart",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Process death separate from recreation"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-015",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R05",
+        "R10"
+      ],
+      "required_assertion": "No data loss/duplicate mutation",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "App rotation and process restoration"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-016",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "No clipping or obscured buttons/insets",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "SystemUI status/navigation bar layout"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-017",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "No clipped inaccessible controls, correct translations",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Dark/light, locale and RTL coverage"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-018",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "Actual focus/labels/targets pass",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Accessibility touch/heading/navigation"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "GX04 actual five lifecycle callbacks and unavailable-state named tile assertions; inspect original JUnit method evidence before acceptance",
+      "id": "EM-019",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R08"
+      ],
+      "required_assertion": "Disabled/unavailable state; no root/false success",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS TileService callback on unavailable backend"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Both direct process death stages passed; inspect duplicate-command and persisted-state exact evidence before acceptance",
+      "id": "EM-020",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R08"
+      ],
+      "required_assertion": "No duplicate commands and correct persisted state",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS rapid taps and process recreation"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Hosted confirmation gate coverage; physical lockscreen and exact original assertion remain pending",
+      "id": "EM-021",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R08"
+      ],
+      "required_assertion": "Sensitive action requires unlock/explicit confirmation",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS unlock/confirmation gate"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-022",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10",
+        "R12"
+      ],
+      "required_assertion": "Unique dimensions/hash, no user secrets or raw private log",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "App screenshots and evidence redaction"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-023",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "App launches, Tasker fallback and no unsupported call",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "API26 compatibility smoke"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "EM-024",
+      "lane": "ANDROID_EMULATOR_HOSTED",
+      "phases": [
+        "R10"
+      ],
+      "required_assertion": "No API-specific SecurityException, correct sender rules",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "API34 sender identity and FGS smoke"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-001",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R11"
+      ],
+      "required_assertion": "API, kernelSU/Magisk version and module status only; no mutation",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical read-only acceptance"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-002",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R04",
+        "R11"
+      ],
+      "required_assertion": "Exact artifact hash, install success and recovery record",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical module install manifest"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-003",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R03",
+        "R11"
+      ],
+      "required_assertion": "Daemon comes up, config exists, boot event observed",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Actual daemon boot state"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-004",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R03",
+        "R11"
+      ],
+      "required_assertion": "Expected transitions and no duplicate effect",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Actual charging/unplugging state"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-005",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R03",
+        "R11"
+      ],
+      "required_assertion": "Corresponding event state maintained and reversed",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Actual screen on/off state"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-006",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R02",
+        "R11"
+      ],
+      "required_assertion": "CLI and app observed daemon-confirmed status",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Root controller end-to-end command"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-007",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R05",
+        "R11"
+      ],
+      "required_assertion": "Completion and state match exact command outcome",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical Tasker end-to-end"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-008",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R08",
+        "R11"
+      ],
+      "required_assertion": "Correct labels, lockscreen, off/on/update without app",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical QS tile integration"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-009",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R01",
+        "R11"
+      ],
+      "required_assertion": "Journal recovers, no duplicate operation",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical daemon forced stop recovery"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-010",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R05",
+        "R11"
+      ],
+      "required_assertion": "Cancel/timeout terminates only owned process tree",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical root process termination"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-011",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R01",
+        "R11"
+      ],
+      "required_assertion": "Exact before/after verified and cleanup pass",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical reversible effect restoration"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-012",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R01",
+        "R11"
+      ],
+      "required_assertion": "CPU/GMS/Wi-Fi stress verified and restored, no primary-phone run",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Disposable high-impact effects lab"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "RD-013",
+      "lane": "ANDROID_PHYSICAL_OPT_IN",
+      "phases": [
+        "R04",
+        "R11"
+      ],
+      "required_assertion": "User config preserved/upgrades; restore/uninstall reports truth",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Physical uninstall and upgrade preservation"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "PF-001",
+      "lane": "PERFORMANCE_REGRESSION",
+      "phases": [
+        "R10",
+        "R12"
+      ],
+      "required_assertion": "Measured median/p95 and regressions flagged against approved baseline",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Application cold startup duration"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "PF-005",
+      "lane": "PERFORMANCE_REGRESSION",
+      "phases": [
+        "R08",
+        "R12"
+      ],
+      "required_assertion": "No continuous high-rate polls/wakelocks; measured budget",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "QS refresh polling and wakeups"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "PF-007",
+      "lane": "PERFORMANCE_REGRESSION",
+      "phases": [
+        "R10",
+        "R12"
+      ],
+      "required_assertion": "No text clipping/overlap, real screen images and metadata",
+      "scope": "HOSTED_CANDIDATE",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "UI screenshot dimensions and geometry"
+    },
+    {
+      "accepted": false,
+      "candidate_observation": "Original assertion preserved; no case acceptance promoted",
+      "id": "PF-008",
+      "lane": "PERFORMANCE_REGRESSION",
+      "phases": [
+        "R11",
+        "R12"
+      ],
+      "required_assertion": "Before/after data and confounders recorded, no invented savings",
+      "scope": "PHYSICAL",
+      "status": "PENDING_ORIGINAL_ASSERTION_REVIEW",
+      "title": "Root effects genuine battery impact"
+    }
+  ],
+  "event": "pull_request",
+  "job_id": 140679274165,
+  "merged_sha": "74dfdfcc060d4677261cbc572057b173b28cdc08",
+  "observation_scope": "Independent GitHub metadata and hosted API36 job log; artifact bytes not retrieved",
+  "observed_markers": [
+    "GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true listening=true stopped=true",
+    "GX03_DIRECT_PROCESS_STAGE_PASS stageAWriteDurablePendingOwnership",
+    "GX03_DIRECT_PROCESS_STAGE_PASS stageBInspectRecoveryAfterExternalForceStop",
+    "GX03_HOSTED_ANDROID_EVIDENCE_PASS api=36 source=931548d8cf74c4621e37f8f331462a0ddde5251b run=46049889390 attempt=1 physical_root_qualified=false original_cases_accepted=0"
+  ],
+  "original_cases_accepted": [],
+  "original_counts": {
+    "cases": 131,
+    "findings": 26,
+    "tasks": 178
+  },
+  "physical_qualified": false,
+  "pr": 42,
+  "release_qualified": false,
+  "repository": "Mikeyphw/xbsctl",
+  "repository_id": 1422199806,
+  "schema": "xbs-r11a-historical-baseline/v1",
+  "source_sha": "931548d8cf74c4621e37f8f331462a0ddde5251b",
+  "source_tree": "6bcc90b26646aced8bf2ccba04d9db0752df3f2a",
+  "workflow_conclusions": {
+    "46049889282": "success",
+    "46049889311": "success",
+    "46049889390": "success"
+  }
+}

@@ -468,4 +468,44 @@ class Ui04SecondHotfixTests(unittest.TestCase):
         self.merge(self.prior,self.next,self.git('rev-parse',self.prior+'^{tree}'))
         with self.assertRaisesRegex(Refused,'UI04_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
 
+
+class R11AHistoryTests(Ui04SecondHotfixTests):
+    def setUp(self):
+        super().setUp()
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        self.merged=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        ctx=patch.multiple(g,UI04_HF02_PUBLISHED_HEAD=self.next,UI04_HF02_MERGED_HEAD=self.merged,
+                           UI04_HF02_MERGED_TREE=self.git('rev-parse','HEAD^{tree}'),R11A_CHANGED_PATHS=frozenset({'r11a'}))
+        ctx.start();self.addCleanup(ctx.stop)
+        self.r11=self.commit('R11A',{'r11a':'read-only readiness'})
+    def test_candidate_and_merge(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,R11A_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'R11A')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':R11A_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.r11,'GITHUB_RUN_ID':'5','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('5','1'))
+        head=self.merge(self.merged,self.r11,self.git('rev-parse',self.r11+'^{tree}'))
+        self.assertEqual(reviewed_stage(self.root),'R11A_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'5','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('5','1'))
+    def test_preimage_tree_drift(self):
+        from unittest.mock import patch
+        from gx06_stack_gate import reviewed_stage,Refused
+        with patch('gx06_stack_gate.UI04_HF02_MERGED_TREE','0'*40),self.assertRaisesRegex(Refused,'R11A_PREVIOUS_TREE_DRIFT'):
+            reviewed_stage(self.root)
+    def test_extra_path_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.merged);self.commit('drift',{'r11a':'readiness','evil':'bad'})
+        with self.assertRaisesRegex(Refused,'CHANGED_PATHS_DRIFT R11A'):reviewed_stage(self.root)
+    def test_extra_child_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.commit('unreviewed child',{'r11a':'another'})
+        with self.assertRaises(Refused):reviewed_stage(self.root)
+    def test_merge_tree_drift(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.merged,self.r11,self.git('rev-parse',self.merged+'^{tree}'))
+        with self.assertRaisesRegex(Refused,'R11A_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+
 if __name__=='__main__':unittest.main(verbosity=2)
