@@ -1,6 +1,8 @@
 package io.github.mikeceead.xbscompanion;
 
 import android.content.Intent;
+import androidx.lifecycle.ViewModelProvider;
+import org.json.JSONObject;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -17,8 +19,18 @@ public final class TaskerEventEditActivity extends XbsActivity {
     private UiKit ui;
     private TaskerHostIdentity hostIdentity;
 
+    private EditorSession session;
+    private void restoreDraft(Bundle state){
+        session=new ViewModelProvider(this).get(EditorSession.class);session.initialize(this,state,"tasker-event:"+hostIdentity.packageName+":"+hostIdentity.certificateSha256);
+        if(session.blocked()){Toast.makeText(this,session.problem(),Toast.LENGTH_LONG).show();setResult(RESULT_CANCELED);finish();return;}
+        JSONObject draft=session.snapshot();String selected=draft.optString("state","");for(int i=0;i<VALUES.length;i++)if(VALUES[i].equals(selected)){type.setSelection(i);filter.setText(draft.optString("filter",""));break;}
+    }
+    @Override protected void onSaveInstanceState(Bundle out){
+        if(session!=null&&type!=null&&filter!=null){JSONObject d=new JSONObject();int index=type.getSelectedItemPosition();if(index>=0&&index<VALUES.length)EditorSession.put(d,"state",VALUES[index]);EditorSession.put(d,"filter",filter.getText().toString());if(!session.save(out,d))Toast.makeText(this,session.problem(),Toast.LENGTH_LONG).show();}super.onSaveInstanceState(out);
+    }
+    @Override protected void onDestroy(){if(session!=null&&isFinishing())session.clear();super.onDestroy();}
     @Override protected void onCreate(Bundle state) {
-        super.onCreate(state); hostIdentity=TaskerAuthorization.editorIdentity(this); if(!hostIdentity.valid){Toast.makeText(this,"Open this event from Tasker.",Toast.LENGTH_LONG).show();setResult(RESULT_CANCELED);finish();return;} ui = new UiKit(this); registerXbsBackHandler(this::save); setXbsContentView(build()); load();
+        super.onCreate(state); hostIdentity=TaskerAuthorization.editorIdentity(this); if(!hostIdentity.valid){Toast.makeText(this,"Open this event from Tasker.",Toast.LENGTH_LONG).show();setResult(RESULT_CANCELED);finish();return;} ui = new UiKit(this); registerXbsBackHandler(this::save); setXbsContentView(build()); load();restoreDraft(state);
     }
     private ScrollView build() {
         LinearLayout c = new LinearLayout(this); c.setOrientation(LinearLayout.VERTICAL); c.setPadding(ui.dp(20),ui.dp(20),ui.dp(20),ui.dp(24)); c.setBackgroundColor(ui.palette.background);
@@ -29,5 +41,5 @@ public final class TaskerEventEditActivity extends XbsActivity {
         ScrollView s=new ScrollView(this);s.addView(c);return s;
     }
     private void load(){Bundle b=getIntent().getBundleExtra(TaskerConditionProtocol.EXTRA_BUNDLE);if(b==null)return;if(!TaskerAuthorization.verify(this,b,true).valid)return;String value=b.getString(TaskerConditionProtocol.KEY_STATE,"any");for(int i=0;i<VALUES.length;i++)if(VALUES[i].equals(value))type.setSelection(i);filter.setText(b.getString(TaskerConditionProtocol.KEY_FILTER,""));}
-    private void save(){Bundle b=new Bundle();b.putString(TaskerConditionProtocol.KEY_KIND,TaskerConditionProtocol.KIND_EVENT);b.putString(TaskerConditionProtocol.KEY_STATE,VALUES[type.getSelectedItemPosition()]);b.putString(TaskerConditionProtocol.KEY_FILTER,filter.getText().toString().trim());if(!TaskerAuthorization.sign(this,b,hostIdentity)){Toast.makeText(this,"Could not sign Tasker event",Toast.LENGTH_LONG).show();return;}Intent result=TaskerConditionProtocol.result(b,TYPES[type.getSelectedItemPosition()]+(filter.getText().toString().trim().isEmpty()?"":" · "+filter.getText().toString().trim()));setResult(RESULT_OK,result);finish();}
+    private void save(){if(session==null||session.blocked()||isFinishing())return;String input=filter.getText().toString().trim();if(input.length()>160||input.indexOf(0)>=0){filter.setError("Filter must be at most 160 characters");return;}Bundle b=new Bundle();b.putString(TaskerConditionProtocol.KEY_KIND,TaskerConditionProtocol.KIND_EVENT);b.putString(TaskerConditionProtocol.KEY_STATE,VALUES[type.getSelectedItemPosition()]);b.putString(TaskerConditionProtocol.KEY_FILTER,filter.getText().toString().trim());if(!TaskerAuthorization.sign(this,b,hostIdentity)){Toast.makeText(this,"Could not sign Tasker event",Toast.LENGTH_LONG).show();return;}Intent result=TaskerConditionProtocol.result(b,TYPES[type.getSelectedItemPosition()]+(filter.getText().toString().trim().isEmpty()?"":" · "+filter.getText().toString().trim()));setResult(RESULT_OK,result);finish();}
 }

@@ -1,6 +1,7 @@
 package io.github.mikeceead.xbscompanion;
 
 import android.content.Intent;
+import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -25,6 +26,21 @@ public final class TaskerPluginActivity extends XbsActivity {
     private String savedCommand="",savedValues=""; private boolean savedDestructive;
     private TaskerHostIdentity hostIdentity;
     private SwitchCompat destructiveOptIn;
+    private EditorSession session;
+    private String renderedCommand="";
+    @Override protected void onSaveInstanceState(Bundle out){
+        if(session!=null&&commands!=null&&commandSpinner!=null&&commandSpinner.getSelectedItemPosition()>=0&&commandSpinner.getSelectedItemPosition()<commands.size()){
+            syncSelection();JSONObject draft=new JSONObject();CliCommand command=commands.get(commandSpinner.getSelectedItemPosition());
+            EditorSession.put(draft,"command",command.id);EditorSession.put(draft,"values",new JSONObject(collect(command)).toString());
+            EditorSession.put(draft,"destructive",command.destructive&&destructiveOptIn.isChecked());
+            if(!session.save(out,draft))Toast.makeText(this,session.problem(),Toast.LENGTH_LONG).show();
+        }super.onSaveInstanceState(out);
+    }
+    @Override protected void onDestroy(){if(session!=null&&isFinishing())session.clear();super.onDestroy();}
+    private void syncSelection(){
+        int pos=commandSpinner.getSelectedItemPosition();if(pos<0||pos>=commands.size())return;
+        CliCommand command=commands.get(pos);if(!command.id.equals(renderedCommand)){renderFields(command,"");destructiveOptIn.setChecked(false);}
+    }
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -33,7 +49,13 @@ public final class TaskerPluginActivity extends XbsActivity {
             Toast.makeText(this, "Open this action from Tasker.", Toast.LENGTH_LONG).show();setResult(RESULT_CANCELED);finish();return;
         }
         ui=new UiKit(this);getWindow().setStatusBarColor(ui.palette.background);getWindow().setNavigationBarColor(ui.palette.background);
-        registerXbsBackHandler(this::save);loadSaved();setXbsContentView(build());restoreSelection();
+        session=new ViewModelProvider(this).get(EditorSession.class);
+        session.initialize(this,state,"tasker-action:"+hostIdentity.packageName+":"+hostIdentity.certificateSha256);
+        if(session.blocked()){Toast.makeText(this,session.problem(),Toast.LENGTH_LONG).show();setResult(RESULT_CANCELED);finish();return;}
+        registerXbsBackHandler(this::save);loadSaved();JSONObject draft=session.snapshot();
+        if(draft.has("command")){savedCommand=draft.optString("command");savedValues=draft.optString("values");savedDestructive=draft.optBoolean("destructive");}
+        setXbsContentView(build());restoreSelection();
+        commandSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){if(pos==commandSpinner.getSelectedItemPosition())syncSelection();}});
     }
     private View build(){
         LinearLayout content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);content.setPadding(ui.dp(20),ui.dp(18),ui.dp(20),ui.dp(24));content.setBackgroundColor(ui.palette.background);
@@ -41,7 +63,6 @@ public final class TaskerPluginActivity extends XbsActivity {
         TextView subtitle=ui.text("Every literal xbs and XBSctl command is available as an allowlisted typed form. Runtime variable replacement is disabled so the signature remains exact. Tasker receives structured completion variables.",14,ui.palette.muted,false);subtitle.setPadding(0,ui.dp(6),0,ui.dp(12));content.addView(subtitle);
         LinearLayout card=ui.surface();commands=XbsCliCatalog.runnable();commandSpinner=spinner(labels(commands));card.addView(label("Command"));card.addView(commandSpinner);
         fieldsHost=new LinearLayout(this);fieldsHost.setOrientation(LinearLayout.VERTICAL);card.addView(fieldsHost);
-        commandSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){renderFields(commands.get(pos),"");}});
         destructiveOptIn=ui.toggle("Allow destructive command",false);card.addView(destructiveOptIn);
         card.addView(ui.text("The saved configuration is HMAC-signed and pinned to the current Tasker signing certificate.",12,ui.palette.muted,true));card.addView(ui.button("Save Tasker action",ui.palette.orange,v->save()));card.addView(ui.secondaryButton("Cancel",v->{setResult(RESULT_CANCELED);finish();}));content.addView(card);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.addView(content);return scroll;
@@ -52,7 +73,7 @@ public final class TaskerPluginActivity extends XbsActivity {
     private void restoreSelection(){int index=0;for(int i=0;i<commands.size();i++)if(commands.get(i).id.equals(savedCommand)){index=i;break;}commandSpinner.setSelection(index);renderFields(commands.get(index),savedValues);destructiveOptIn.setChecked(savedDestructive&&commands.get(index).destructive);}
 
     private void renderFields(CliCommand command,String json){
-        if(fieldsHost==null)return;fieldsHost.removeAllViews();controls.clear();JSONObject saved=null;try{if(json!=null&&!json.isEmpty())saved=new JSONObject(json);}catch(Exception ignored){}
+        if(fieldsHost==null)return;renderedCommand=command.id;fieldsHost.removeAllViews();controls.clear();JSONObject saved=null;try{if(json!=null&&!json.isEmpty())saved=new JSONObject(json);}catch(Exception ignored){}
         for(CliField field:command.fields){fieldsHost.addView(label(field.label+(field.required?" *":"")));View control;String initial=field.defaultValue;if(saved!=null)initial=saved.optString(field.name,initial);
             if(field.kind==CliField.Kind.BOOLEAN){SwitchCompat sw=ui.toggle("Enable","true".equalsIgnoreCase(initial));control=sw;fieldsHost.addView(sw);}
             else if(field.kind==CliField.Kind.CHOICE){Spinner sp=spinner(field.choices);int idx=0;for(int i=0;i<field.choices.length;i++)if(field.choices[i].equals(initial))idx=i;sp.setSelection(idx);control=sp;fieldsHost.addView(sp);}
@@ -61,10 +82,13 @@ public final class TaskerPluginActivity extends XbsActivity {
     }
 
     private void save(){
-        if(commands==null||commands.isEmpty())return;CliCommand selected=commands.get(commandSpinner.getSelectedItemPosition());Map<String,String> values=collect(selected);
+        if(session==null||session.blocked()||isFinishing()||commands==null||commands.isEmpty()||commandSpinner.getSelectedItemPosition()<0||commandSpinner.getSelectedItemPosition()>=commands.size())return;syncSelection();CliCommand selected=commands.get(commandSpinner.getSelectedItemPosition());Map<String,String> values=collect(selected);
         if(selected.destructive&&!destructiveOptIn.isChecked()){Toast.makeText(this,"Enable destructive-command permission for this Tasker action.",Toast.LENGTH_LONG).show();return;}
+        TaskerRequestPolicy.Validation bounded=TaskerRequestPolicy.validateCliValues(values,controls.keySet());
+        if(!bounded.valid){Toast.makeText(this,"Tasker input exceeds its supported bounds",Toast.LENGTH_LONG).show();return;}
         try{selected.build(values);}catch(IllegalArgumentException e){Toast.makeText(this,e.getMessage(),Toast.LENGTH_LONG).show();return;}
         JSONObject object=new JSONObject();try{for(Map.Entry<String,String> e:values.entrySet())object.put(e.getKey(),e.getValue());}catch(Exception e){Toast.makeText(this,"Could not save fields",Toast.LENGTH_LONG).show();return;}
+        if(object.toString().length()>TaskerRequestPolicy.MAX_VALUE_CHARS){Toast.makeText(this,"Encoded Tasker inputs exceed the supported bounds",Toast.LENGTH_LONG).show();return;}
         Bundle bundle=new Bundle();bundle.putString(TaskerProtocol.KEY_MODULE,"xbs");bundle.putString(TaskerProtocol.KEY_CLI_COMMAND,selected.id);bundle.putString(TaskerProtocol.KEY_CLI_VALUES,object.toString());bundle.putString(TaskerProtocol.KEY_BACKEND,"root");bundle.putBoolean(TaskerRequestPolicy.KEY_ALLOW_DESTRUCTIVE,selected.destructive&&destructiveOptIn.isChecked());if(!TaskerAuthorization.sign(this,bundle,hostIdentity)){Toast.makeText(this,"Could not sign Tasker configuration",Toast.LENGTH_LONG).show();return;}
         Intent result=new Intent();TaskerProtocol.decorate(result,bundle);setResult(RESULT_OK,result);finish();
     }

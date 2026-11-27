@@ -12,4 +12,11 @@
     <item name="xbs_tile_settings_root" type="id" />
     <item name="xbs_tile_settings_scroll" type="id" />
     <item name="xbs_tile_settings_reset" type="id" />
+    <item type="id" name="xbs_essentials_path" />
+    <item type="id" name="xbs_essentials_list" />
+    <item type="id" name="xbs_essentials_save" />
+    <item type="id" name="xbs_config_delay" />
+    <item type="id" name="xbs_event_name" />
+    <item type="id" name="xbs_event_allow" />
+    <item type="id" name="xbs_event_save" />
 </resources>

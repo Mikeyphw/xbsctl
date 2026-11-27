@@ -1,0 +1,90 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": 15198160605,
+      "kind": "api36",
+      "sha256": "f54cee0d761ec3ba72f56e10b6a9014fc5ce2eb96407fc4ce4d7f3026d0685e2",
+      "size_bytes": 9043004
+    },
+    {
+      "artifact_id": 15197712301,
+      "kind": "r05c",
+      "sha256": "e1c51361e119001138519696188c445792d449c2301cead9f53ee18263f772f8",
+      "size_bytes": 5641153
+    },
+    {
+      "artifact_id": 15196823544,
+      "kind": "module",
+      "sha256": "3f7f7e4e1046a60fe7826be1ff143a463eeaa6dc995fd8ce4471ccef03b6802d",
+      "size_bytes": 6533658
+    },
+    {
+      "artifact_id": 15196608246,
+      "kind": "jvm",
+      "sha256": "4470e3c4e314b0a4645baf63580fcab0554f9833c755ec1e9bc1cb6c85d5eb58",
+      "size_bytes": 374
+    }
+  ],
+  "case_links": {
+    "EM-005": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Save, error and reload outcome visible"
+    },
+    "EM-006": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Correct persistence/validation and no dropped changes"
+    },
+    "EM-007": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Reject unsafe input and explain why"
+    },
+    "EM-011": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Valid bounded config and correct return/result"
+    },
+    "EM-015": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No data loss/duplicate mutation"
+    },
+    "EM-016": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No clipping or obscured buttons/insets"
+    },
+    "EM-017": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No clipped inaccessible controls, correct translations"
+    },
+    "EM-018": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Actual focus/labels/targets pass"
+    }
+  },
+  "main_workflow": {
+    "attempt": 1,
+    "conclusion": "success",
+    "id": 386774409,
+    "run_id": 45998645628
+  },
+  "original_cases_accepted": [],
+  "physical_qualified": false,
+  "presentation_assertions": {
+    "failed_cases": 0,
+    "matched": {
+      "Gx10PresentationInstrumentedTest": [
+        "actualDayNightActivitiesUseDistinctReadablePalettes",
+        "arabicMainNavigationMirrorsAndExposesLocalizedLabels",
+        "realRotationPreservesSelectedTabAndMeasuredInsets",
+        "tileSettingsOfflineSelectionAndResetCancellationDoNotDispatch"
+      ]
+    },
+    "required_testcases": 4,
+    "skipped_cases": 0,
+    "testcase_identifiers_verified": true,
+    "total_testcases": 4,
+    "xml_files": 1
+  },
+  "release_qualified": false,
+  "schema": "xbs-r08r10-ui02-handoff/v1",
+  "source_commit": "f98ae063f6b20a6a4b6cac86342dbacaefe873b0",
+  "source_tree": "cad6c6abbb0eeff73b888c8f1b67ed2bc7abe01f"
+}

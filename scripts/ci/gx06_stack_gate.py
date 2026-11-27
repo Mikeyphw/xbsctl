@@ -35,6 +35,35 @@ MAIN_TREE = 'f5d7788728ec808e4ba883519ac75d0c54d98858'
 INT01_PUBLISHED_HEAD = '81cd237d8e4ad15fa305cd9243dcdb686347a515'
 INTEGRATED_MAIN_HEAD = 'ff9e67661a76e0114a025c5e516524750ba30e88'
 INTEGRATED_MAIN_TREE = '648ba25d3fc15b0fecec9ad097eb7fc3dc4235a0'
+UI02_BRANCH = 'feature/xbs-r08-r10-editor-lifecycle-20261127'
+UI01_HF01_PUBLISHED_HEAD = '4809610597722d10d4d6c7d3c2231d2c547ddc21'
+UI01_MERGED_HEAD = 'f98ae063f6b20a6a4b6cac86342dbacaefe873b0'
+UI01_MERGED_TREE = 'cad6c6abbb0eeff73b888c8f1b67ed2bc7abe01f'
+UI02_CHANGED_PATHS = frozenset({
+    '.github/workflows/devtool-xbs-ci.yml',
+    'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx10EditorInstrumentedTest.java',
+    'android-app/app/src/debug/java/io/github/mikeceead/xbscompanion/EditorBackendProvider.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EditorBackend.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EditorSession.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/EssentialsDraftPolicy.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerEventEditActivity.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerPluginActivity.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/TaskerStateEditActivity.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigActivity.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsConfigApi.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEssentialsActivity.java',
+    'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/XbsEventEditorActivity.java',
+    'android-app/app/src/main/res/values/ids.xml',
+    'android-app/app/src/release/java/io/github/mikeceead/xbscompanion/EditorBackendProvider.java',
+    'docs/engineering/XBS_R08_R10_UI02.md',
+    'docs/engineering/XBS_R08_R10_UI02_EVIDENCE.json',
+    'scripts/ci/aggregate_integration.py',
+    'scripts/ci/gx03_emulator_host.py',
+    'scripts/ci/gx06_stack_gate.py',
+    'scripts/ci/gx10_editor.py',
+    'scripts/ci/test_aggregate_integration.py',
+    'scripts/ci/test_gx10_editor.py',
+})
 UI01_BRANCH = 'feature/xbs-r08-r10-acceptance-closure-20261127'
 UI01_PUBLISHED_HEAD = '8b911a1966375c01e2521e3faa3b74cc7b9dcdad'
 UI01_PUBLISHED_TREE = 'a325734f9ea08153494eb5ece81502e01ba33c7f'
@@ -203,7 +232,7 @@ def git(root: Path, *args: str):
     need(p.returncode==0, 'GX06_GIT_FAILED '+repr(args[:3]))
     return p.stdout.strip()
 
-def reviewed_stage(root: Path) -> str:
+def reviewed_stage(root: Path, *, head=None) -> str:
     """All consumers share the same exact interval and direct-parent policy."""
     from stack_ancestry import Segment, verify_reviewed_history, HistoryRefused
     segments = (
@@ -215,8 +244,19 @@ def reviewed_stage(root: Path) -> str:
         Segment('INT01', HF01_HEAD, None, INT01_CHANGED_PATHS),
     )
     try:
-        head = git(root, 'rev-parse', 'HEAD')
+        head = head or git(root, 'rev-parse', 'HEAD')
         parents = git(root, 'rev-list', '--parents', '-n', '1', head).split()
+        if len(parents) in (2,3) and parents[1] == UI01_MERGED_HEAD:
+            need(git(root,'rev-list','--parents','-n','1',UI01_MERGED_HEAD).split()==
+                 [UI01_MERGED_HEAD,INTEGRATED_MAIN_HEAD,UI01_HF01_PUBLISHED_HEAD], 'UI02_PREVIOUS_MERGE_DRIFT')
+            need(reviewed_stage(root,head=UI01_MERGED_HEAD)=='UI01_HF01_MAIN','UI02_PREVIOUS_STAGE_DRIFT')
+            need(git(root,'rev-parse',UI01_MERGED_HEAD+'^{tree}')==UI01_MERGED_TREE,'UI02_PREVIOUS_TREE_DRIFT')
+            candidate=head if len(parents)==2 else parents[2]
+            need(verify_reviewed_history(root,(Segment('UI02',UI01_MERGED_HEAD,None,UI02_CHANGED_PATHS),),head=candidate)=='UI02','UI02_CANDIDATE_NOT_REVIEWED')
+            if len(parents)==3:
+                need(git(root,'rev-parse',head+'^{tree}')==git(root,'rev-parse',candidate+'^{tree}'),'UI02_MERGE_TREE_DRIFT')
+                return 'UI02_MAIN'
+            return 'UI02'
         if (len(parents) in (2,3) and parents[1] == INTEGRATED_MAIN_HEAD) or (len(parents)==2 and parents[1]==UI01_PUBLISHED_HEAD):
             need(git(root, 'rev-list', '--parents', '-n', '1', INTEGRATED_MAIN_HEAD).split()
                  == [INTEGRATED_MAIN_HEAD, AGG_MAIN_HEAD, INT01_PUBLISHED_HEAD], 'UI01_MAIN_HISTORY_DRIFT')
@@ -255,19 +295,19 @@ def reviewed_stage(root: Path) -> str:
             need(git(root, 'rev-parse', head+'^{tree}') == git(root, 'rev-parse', candidate+'^{tree}'),
                  'INT01_MAIN_MERGE_TREE_DRIFT')
             return 'INT01_MAIN'
-        return verify_reviewed_history(root, segments)
+        return verify_reviewed_history(root, segments, head=head)
     except HistoryRefused as exc:
         raise Refused('GX06_REVIEWED_HISTORY_REFUSED ' + str(exc)) from exc
 
 
 def stage_branch(stage: str) -> str:
     return {'GX06': GX06_BRANCH, 'R08R10': R08R10_BRANCH, 'AGG': AGG_BRANCH,
-            'FIX': FIX_BRANCH, 'HF01': FIX_BRANCH, 'INT01': INT01_BRANCH, 'INT01_MAIN': 'main', 'UI01': UI01_BRANCH, 'UI01_MAIN': 'main', 'UI01_HF01': UI01_BRANCH, 'UI01_HF01_MAIN': 'main'}[stage]
+            'FIX': FIX_BRANCH, 'HF01': FIX_BRANCH, 'INT01': INT01_BRANCH, 'INT01_MAIN': 'main', 'UI01': UI01_BRANCH, 'UI01_MAIN': 'main', 'UI01_HF01': UI01_BRANCH, 'UI01_HF01_MAIN': 'main', 'UI02': UI02_BRANCH, 'UI02_MAIN': 'main'}[stage]
 
 
 def stage_base_branch(stage: str) -> str:
     return {'GX06': GX05_BRANCH, 'R08R10': GX06_BRANCH, 'AGG': R08R10_BRANCH,
-            'FIX': AGG_BRANCH, 'HF01': AGG_BRANCH, 'INT01': 'main', 'INT01_MAIN': 'main', 'UI01': 'main', 'UI01_MAIN': 'main', 'UI01_HF01': 'main', 'UI01_HF01_MAIN': 'main'}[stage]
+            'FIX': AGG_BRANCH, 'HF01': AGG_BRANCH, 'INT01': 'main', 'INT01_MAIN': 'main', 'UI01': 'main', 'UI01_MAIN': 'main', 'UI01_HF01': 'main', 'UI01_HF01_MAIN': 'main', 'UI02': 'main', 'UI02_MAIN': 'main'}[stage]
 
 
 def hosted_branch(env):
@@ -286,13 +326,13 @@ def validate_hosted_context(root, env, *, stage=None, head=None):
     event = env.get('GITHUB_EVENT_NAME')
     need(env.get('XBS_EXPECTED_HEAD_SHA') == head, 'GX06_HOSTED_SOURCE_SHA_DRIFT')
     need(hosted_branch(env) == stage_branch(stage), 'GX06_HOSTED_BRANCH_DRIFT')
-    if stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN'):
+    if stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN','UI02_MAIN'):
         need(event in ('push', 'workflow_dispatch') and env.get('GITHUB_SHA') == head
              and not env.get('GITHUB_HEAD_REF') and not env.get('GITHUB_BASE_REF'),
              'INT01_MAIN_EVENT_REFUSED')
     else:
         need(event == 'pull_request', 'GX06_HOSTED_PR_SOURCE_IDENTITY_REFUSED')
-        if stage in ('INT01','UI01','UI01_HF01'):
+        if stage in ('INT01','UI01','UI01_HF01','UI02'):
             need(env.get('GITHUB_BASE_REF') == 'main', 'INT01_PR_BASE_DRIFT')
     run, attempt = env.get('GITHUB_RUN_ID', ''), env.get('GITHUB_RUN_ATTEMPT', '')
     need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
@@ -398,7 +438,7 @@ def audit_local(root: Path, *, env: dict|None=None):
             else git(root,'symbolic-ref','--short','HEAD'))
     stage=reviewed_stage(root)
     need(branch==stage_branch(stage),'GX06_UNREVIEWED_BRANCH')
-    aggregate=stage in ('AGG','FIX','HF01','INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN')
+    aggregate=stage in ('AGG','FIX','HF01','INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN','UI02','UI02_MAIN')
     continuation=stage!='GX06'
     need(git(root,'rev-parse',GX05_HEAD+'^{tree}')==GX05_TREE,'GX06_GX05_TREE_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),
@@ -431,23 +471,26 @@ def audit_local(root: Path, *, env: dict|None=None):
     if env.get('GITHUB_ACTIONS')=='true':
         run,attempt=validate_hosted_context(root,env,stage=stage,head=head)
     else: run=attempt=''
-    if stage in ('INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN'):
+    if stage in ('INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN','UI02','UI02_MAIN'):
         from aggregate_handback import validate_documents
         validate_documents(root)
-    if stage in ('UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN'):
+    if stage in ('UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN','UI02','UI02_MAIN'):
         from gx10_presentation import validate_presentation_source, validate_handoff
         validate_presentation_source(root)
         validate_handoff(root)
-        if stage in ('UI01_HF01','UI01_HF01_MAIN'):
+        if stage in ('UI01_HF01','UI01_HF01_MAIN','UI02','UI02_MAIN'):
             from gx10_presentation import validate_layout_repair
             validate_layout_repair(root)
+    if stage in ('UI02','UI02_MAIN'):
+        from gx10_editor import validate_editor_source,validate_handoff as validate_editor_handoff
+        validate_editor_source(root);validate_editor_handoff(root)
     out=dict(original, schema='xbs-gx06-local-audit/v1', source_sha=head,
              source_tree=tree, base_sha=GX05_HEAD, branch=branch,
              github_run_id=run, github_run_attempt=attempt,
              inspected_prs=[p['pr'] for p in stack],
              prior_hosted_status='HISTORICAL_RUN_IDS_SOURCE_BOUND_LIVE_RECHECK_REQUIRED',
              gx06_hosted_status='CURRENT_WORKFLOW_TESTS_MUST_PASS',
-             main_merge_status=('EXACT_MAIN_MERGE_OBSERVED' if stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN') else 'NOT_MERGED'),
+             main_merge_status=('EXACT_MAIN_MERGE_OBSERVED' if stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN','UI02_MAIN') else 'NOT_MERGED'),
              physical_qualified=False, release_qualified=False,
              automatic_merge=False)
     return out
