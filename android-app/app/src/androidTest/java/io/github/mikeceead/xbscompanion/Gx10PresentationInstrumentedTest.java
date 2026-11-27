@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -37,9 +38,11 @@ import static org.junit.Assert.*;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 /** Real rootless API36 presentation assertions. Never dispatch a privileged action. */
 @RunWith(AndroidJUnit4.class)
@@ -74,9 +77,12 @@ public final class Gx10PresentationInstrumentedTest {
     private static void assertVisible(View view) {
         assertNotNull(view);
         Rect actual=new Rect();
-        assertTrue("view not visible: "+view.getId(),view.getGlobalVisibleRect(actual));
-        assertEquals("horizontal clipping: "+view.getId(),view.getWidth(),actual.width());
-        assertEquals("vertical clipping: "+view.getId(),view.getHeight(),actual.height());
+        String name=view.getId()==View.NO_ID?view.getClass().getSimpleName():view.getResources().getResourceEntryName(view.getId());
+        assertTrue("view not visible: "+name,view.getGlobalVisibleRect(actual));
+        Rect local=new Rect();view.getLocalVisibleRect(local);
+        String detail=name+" measured="+view.getWidth()+"x"+view.getHeight()+" visible="+actual+" local="+local;
+        assertEquals("horizontal clipping: "+detail,view.getWidth(),actual.width());
+        assertEquals("vertical clipping: "+detail,view.getHeight(),actual.height());
         assertTrue(view.getWidth()>0 && view.getHeight()>0);
     }
     private static void assertTextFits(TextView view) {
@@ -106,10 +112,20 @@ public final class Gx10PresentationInstrumentedTest {
         assertTrue(ViewCompat.isAccessibilityHeading(title));
         assertTextFits(title);
         int minimum=Math.round(48*a.getResources().getDisplayMetrics().density);
+        LinearLayout navigation=a.findViewById(R.id.xbs_main_navigation);
+        assertFalse("multiline touch targets must not be baseline-aligned",navigation.isBaselineAligned());
         for(int i=0;i<NAV.length;i++) {
             Button nav=a.findViewById(NAV[i]);
             assertNotNull(nav);
             assertTrue(nav.getWidth()>=minimum && nav.getHeight()>=minimum);
+            assertTrue("navigation target escapes its padded parent",nav.getLeft()>=navigation.getPaddingLeft()
+                && nav.getRight()<=navigation.getWidth()-navigation.getPaddingRight()
+                && nav.getTop()>=navigation.getPaddingTop()
+                && nav.getBottom()<=navigation.getHeight()-navigation.getPaddingBottom());
+            if(navigation.getOrientation()==LinearLayout.HORIZONTAL) {
+                assertEquals(navigation.getPaddingTop(),nav.getTop());
+                assertEquals(navigation.getHeight()-navigation.getPaddingBottom(),nav.getBottom());
+            }
             assertTextFits(nav);
             AccessibilityNodeInfo node=nav.createAccessibilityNodeInfo();
             assertTrue(node.isClickable() && node.isFocusable() && node.isVisibleToUser());
@@ -214,6 +230,41 @@ public final class Gx10PresentationInstrumentedTest {
             AppSettings.setPage(app(),0);
         }
     }
+    private static void assertTileViewport(XbsTileSettingsActivity a) {
+        View root=a.findViewById(R.id.xbs_tile_settings_root);
+        ScrollView scroll=a.findViewById(R.id.xbs_tile_settings_scroll);
+        assertNotNull(root);assertNotNull(scroll);
+        WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(root);
+        assertNotNull("tile settings insets missing",insets);
+        Insets bars=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout());
+        assertTrue(root.getPaddingLeft()>=bars.left && root.getPaddingRight()>=bars.right);
+        assertTrue(root.getPaddingTop()>=bars.top && root.getPaddingBottom()>=bars.bottom);
+        assertEquals(root.getPaddingTop(),scroll.getTop());
+        assertEquals(root.getHeight()-root.getPaddingBottom(),scroll.getBottom());
+        assertEquals(0,scroll.getPaddingTop());assertEquals(0,scroll.getPaddingBottom());
+        assertVisible(scroll);
+    }
+    private static void revealResetByScrolling(ActivityScenario<XbsTileSettingsActivity> scenario) {
+        for(int attempt=0;attempt<12;attempt++) {
+            AtomicBoolean visible=new AtomicBoolean(false);
+            scenario.onActivity(a->{
+                assertTileViewport(a);
+                ScrollView scroll=a.findViewById(R.id.xbs_tile_settings_scroll);
+                Button reset=a.findViewById(R.id.xbs_tile_settings_reset);
+                assertNotNull(reset);
+                Rect rect=new Rect();
+                boolean fullyVisible=reset.getGlobalVisibleRect(rect)&&rect.width()==reset.getWidth()&&rect.height()==reset.getHeight();
+                if(fullyVisible) {
+                    assertTextFits(reset);assertTrue(reset.isEnabled()&&reset.isClickable());visible.set(true);
+                } else {
+                    assertTrue("reset unreachable at scrollY="+scroll.getScrollY()+" viewport="+scroll.getHeight()+" visible="+rect,scroll.canScrollVertically(1));
+                }
+            });
+            if(visible.get()) return;
+            onView(withId(R.id.xbs_tile_settings_scroll)).perform(swipeUp());
+        }
+        fail("Local reset not fully visible after bounded real scroll gestures");
+    }
     @Test public void tileSettingsOfflineSelectionAndResetCancellationDoNotDispatch() {
         Context app=app();
         XbsStateStore.save(app,XbsSnapshot.unavailable("GX10 rootless fixture"),Collections.emptyList());
@@ -226,7 +277,8 @@ public final class Gx10PresentationInstrumentedTest {
             onView(withText("Choose saver event")).perform(scrollTo(),click());
             onView(withText("Event selection blocked")).check(matches(isDisplayed()));
             onView(withText("OK")).perform(click());
-            onView(withText("Review local tile shortcut reset")).perform(scrollTo(),click());
+            revealResetByScrolling(scenario);
+            onView(withId(R.id.xbs_tile_settings_reset)).check(matches(withText("Review local tile shortcut reset"))).perform(click());
             onView(withText("Unlock LOCAL tile shortcut reset")).check(matches(isDisplayed()));
             onView(withText("Continue")).perform(click());
             onView(withText("Confirm local tile reset")).check(matches(isDisplayed()));

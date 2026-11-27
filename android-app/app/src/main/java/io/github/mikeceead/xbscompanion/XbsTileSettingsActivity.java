@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -38,15 +39,21 @@ public final class XbsTileSettingsActivity extends XbsActivity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         ui=new UiKit(this);
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
-        scroll.setBackgroundColor(ui.palette.background);content=new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);int pad=(int)(16*getResources().getDisplayMetrics().density);
-        content.setPadding(pad,pad,pad,pad);scroll.addView(content);
-        render();setXbsContentView(scroll);
+        // Insets belong to the non-scrolling outer frame. The ScrollView's entire
+        // viewport is then safe, including its maximum scroll position and last button.
+        FrameLayout frame=new FrameLayout(this);frame.setId(R.id.xbs_tile_settings_root);
+        frame.setBackgroundColor(ui.palette.background);
+        ScrollView scroll=new ScrollView(this);scroll.setId(R.id.xbs_tile_settings_scroll);
+        scroll.setFillViewport(true);scroll.setClipToPadding(true);
+        content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);
+        int pad=ui.dp(16);content.setPadding(pad,pad,pad,pad);
+        scroll.addView(content,new ScrollView.LayoutParams(-1,-2));
+        frame.addView(scroll,new FrameLayout.LayoutParams(-1,-1));
+        render();setXbsContentView(frame);
     }
     private void label(String s) {TextView text=ui.text(s,16,ui.palette.text,false);
         text.setPadding(0,ui.dp(8),0,ui.dp(8));content.addView(text);}
-    private void button(String s,View.OnClickListener click) {Button b=ui.touchTarget(ui.secondaryButton(s,click));content.addView(b);}
+    private Button button(String s,View.OnClickListener click) {Button b=ui.touchTarget(ui.secondaryButton(s,click));content.addView(b);return b;}
     private XbsTileDecision.Kind requestedKind() {
         String raw=getIntent()==null?"":getIntent().getStringExtra(EXTRA_KIND);
         if(raw!=null)for(XbsTileDecision.Kind kind:kinds)if(kind.name().equals(raw))return kind;
@@ -82,7 +89,7 @@ public final class XbsTileSettingsActivity extends XbsActivity {
                 button("Review recovered "+kind.name()+" tile",v->confirmRecovery(kind));
         }
         label("Restore Defaults: XBS currently has no allowlisted runtime restore command. No daemon configuration will be changed from Quick Settings.");
-        button("Review local tile shortcut reset",v->confirmLocalReset());
+        button("Review local tile shortcut reset",v->confirmLocalReset()).setId(R.id.xbs_tile_settings_reset);
     }
     private void choose(XbsTileDecision.Kind kind) {
         XbsSnapshot snapshot=XbsStateStore.current(this);

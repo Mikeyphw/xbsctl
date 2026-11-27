@@ -114,6 +114,29 @@ def validate_presentation_source(root: Path) -> None:
     need('python3 -B scripts/ci/test_gx10_presentation.py' in workflow,'GX10_HOSTED_NEGATIVE_TESTS_NOT_REQUIRED')
 
 
+def validate_layout_repair(root: Path) -> None:
+    """Retain strict instrumentation and verify the UI repair is connected to production."""
+    base=root/'android-app/app/src/main/java/io/github/mikeceead/xbscompanion'
+    activity=(base/'MainActivity.java').read_text(encoding='utf8')
+    tile=(base/'XbsTileSettingsActivity.java').read_text(encoding='utf8')
+    tests=(root/'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion'/f'{CLASS}.java').read_text(encoding='utf8')
+    # Real UI acceptance is still the hosted test; these source checks prevent
+    # accidentally replacing the fix with tolerance or a programmatic action.
+    need('row.setBaselineAligned(false)' in activity and 'new LinearLayout.LayoutParams(0,-1,1)' in activity,
+         'GX10_HF01_NAV_LAYOUT_DRIFT')
+    need('frame.addView(scroll,new FrameLayout.LayoutParams(-1,-1))' in tile and 'setXbsContentView(frame)' in tile
+         and 'setXbsContentView(scroll)' not in tile,'GX10_HF01_INSET_VIEWPORT_DRIFT')
+    need('view.getWidth(),actual.width()' in tests and 'view.getHeight(),actual.height()' in tests
+         and 'assertTextFits(nav)' in tests and 'nav.getWidth()>=minimum && nav.getHeight()>=minimum' in tests,
+         'GX10_HF01_STRICT_GEOMETRY_WEAKENED')
+    need('onView(withId(R.id.xbs_tile_settings_scroll)).perform(swipeUp())' in tests
+         and 'assertTextFits(reset)' in tests and 'scroll.canScrollVertically(1)' in tests
+         and 'onView(withId(R.id.xbs_tile_settings_reset)).check(matches(withText("Review local tile shortcut reset"))).perform(click())' in tests,
+         'GX10_HF01_REAL_SCROLL_OR_CLICK_MISSING')
+    need('assertEquals(before,RunStore.all(app).size())' in tests and 'assertEquals(saver,XbsTileConfiguration.selected' in tests
+         and 'assertEquals(profiles,XbsTileConfiguration.selected' in tests,'GX10_HF01_NO_DISPATCH_ASSERTION_WEAKENED')
+
+
 def validate_handoff(root: Path) -> None:
     import json
     path=root/'docs/engineering/XBS_R08_R10_UI01_EVIDENCE.json'

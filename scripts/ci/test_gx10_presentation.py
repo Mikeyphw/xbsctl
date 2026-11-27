@@ -10,7 +10,7 @@ import zlib
 import xml.etree.ElementTree as ET
 from gx03_evidence import PKG, Refused, PNG, chunk, redact_png
 from gx10_presentation import (NAV, WIDTHS, validate_window_xml, validate_foreground,
-    validate_capture, validate_matrix, validate_presentation_source, validate_handoff)
+    validate_capture, validate_matrix, validate_presentation_source, validate_handoff, validate_layout_repair)
 ROOT=Path(__file__).resolve().parents[2]
 
 def xml_fixture():
@@ -59,6 +59,28 @@ class PresentationTests(unittest.TestCase):
         with self.assertRaises(Refused):redact_png(broken,w)
     def test_source_and_historical_handoff(self):
         validate_presentation_source(ROOT);validate_handoff(ROOT)
+    def test_layout_repair_source(self):
+        validate_layout_repair(ROOT)
+    def test_layout_repair_negative(self):
+        from shutil import copytree
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            base='android-app/app/src/'
+            for kind in ('main/java','androidTest/java'):
+                rel=base+kind+'/io/github/mikeceead/xbscompanion'
+                copytree(ROOT/rel,root/rel)
+            prod=root/(base+'main/java/io/github/mikeceead/xbscompanion')
+            inst=root/(base+'androidTest/java/io/github/mikeceead/xbscompanion/Gx10PresentationInstrumentedTest.java')
+            for path,old,new in [(prod/'MainActivity.java','row.setBaselineAligned(false)','row.setBaselineAligned(true)'),
+                (prod/'XbsTileSettingsActivity.java','setXbsContentView(frame)','setXbsContentView(scroll)'),
+                (inst,'view.getHeight(),actual.height()','view.getHeight()-1,actual.height()'),
+                (inst,'assertTextFits(reset)','assertNotNull(reset)'),
+                (inst,'assertEquals(before,RunStore.all(app).size())','assertTrue(true)')]:
+                source=path.read_text();self.assertIn(old,source)
+                path.write_text(source.replace(old,new))
+                try:
+                    with self.subTest(old=old),self.assertRaises(Refused):validate_layout_repair(root)
+                finally:path.write_text(source)
     def test_real_java_policy(self):
         # No Android SDK or Gradle: exercise the actual Java policy with the JDK.
         source=ROOT/'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ThemePalettePolicy.java'
