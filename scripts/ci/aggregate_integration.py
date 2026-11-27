@@ -32,25 +32,17 @@ def git(root,*args):
 
 def audit(root,hosted=False):
     root=Path(root).resolve(strict=True)
-    from gx06_stack_gate import AGG_CHANGED_PATHS,FIX_CHANGED_PATHS
+    from gx06_stack_gate import reviewed_stage, stage_branch, stage_base_branch
     branch=os.environ.get('GITHUB_HEAD_REF') if hosted else git(root,'symbolic-ref','--short','HEAD')
-    need(branch in (AGG_BRANCH,FIX_BRANCH),'AGG_UNREVIEWED_BRANCH')
-    fix=branch==FIX_BRANCH
+    stage=reviewed_stage(root)
+    need(stage in ('AGG','FIX','HF01') and branch==stage_branch(stage),'AGG_UNREVIEWED_BRANCH')
     head=git(root,'rev-parse','HEAD')
     need(re.fullmatch('[a-f0-9]{40}',head) is not None,'AGG_INVALID_HEAD')
-    need(git(root,'rev-parse','HEAD^')==(AGG_HEAD if fix else R08R10_HEAD),'AGG_PARENT_DRIFT')
-    if fix:need(git(root,'rev-parse',AGG_HEAD+'^')==R08R10_HEAD,'AGG_ORIGINAL_PARENT_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),'AGG_DIRTY_WORKTREE')
-    original=AGG_HEAD if fix else 'HEAD'
-    changed=set(git(root,'diff','--name-only',R08R10_HEAD,original).splitlines())
-    need(changed==AGG_CHANGED_PATHS,'AGG_UNREVIEWED_CHANGED_PATHS '+str(sorted(changed^AGG_CHANGED_PATHS)))
-    if fix:
-        delta=set(git(root,'diff','--name-only',AGG_HEAD,'HEAD').splitlines())
-        need(delta==FIX_CHANGED_PATHS,'AGG_UNREVIEWED_FIX_PATHS '+str(sorted(delta^FIX_CHANGED_PATHS)))
     observed={p:git(root,'rev-parse','HEAD:'+p) for p in list(MAIN_FILES)+['android-app/build.gradle']}
     verify_blob_map(observed)
     policy=__import__('json').loads((root/'config/delivery-required-ci.json').read_text())
-    need(policy.get('base_branch')==(AGG_BRANCH if fix else 'feature/xbs-r08-r10-acceptance-rebuild-20261118'),'AGG_CI_BASE_DRIFT')
+    need(policy.get('base_branch')==stage_base_branch(stage),'AGG_CI_BASE_DRIFT')
     required={(x['name'],x['workflow_id']) for x in policy['required_workflows']}
     need(required=={
         ('Devtool XBS Go and Android candidates',386774409),
@@ -59,7 +51,8 @@ def audit(root,hosted=False):
     if hosted:
         need(os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('GITHUB_EVENT_NAME')=='pull_request' and
              os.environ.get('XBS_EXPECTED_HEAD_SHA')==head,'AGG_HOSTED_SOURCE_UNVERIFIED')
-        need(str(os.environ.get('GITHUB_RUN_ID','')).isdigit() and str(os.environ.get('GITHUB_RUN_ATTEMPT','')).isdigit(),
+        run=os.environ.get('GITHUB_RUN_ID','');attempt=os.environ.get('GITHUB_RUN_ATTEMPT','')
+        need(run.isdigit() and int(run)>0 and attempt.isdigit() and int(attempt)>0,
              'AGG_HOSTED_RUN_IDENTITY_MISSING')
     print('XBS_AGGREGATE_SOURCE_INTEGRITY_PASS sha='+head+' parent='+R08R10_HEAD+' main='+MAIN_SHA+' preview='+MERGE_TREE+' release=false',flush=True)
     return {'head':head,'source':'SHA_AND_BLOB_PINNED','merge_applied':False,'aggregate_ci_qualified':False,

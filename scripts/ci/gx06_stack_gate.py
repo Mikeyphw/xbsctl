@@ -27,6 +27,7 @@ AGG_MAIN_HEAD = 'c52561dfa203090befb680a058aa5e5e79870f1b'
 AGG_MERGE_TREE = 'ae7292929149833cbecd65667d9a4f7b0588697d'
 AGG_HEAD = 'b693612fc76bef3bd4d7fb8375861a990180fd0a'
 FIX_BRANCH = 'feature/xbs-aggregate-r07a-ci-repair-20261118'
+FIX_HEAD = '5cfa4e6e846263d85338b5d394e201fd6ac4f6c1'
 GX05_BRANCH = 'feature/xbs-gx05-security-performance-readiness-20261116'
 LOCK = 'docs/engineering/XBS_GX06_STACK_LOCK.json'
 GATES = 'docs/engineering/XBS_GX06_COVERAGE.json'
@@ -80,6 +81,19 @@ FIX_CHANGED_PATHS = frozenset({
     'scripts/ci/test_r07a_policy.py',
 })
 R08R10_CHANGED_PATHS = frozenset(('.github/workflows/devtool-xbs-ci.yml', 'android-app/app/src/androidTest/java/io/github/mikeceead/xbscompanion/Gx04TilesInstrumentedTest.java', 'android-app/build.gradle', 'config/delivery-required-ci.json', 'docs/engineering/XBS_R08_R10_ACCEPTANCE_HANDOFF.md', 'docs/engineering/XBS_R08_R10_EVIDENCE_MAP.json', 'scripts/ci/gx02_ci_verify.py', 'scripts/ci/gx03_contract_audit.py', 'scripts/ci/gx03_emulator_host.py', 'scripts/ci/gx06_stack_gate.py', 'scripts/ci/r08_r10_acceptance.py', 'scripts/ci/test_gx04_tiles.py', 'scripts/ci/test_gx06_stack_gate.py', 'scripts/ci/test_r08_r10_acceptance.py'))
+HF01_CHANGED_PATHS = frozenset({
+    'conftest.py',
+    'docs/engineering/XBS_AGGREGATE_INTEGRATION_20261118.md',
+    'scripts/ci/aggregate_integration.py',
+    'scripts/ci/gx02_ci_verify.py',
+    'scripts/ci/gx03_contract_audit.py',
+    'scripts/ci/gx06_stack_gate.py',
+    'scripts/ci/r08_r10_acceptance.py',
+    'scripts/ci/stack_ancestry.py',
+    'scripts/ci/test_aggregate_integration.py',
+    'scripts/ci/test_r08_r10_acceptance.py',
+    'scripts/ci/test_gx06_stack_gate.py',
+})
 SHA = re.compile(r'[0-9a-f]{40}\Z')
 SHA256 = re.compile(r'[0-9a-f]{64}\Z')
 RUN_REQUIRED = {'Devtool XBS Go and Android candidates': 386774409,
@@ -105,6 +119,32 @@ def git(root: Path, *args: str):
     except (OSError,subprocess.TimeoutExpired) as e: raise Refused('GX06_GIT_UNAVAILABLE') from e
     need(p.returncode==0, 'GX06_GIT_FAILED '+repr(args[:3]))
     return p.stdout.strip()
+
+def reviewed_stage(root: Path) -> str:
+    """All consumers share the same exact interval and direct-parent policy."""
+    from stack_ancestry import Segment, verify_reviewed_history, HistoryRefused
+    segments = (
+        Segment('GX06', GX05_HEAD, GX06_HEAD, GX06_CHANGED_PATHS),
+        Segment('R08R10', GX06_HEAD, R08R10_HEAD, R08R10_CHANGED_PATHS),
+        Segment('AGG', R08R10_HEAD, AGG_HEAD, AGG_CHANGED_PATHS),
+        Segment('FIX', AGG_HEAD, FIX_HEAD, FIX_CHANGED_PATHS),
+        Segment('HF01', FIX_HEAD, None, HF01_CHANGED_PATHS),
+    )
+    try:
+        return verify_reviewed_history(root, segments)
+    except HistoryRefused as exc:
+        raise Refused('GX06_REVIEWED_HISTORY_REFUSED ' + str(exc)) from exc
+
+
+def stage_branch(stage: str) -> str:
+    return {'GX06': GX06_BRANCH, 'R08R10': R08R10_BRANCH, 'AGG': AGG_BRANCH,
+            'FIX': FIX_BRANCH, 'HF01': FIX_BRANCH}[stage]
+
+
+def stage_base_branch(stage: str) -> str:
+    return {'GX06': GX05_BRANCH, 'R08R10': GX06_BRANCH, 'AGG': R08R10_BRANCH,
+            'FIX': AGG_BRANCH, 'HF01': AGG_BRANCH}[stage]
+
 
 def validated_lock(lock):
     need(lock.get('schema')=='xbs-gx06-stack-lock/v1' and lock.get('repository')==REPO,
@@ -202,46 +242,16 @@ def audit_local(root: Path, *, env: dict|None=None):
          'GX06_HEAD_OR_TREE_INVALID')
     branch=(env.get('GITHUB_HEAD_REF') if env.get('GITHUB_ACTIONS')=='true'
             else git(root,'symbolic-ref','--short','HEAD'))
-    need(branch in (GX06_BRANCH,R08R10_BRANCH,AGG_BRANCH,FIX_BRANCH),'GX06_UNREVIEWED_BRANCH')
-    fix=branch==FIX_BRANCH
-    aggregate=branch in (AGG_BRANCH,FIX_BRANCH)
-    continuation=branch in (R08R10_BRANCH,AGG_BRANCH,FIX_BRANCH)
-    if continuation:
-        need(git(root,'rev-parse','HEAD^')==(AGG_HEAD if fix else R08R10_HEAD if aggregate else GX06_HEAD),
-             'R08R10_OR_AGG_PARENT_NOT_EXACT')
-        need(git(root,'rev-parse',GX06_HEAD+'^')==GX05_HEAD,
-             'R08R10_GX06_SOURCE_PARENT_DRIFT')
-        if aggregate:
-            need(git(root,'rev-parse',R08R10_HEAD+'^')==GX06_HEAD,
-                 'AGG_R08R10_SOURCE_PARENT_DRIFT')
-            if fix:
-                need(git(root,'rev-parse',AGG_HEAD+'^')==R08R10_HEAD,
-                     'R07A_FIX_AGGREGATE_PARENT_DRIFT')
-    else:
-        need(git(root,'rev-parse','HEAD^')==GX05_HEAD,'GX06_UNREVIEWED_PARENT')
+    stage=reviewed_stage(root)
+    need(branch==stage_branch(stage),'GX06_UNREVIEWED_BRANCH')
+    aggregate=stage in ('AGG','FIX','HF01')
+    continuation=stage!='GX06'
     need(git(root,'rev-parse',GX05_HEAD+'^{tree}')==GX05_TREE,'GX06_GX05_TREE_DRIFT')
     need(not git(root,'status','--porcelain','--untracked-files=all'),
          'GX06_DIRTY_SOURCE_CHECKOUT')
-    gx06_diff_target=GX06_HEAD if continuation else 'HEAD'
-    changed=set(git(root,'diff','--name-only',GX05_HEAD,gx06_diff_target).splitlines())
-    need(changed==GX06_CHANGED_PATHS,
-         'GX06_EXACT_CHANGE_INVENTORY_MISMATCH '+repr(sorted(changed^GX06_CHANGED_PATHS)))
     if continuation:
-        r08_target=R08R10_HEAD if aggregate else 'HEAD'
-        next_changed=set(git(root,'diff','--name-only',GX06_HEAD,r08_target).splitlines())
-        need(next_changed==R08R10_CHANGED_PATHS,
-             'R08R10_EXACT_CHANGE_INVENTORY_MISMATCH '+repr(sorted(next_changed^R08R10_CHANGED_PATHS)))
-        if aggregate:
-            agg_target=AGG_HEAD if fix else 'HEAD'
-            agg_changed=set(git(root,'diff','--name-only',R08R10_HEAD,agg_target).splitlines())
-            need(agg_changed==AGG_CHANGED_PATHS,
-                 'AGG_EXACT_CHANGE_INVENTORY_MISMATCH '+repr(sorted(agg_changed^AGG_CHANGED_PATHS)))
-            if fix:
-                fix_changed=set(git(root,'diff','--name-only',AGG_HEAD,'HEAD').splitlines())
-                need(fix_changed==FIX_CHANGED_PATHS,
-                     'R07A_FIX_EXACT_INVENTORY_MISMATCH '+repr(sorted(fix_changed^FIX_CHANGED_PATHS)))
         from r08_r10_acceptance import audit_source
-        audit_source(root, expected_base=AGG_BRANCH if fix else R08R10_BRANCH if aggregate else GX06_BRANCH)
+        audit_source(root, expected_base=stage_base_branch(stage))
     for path in ORIGINAL:
         need(git(root,'rev-parse',GX05_HEAD+':'+path)==git(root,'rev-parse','HEAD:'+path),
              'GX06_ORIGINAL_PROTECTED_FILE_CHANGED '+path)
@@ -258,7 +268,7 @@ def audit_local(root: Path, *, env: dict|None=None):
     required_workflows=set(RUN_REQUIRED.items())
     if aggregate:
         required_workflows.add(('Devtool S7 P05 XBS Android Consumer Adoption',418896455))
-    expected_base=(AGG_BRANCH if fix else R08R10_BRANCH if aggregate else GX06_BRANCH if continuation else GX05_BRANCH)
+    expected_base=stage_base_branch(stage)
     need(policy.get('base_branch')==expected_base and
          policy.get('repository')==REPO and
          policy.get('event')=='pull_request' and policy.get('release_qualification')=='separate' and

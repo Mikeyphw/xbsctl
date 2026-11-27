@@ -22,3 +22,26 @@ symlinked or modified workflow files continue to be refused. The source
 ancestry gates check direct parent PR #36 and this exact 9-file delta.
 All three required aggregate workflows remain mandatory on the new PR head.
 No branch rewrite, main merge, physical qualification, signing or release.
+
+## AGG-R07A-HF01 — source-history gate correction
+
+PR #37 source `5cfa4e6e846263d85338b5d394e201fd6ac4f6c1` failed
+[canonical Go run 44411366017](https://github.com/Mikeyphw/xbsctl/actions/runs/44411366017)
+with `R08R10_CHANGED_PATHS_DRIFT`: the R08/R10 verifier selected HEAD for the
+aggregate repair rather than the immutable R08/R10 endpoint. GX03 duplicated
+the same selection. A fresh commit on the existing PR also needs a reviewed
+parent and delta; simply correcting that conditional would reject the new HEAD.
+
+All four consumers now use one linear history verifier with exact single-parent
+checks, pinned historical endpoints, NUL-delimited exact changed paths (no rename
+heuristics), and an explicit eleven-file HF01 delta on the original PR #37 head.
+The existing PR branch and base are unchanged. The R08/R10 evidence gate now accepts that exact aggregate base only with the unchanged three-workflow inventory; local source audit exposed the previously unreachable base refusal. Real disposable Git-history tests
+exercise every terminal stage, historical boundary selection, extra/missing paths,
+wrong pins and parents, and merge-commit rejection; the previously undiscovered
+GX06 integration tests now run in the mandatory direct-script suite. All three
+workflow IDs, six protected integration blobs, original 178 tasks / 131 cases /
+26 findings and separate physical/signing/release boundaries remain unchanged.
+Hosted acceptance requires fresh exact-source runs; no green result is presumed.
+
+Root pytest discovery explicitly excludes only the retired `archive/legacy-suite-tests`
+collection (documented in `archive/README.md`); no active CI or S7 tests are excluded.

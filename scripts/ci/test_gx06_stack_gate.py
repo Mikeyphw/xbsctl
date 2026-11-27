@@ -134,7 +134,6 @@ class GX06StackTests(unittest.TestCase):
         row=copy.deepcopy(self.coverage);row['release_gate']='ACCEPTED'
         with self.assertRaises(Refused):validate_release_limits(row)
 
-if __name__=='__main__':unittest.main()
 
 # Additional integration tests verify the entrypoint used by the mandatory
 # Go job, not merely independent fixture-policy functions.
@@ -156,6 +155,7 @@ class GX06AuditIntegrationTests(unittest.TestCase):
             if name=='config/delivery-required-ci.json':
                 policy=json.loads(dest.read_text())
                 policy['base_branch']=GX05_BRANCH
+                policy['required_workflows']=[w for w in policy['required_workflows'] if w['workflow_id'] != 418896455]
                 dest.write_text(json.dumps(policy))
         ledger,matrix,tracker=original_fixture()
         for name,payload in [
@@ -174,6 +174,8 @@ class GX06AuditIntegrationTests(unittest.TestCase):
         if args==('rev-parse','HEAD'):return self.head
         if args==('rev-parse','HEAD^{tree}'):return self.tree
         if args==('rev-parse','HEAD^'):return 'a'*40 if self.wrong_parent else GX05_HEAD
+        if args==('rev-list','--parents','-n','1',self.head):return self.head+' '+('a'*40 if self.wrong_parent else GX05_HEAD)
+        if args==('diff','--name-only','--no-renames','-z',GX05_HEAD,self.head):return '\0'.join(sorted(self.changes))+'\0'
         if args==('rev-parse',GX05_HEAD+'^{tree}'):return GX05_TREE
         if args==('symbolic-ref','--short','HEAD'):return GX06_BRANCH
         if args==('status','--porcelain','--untracked-files=all'):return ''
@@ -183,6 +185,7 @@ class GX06AuditIntegrationTests(unittest.TestCase):
 
     def audit(self,env):
         with mock.patch('gx06_stack_gate.git',side_effect=self.fakegit),\
+             mock.patch('stack_ancestry.git',side_effect=lambda root,*a:self.fakegit(root,*a).encode()),\
              mock.patch('gx06_stack_gate.subprocess.run',return_value=SimpleNamespace(returncode=0)):
             return audit_local(self.root,env=env)
 
@@ -228,5 +231,9 @@ class GX06AuditIntegrationTests(unittest.TestCase):
             if args==('rev-parse','HEAD:docs/engineering/XBS_TEST_MATRIX.json'):return 'b'*40
             return old(root,*args)
         with mock.patch('gx06_stack_gate.git',side_effect=wrong),\
+             mock.patch('stack_ancestry.git',side_effect=lambda root,*a:self.fakegit(root,*a).encode()),\
              mock.patch('gx06_stack_gate.subprocess.run',return_value=SimpleNamespace(returncode=0)):
             with self.assertRaises(Refused):audit_local(self.root,env={})
+
+
+if __name__=='__main__':unittest.main()

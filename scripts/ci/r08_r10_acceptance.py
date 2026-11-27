@@ -142,7 +142,8 @@ def validate_gradle_merge_compatibility(text: str) -> None:
          'GRADLE_STANDALONE_PATH_REGRESSION')
 
 def audit_source(root: Path, expected_base: str = BASE_BRANCH) -> dict:
-    need(expected_base in (BASE_BRANCH, 'feature/xbs-r08-r10-acceptance-rebuild-20261118'), 'UNKNOWN_REQUIRED_CI_BASE')
+    need(expected_base in (BASE_BRANCH, 'feature/xbs-r08-r10-acceptance-rebuild-20261118',
+                           'feature/xbs-aggregate-r08-r10-main-20261118'), 'UNKNOWN_REQUIRED_CI_BASE')
     root = Path(root).resolve(strict=True)
     mapping = json.loads(read_regular(root, MAP))
     validate_mapping(mapping)

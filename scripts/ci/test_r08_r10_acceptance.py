@@ -144,6 +144,24 @@ class R08R10AcceptanceTests(unittest.TestCase):
                 file=base/relative;file.parent.mkdir(parents=True,exist_ok=True)
                 file.write_text(content)
             self.assertEqual(audit_source(base)['required_instrumentation'],6)
+            policy_path=base/POLICY
+            policy=json.loads(policy_path.read_text())
+            for branch in ('feature/xbs-r08-r10-acceptance-rebuild-20261118',
+                           'feature/xbs-aggregate-r08-r10-main-20261118'):
+                with self.subTest(branch=branch):
+                    policy['base_branch']=branch
+                    policy['required_workflows']=policy['required_workflows'][:2]
+                    policy_path.write_text(json.dumps(policy))
+                    with self.assertRaisesRegex(Refused,'REQUIRED_CI_WORKFLOWS_DRIFT'):
+                        audit_source(base, expected_base=branch)
+                    policy['required_workflows'].append({
+                        'name':'Devtool S7 P05 XBS Android Consumer Adoption',
+                        'workflow_id':418896455})
+                    policy_path.write_text(json.dumps(policy))
+                    self.assertEqual(audit_source(base,expected_base=branch)['total_tile_instrumentation'],15)
+            with self.assertRaisesRegex(Refused,'UNKNOWN_REQUIRED_CI_BASE'):
+                audit_source(base,expected_base='main')
+
 
     def test_25_original_source_is_not_silently_updated(self):
         self.assertEqual(self.mapping['base_source_sha'],
