@@ -54,4 +54,15 @@
         <item quantity="other">%d processes</item>
     </plurals>
 
+    <string name="xbs_main_brand">XBS COMPANION</string>
+    <string name="xbs_page_overview">Overview</string>
+    <string name="xbs_page_events">Events</string>
+    <string name="xbs_page_processes">Processes</string>
+    <string name="xbs_page_activity">Activity</string>
+    <string name="xbs_page_settings">Settings</string>
+    <string name="xbs_subtitle_overview">Live XBS runtime state, simultaneous events and primary controls.</string>
+    <string name="xbs_subtitle_events">Manage protected built-in and custom XBS event profiles.</string>
+    <string name="xbs_subtitle_processes">Live root process CPU, memory, app ownership and XBS rules.</string>
+    <string name="xbs_subtitle_activity">Runtime transitions and technical command results.</string>
+    <string name="xbs_subtitle_settings">Root, caching, notifications, Tasker and monitoring behavior.</string>
 </resources>

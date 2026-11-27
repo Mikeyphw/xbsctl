@@ -8,23 +8,24 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 /** Explicit in-app configuration. No privileged command or profile is inferred from a tile label. */
-public final class XbsTileSettingsActivity extends AppCompatActivity {
+public final class XbsTileSettingsActivity extends XbsActivity {
     static final String EXTRA_KIND="gx04_kind";
     private final XbsTileDecision.Kind[] kinds={XbsTileDecision.Kind.SAVER,
         XbsTileDecision.Kind.PROFILES,XbsTileDecision.Kind.PAUSE,XbsTileDecision.Kind.SAFE,
         XbsTileDecision.Kind.RESTORE};
     private LinearLayout content;
+    private UiKit ui;
     // Never run RootCommandRunner or Room-backed command-history checks on the UI thread.
     private final ExecutorService commandWorker=Executors.newSingleThreadExecutor();
     private void dispatchCommand(Runnable task){
@@ -37,22 +38,29 @@ public final class XbsTileSettingsActivity extends AppCompatActivity {
     }
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
-        ScrollView scroll=new ScrollView(this);content=new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);int pad=(int)(16*getResources().getDisplayMetrics().density);
-        content.setPadding(pad,pad,pad,pad);scroll.addView(content);setContentView(scroll);
-        render();
+        ui=new UiKit(this);
+        // Insets belong to the non-scrolling outer frame. The ScrollView's entire
+        // viewport is then safe, including its maximum scroll position and last button.
+        FrameLayout frame=new FrameLayout(this);frame.setId(R.id.xbs_tile_settings_root);
+        frame.setBackgroundColor(ui.palette.background);
+        ScrollView scroll=new ScrollView(this);scroll.setId(R.id.xbs_tile_settings_scroll);
+        scroll.setFillViewport(true);scroll.setClipToPadding(true);
+        content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);
+        int pad=ui.dp(16);content.setPadding(pad,pad,pad,pad);
+        scroll.addView(content,new ScrollView.LayoutParams(-1,-2));
+        frame.addView(scroll,new FrameLayout.LayoutParams(-1,-1));
+        render();setXbsContentView(frame);
     }
-    private void label(String s) {TextView text=new TextView(this);text.setText(s);text.setTextSize(16);
-        text.setPadding(0,12,0,12);content.addView(text);}
-    private void button(String s,View.OnClickListener click) {Button b=new Button(this);
-        b.setText(s);b.setOnClickListener(click);content.addView(b);}
+    private void label(String s) {TextView text=ui.text(s,16,ui.palette.text,false);
+        text.setPadding(0,ui.dp(8),0,ui.dp(8));content.addView(text);}
+    private Button button(String s,View.OnClickListener click) {Button b=ui.touchTarget(ui.secondaryButton(s,click));content.addView(b);return b;}
     private XbsTileDecision.Kind requestedKind() {
         String raw=getIntent()==null?"":getIntent().getStringExtra(EXTRA_KIND);
         if(raw!=null)for(XbsTileDecision.Kind kind:kinds)if(kind.name().equals(raw))return kind;
         return XbsTileDecision.Kind.PROFILES;
     }
     private void render() {
-        content.removeAllViews();label("XBS Quick Settings · verified state only");
+        content.removeAllViews();content.addView(ui.primaryTitle("XBS Quick Settings · verified state only"));
         XbsSnapshot snapshot=XbsStateStore.current(this);
         EventBridgeReport bridge=EventBridgeStore.cached(this);
         boolean attested=XbsTileController.trusted(snapshot,bridge,System.currentTimeMillis());
@@ -81,7 +89,7 @@ public final class XbsTileSettingsActivity extends AppCompatActivity {
                 button("Review recovered "+kind.name()+" tile",v->confirmRecovery(kind));
         }
         label("Restore Defaults: XBS currently has no allowlisted runtime restore command. No daemon configuration will be changed from Quick Settings.");
-        button("Review local tile shortcut reset",v->confirmLocalReset());
+        button("Review local tile shortcut reset",v->confirmLocalReset()).setId(R.id.xbs_tile_settings_reset);
     }
     private void choose(XbsTileDecision.Kind kind) {
         XbsSnapshot snapshot=XbsStateStore.current(this);

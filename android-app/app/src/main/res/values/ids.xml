@@ -1,0 +1,15 @@
+<resources>
+    <item name="xbs_main_root" type="id" />
+    <item name="xbs_main_header" type="id" />
+    <item name="xbs_main_title" type="id" />
+    <item name="xbs_main_navigation" type="id" />
+    <item name="xbs_main_scroll" type="id" />
+    <item name="xbs_nav_overview" type="id" />
+    <item name="xbs_nav_events" type="id" />
+    <item name="xbs_nav_processes" type="id" />
+    <item name="xbs_nav_activity" type="id" />
+    <item name="xbs_nav_settings" type="id" />
+    <item name="xbs_tile_settings_root" type="id" />
+    <item name="xbs_tile_settings_scroll" type="id" />
+    <item name="xbs_tile_settings_reset" type="id" />
+</resources>

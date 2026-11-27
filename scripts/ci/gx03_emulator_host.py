@@ -91,24 +91,55 @@ def pair(serial,identity,apksigner,aapt):
     return results
 
 def screenshot(serial,width,theme,out):
-    need(width in (360,393) and theme in ('light','dark'),'SCREENSHOT_REQUEST_INVALID')
-    pixels=width*3
-    height=2400 if width==360 else 2620
+    from gx10_presentation import WIDTHS,validate_foreground,validate_window_xml,validate_capture
+    need(width in WIDTHS and theme in ('light','dark'),'SCREENSHOT_REQUEST_INVALID')
+    pixels,height=WIDTHS[width]
     adb(serial,'shell','wm','size',str(pixels)+'x'+str(height))
     adb(serial,'shell','wm','density','480')
-    adb(serial,'shell','cmd','uimode','night','yes' if theme=='dark' else 'no')
+    mode='yes' if theme=='dark' else 'no'
+    adb(serial,'shell','cmd','uimode','night',mode)
+    observed=adb(serial,'shell','cmd','uimode','night',check=False)
+    need(observed.returncode==0 and re.fullmatch(r'Night mode:\s*'+mode,observed.stdout.strip(),re.I),
+         'GX10_SYSTEM_NIGHT_MODE_NOT_OBSERVED')
     adb(serial,'shell','am','force-stop',PKG)
-    adb(serial,'shell','am','start','-W','-n',PKG+'/.MainActivity')
-    raw=adb(serial,'exec-out','screencap','-p',bytes_mode=True).stdout
-    redacted,meta=redact_png(raw,pixels)
+    launch=adb(serial,'shell','am','start','-W','-n',PKG+'/.MainActivity','--ei','page','0',check=False)
+    need(launch.returncode==0 and re.search(r'(?m)^Status:\s*ok\s*$',launch.stdout),
+         'GX10_MAIN_ACTIVITY_LAUNCH_NOT_CONFIRMED')
+    # UIAutomator supplies the actual on-screen accessibility tree. Only the fixed
+    # structural fields and digest are published; the raw XML stays in the emulator.
+    remote='/data/local/tmp/gx10-presentation-window.xml'
+    try:
+        adb(serial,'shell','rm','-f',remote)
+        dump=adb(serial,'shell','uiautomator','dump','--compressed',remote,timeout=45,check=False)
+        need(dump.returncode==0,'GX10_WINDOW_DUMP_FAILED')
+        tree=adb(serial,'exec-out','cat',remote,bytes_mode=True,check=False)
+        need(tree.returncode==0,'GX10_WINDOW_XML_UNAVAILABLE')
+        window=validate_window_xml(tree.stdout,pixels,height)
+    finally:
+        removed=adb(serial,'shell','rm','-f',remote,check=False)
+        need(removed.returncode==0,'GX10_PRIVATE_WINDOW_XML_CLEANUP_FAILED')
+    state=adb(serial,'shell','dumpsys','activity','activities',check=False)
+    need(state.returncode==0,'GX10_FOREGROUND_QUERY_FAILED')
+    validate_foreground(state.stdout)
+    capture=adb(serial,'exec-out','screencap','-p',bytes_mode=True,check=False)
+    need(capture.returncode==0,'GX10_SCREEN_CAPTURE_FAILED')
+    state=adb(serial,'shell','dumpsys','activity','activities',check=False)
+    need(state.returncode==0,'GX10_FOREGROUND_QUERY_FAILED')
+    validate_foreground(state.stdout)
+    redacted,meta=redact_png(capture.stdout,pixels,band=180)
     target=out/('gx03-'+str(width)+'dp-'+theme+'-redacted.png')
-    target.write_bytes(redacted)
-    need(target.is_file() and sha(target.read_bytes())==meta['redacted_sha256'],
-         'REDATED_SCREENSHOT_HASH_MISMATCH')
-    meta.update({'file':target.name,'theme_requested':theme,'screen_context':'offline-clean-emulator',
+    need(not target.exists(),'GX10_STALE_SCREENSHOT_REFUSED')
+    meta.update(window)
+    meta.update({'file':target.name,'theme_requested':theme,'theme_observed':theme,
+                 'foreground_verified':True,'screen_context':'offline-clean-emulator',
                  'locale_rtl_accepted':False,'accessibility_accepted':False,
                  'redaction_scope':'status_and_navigation_bands_only'})
+    validate_capture(meta,width,theme)
+    target.write_bytes(redacted)
+    need(target.is_file() and sha(target.read_bytes())==meta['redacted_sha256'],
+         'REDACTED_SCREENSHOT_HASH_MISMATCH')
     return meta
+
 
 def verified_direct_stage_receipt(output:str,selector:str)->dict:
     """Accept precisely one successful, real AndroidJUnitRunner instrumentation.
@@ -245,6 +276,11 @@ def execute(args):
         need(args.api==36,'AUTHORITATIVE_API36_REQUIRED')
         gradle_test('io.github.mikeceead.xbscompanion.Gx03JourneyInstrumentedTest')
         report['journey_assertions']=junit_receipt(RESULTS,JOURNEYS)
+        from gx10_presentation import CLASS as presentation_class,METHODS as presentation_methods,validate_matrix
+        gradle_test('io.github.mikeceead.xbscompanion.Gx10PresentationInstrumentedTest')
+        report['gx10_presentation_assertions']=junit_receipt(RESULTS,{presentation_class:set(presentation_methods)})
+        need(report['gx10_presentation_assertions']['total_testcases']==len(presentation_methods),
+             'GX10_UNREVIEWED_OR_DUPLICATE_PRESENTATION_EXECUTION')
         # GX04: actual API36 instrumented package/TileService security checks.
         # Mandatory, never synthetic SystemUI acceptance or root qualification.
         gradle_test('io.github.mikeceead.xbscompanion.Gx04TilesInstrumentedTest')
@@ -330,13 +366,14 @@ def execute(args):
                     captures.append(screenshot(serial,width,theme,out))
         finally:
             # Changes were made only to a disposable emulator; restore global settings.
-            adb(serial,'shell','wm','size','reset',check=False)
-            adb(serial,'shell','wm','density','reset',check=False)
-            adb(serial,'shell','cmd','uimode','night','auto',check=False)
+            restored=[adb(serial,'shell',*command,check=False) for command in
+                      [('wm','size','reset'),('wm','density','reset'),('cmd','uimode','night','auto')]]
+            need(all(x.returncode==0 for x in restored),'GX10_EMULATOR_SETTING_RESTORE_FAILED')
+        report['gx10_capture_matrix']=validate_matrix(captures)
         report['screenshots']=captures
         report['journey_scope']='MainActivity five tabs, hostile navigation, real external process death'
         report['original_cases_accepted']=[]
-        report['remaining_cases']='Editor CRUD, locale/RTL, accessibility and other R10 cases remain unmapped until separate exact tests'
+        report['remaining_cases']='Editor CRUD, full localization/accessibility, landscape screenshots, remaining tile/runtime assertions and other R10 cases remain open; original case acceptance is separate'
     elif args.mode=='compat':
         need(args.api in COMPAT,'COMPAT_API_MUST_BE_26_OR_34')
         report['compat_assertions']=junit_receipt(RESULTS,COMPAT[args.api])

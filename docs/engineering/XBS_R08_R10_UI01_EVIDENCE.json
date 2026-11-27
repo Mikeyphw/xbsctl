@@ -1,0 +1,323 @@
+{
+  "case_links": {
+    "EM-015": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No data loss/duplicate mutation",
+      "scope": "Actual rotation preserves selected tab; editor pending request restoration still open."
+    },
+    "EM-016": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No clipping or obscured buttons/insets",
+      "scope": "Portrait matrix and measured navigation/insets; every screen and obscured controls remain open."
+    },
+    "EM-017": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No clipped inaccessible controls, correct translations",
+      "scope": "Actual day/night palette and Arabic navigation; full translation and control matrix remain open."
+    },
+    "EM-018": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Actual focus/labels/targets pass",
+      "scope": "Measured navigation labels/targets and heading; full focus and Espresso accessibility coverage remain open."
+    },
+    "EM-019": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Disabled/unavailable state; no root/false success",
+      "scope": "Offline tile settings refuses dispatch; retained historical SystemUI callback evidence."
+    },
+    "EM-020": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "No duplicate commands and correct persisted state",
+      "scope": "No new rapid-tap/process-kill acceptance; historical partial evidence only."
+    },
+    "EM-021": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Sensitive action requires unlock/explicit confirmation",
+      "scope": "Reset cancellation tested, actual secure unlock remains open."
+    },
+    "EM-022": {
+      "acceptance": "PARTIAL_CANDIDATE_ONLY",
+      "required_assertion": "Unique dimensions/hash, no user secrets or raw private log",
+      "scope": "Reject duplicate or contradictory theme capture; content privacy and other dimensions remain open."
+    }
+  },
+  "current_hosted_status": "PENDING_NEW_RUN",
+  "observation": {
+    "archives": {
+      "api36": {
+        "archive_size_bytes": 9055773,
+        "artifact_id": 15171431038,
+        "attempt": 1,
+        "members": {
+          "app-debug.apk": {
+            "sha256": "12ed35db46d93de366356e01ec95c7914970069cb2d0c1d585fe6d8f1bd1b000",
+            "size_bytes": 6635987
+          },
+          "evidence.json": {
+            "sha256": "8d2f3051d7df757fa771933e84e01e3903ef0b4cddd66e23edbd111b2c13c7f8",
+            "size_bytes": 9015
+          },
+          "gx03-360dp-dark-redacted.png": {
+            "sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "size_bytes": 136396
+          },
+          "gx03-360dp-light-redacted.png": {
+            "sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+            "size_bytes": 136396
+          },
+          "gx03-393dp-dark-redacted.png": {
+            "sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "size_bytes": 150483
+          },
+          "gx03-393dp-light-redacted.png": {
+            "sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+            "size_bytes": 150483
+          },
+          "gx05-security-tests.json": {
+            "sha256": "04d4cdfc152f2616107b72762370a5813097ab680b60322ff23a3420affae6fe",
+            "size_bytes": 588
+          },
+          "gx05-startup-samples.json": {
+            "sha256": "0cf4db2c6163447aa6f0e4d62386dea14ff9164833416e78b789776dae508f5d",
+            "size_bytes": 361
+          },
+          "test-debug.apk": {
+            "sha256": "eff643fb06772f3c3024575ae1000ff521f5ceb7692b83f7f31bd0fbe31dcf47",
+            "size_bytes": 3884516
+          }
+        },
+        "provider_sha256": "7e9d63b6a6a5ac9c102bf94bcbe731c2745e24572e7c5b2d18fd9e6ebabb21c4",
+        "run_id": 45936373612,
+        "source_sha": "ff9e67661a76e0114a025c5e516524750ba30e88",
+        "workflow_id": 386774409
+      },
+      "jvm": {
+        "archive_size_bytes": 376,
+        "artifact_id": 15170976687,
+        "attempt": 1,
+        "members": {
+          "r06b-jvm-test-counts.json": {
+            "sha256": "2dd014f2bd5872f949422b74cdbef246e6faf5073492dad1fe54b820bdb31d1e",
+            "size_bytes": 335
+          }
+        },
+        "provider_sha256": "0937e72b7850aebfad7ee223acbad047ba4c866a1407133ab97719c9bc4fea98",
+        "run_id": 45936373612,
+        "source_sha": "ff9e67661a76e0114a025c5e516524750ba30e88",
+        "workflow_id": 386774409
+      },
+      "module": {
+        "archive_size_bytes": 6533684,
+        "artifact_id": 15170567901,
+        "attempt": 1,
+        "members": {
+          "SHA256SUMS": {
+            "sha256": "b5bd7f89322f397564c128e5835952669a04b1e5177b6e955027cc22554a0f2f",
+            "size_bytes": 87
+          },
+          "XtremeBS-go.zip": {
+            "sha256": "8afaf5ae52ec358323c99e5fb30474d1592cdd152ec0410d7ca061c3862cce4d",
+            "size_bytes": 6233432
+          },
+          "r06b-devtool-qualification.json": {
+            "sha256": "4e8f055354c7b642d68e9c09b3669e7a63cf049e19c35bbf529934926131c7c5",
+            "size_bytes": 3184
+          },
+          "r06b-go-test-counts.json": {
+            "sha256": "5de8a9dde0732f91c3729504a3c036fe4687a2af31946df34e340c633dc80ee6",
+            "size_bytes": 750
+          },
+          "r09a-backend-qualification.json": {
+            "sha256": "838bae22590a6e47b896f522f134eb3281dfeb3933129e48991b9c571e5c0a08",
+            "size_bytes": 4640
+          },
+          "r09a-backend.coverprofile": {
+            "sha256": "8aa1aeedbf04a24c8abedfa50c7072b6f522800f327566bbac6fc5c75635a109",
+            "size_bytes": 87916
+          },
+          "r09b-backend-matrix.json": {
+            "sha256": "6293122615425bbba76667e8e19a92b09f22d19f143fc5ed07ecbdc92de2d61a",
+            "size_bytes": 1546
+          },
+          "r09c-backend-model.json": {
+            "sha256": "b5dc7d8d4725d68ae8ea756a66ac889b3decd90a48a8406bf9f7ab977e8fb5b4",
+            "size_bytes": 1575
+          },
+          "r09c-backend.coverprofile": {
+            "sha256": "20623fe3d7bf288e0a4a75cc5dc3c16f4ea2486c2d59faaf9b17ef85e26b3eb3",
+            "size_bytes": 48489
+          },
+          "r09d-risk-coverage.json": {
+            "sha256": "dd8586e656a4aacc6e41d8ce6493be125fcbd8af61e1fdf26221b6ecaa22b04c",
+            "size_bytes": 3329
+          },
+          "r09d-risk.coverprofile": {
+            "sha256": "aac6ef97c812cf016792e60999c134e2c61039311dc72560625a2843c7641413",
+            "size_bytes": 2728935
+          },
+          "r09e-boundary-coverage.json": {
+            "sha256": "00423a54ac28a6fb569e193805877ae83a88b56e1ac4cdc88b5f5b2a64a73ead",
+            "size_bytes": 1619
+          },
+          "r09f-final-ledger.json": {
+            "sha256": "9d6cc59a89b26ff7fe615a711733e65d661b06f81095ae30352c155d87831a86",
+            "size_bytes": 11372
+          }
+        },
+        "provider_sha256": "a001f1d4703bd077dd08fb8727b7f7e0f23bcd1659dc5b904c5e5800566394f8",
+        "run_id": 45936373612,
+        "source_sha": "ff9e67661a76e0114a025c5e516524750ba30e88",
+        "workflow_id": 386774409
+      },
+      "r05c-api36": {
+        "archive_size_bytes": 5636112,
+        "artifact_id": 15171081885,
+        "attempt": 1,
+        "members": {
+          "SHA256SUMS": {
+            "sha256": "e58dd9f1eab2f4d45c39877372d8c1b8c1fe38a222a23c92e32d5b40216723f4",
+            "size_bytes": 101
+          },
+          "SOURCE_SHA": {
+            "sha256": "119b7bf4a6cb09d9a430ba7630dad8985cabb077a4c75547ae2ab7becc9e4732",
+            "size_bytes": 41
+          },
+          "xbs-companion-r05c-api36-debug.apk": {
+            "sha256": "12ed35db46d93de366356e01ec95c7914970069cb2d0c1d585fe6d8f1bd1b000",
+            "size_bytes": 6635987
+          }
+        },
+        "provider_sha256": "7a407e0c56fcbc417a055d17a2b9d56722ea3c30bdddad8feedbbced60ec15c4",
+        "run_id": 45936373612,
+        "source_sha": "ff9e67661a76e0114a025c5e516524750ba30e88",
+        "workflow_id": 386774409
+      }
+    },
+    "attempt": 1,
+    "original_cases_accepted": [],
+    "run_id": 45936373612,
+    "screenshots": [
+      {
+        "accessibility_accepted": false,
+        "ancillary_png_metadata_removed": true,
+        "density_dpi": 480,
+        "file": "gx03-360dp-light-redacted.png",
+        "height_px": 2400,
+        "locale_rtl_accepted": false,
+        "masked_bottom_px": 100,
+        "masked_top_px": 100,
+        "raw_sha256_local_only": "64f91deeb732a7e7737cc4f8c4420285aadb511533cc8c0b05db0265265f6530",
+        "redacted_sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+        "redacted_size_bytes": 136396,
+        "redaction_scope": "status_and_navigation_bands_only",
+        "screen_context": "offline-clean-emulator",
+        "theme_requested": "light",
+        "width_dp": 360,
+        "width_px": 1080
+      },
+      {
+        "accessibility_accepted": false,
+        "ancillary_png_metadata_removed": true,
+        "density_dpi": 480,
+        "file": "gx03-360dp-dark-redacted.png",
+        "height_px": 2400,
+        "locale_rtl_accepted": false,
+        "masked_bottom_px": 100,
+        "masked_top_px": 100,
+        "raw_sha256_local_only": "7b9140f38d52b788c1cbd1d953d224829f4382a7ab5efea7903611a0a72df866",
+        "redacted_sha256": "c214057f5df0e14c28b5d7cabb7ee102c094b02f1454e02224b221ebb189cb7e",
+        "redacted_size_bytes": 136396,
+        "redaction_scope": "status_and_navigation_bands_only",
+        "screen_context": "offline-clean-emulator",
+        "theme_requested": "dark",
+        "width_dp": 360,
+        "width_px": 1080
+      },
+      {
+        "accessibility_accepted": false,
+        "ancillary_png_metadata_removed": true,
+        "density_dpi": 480,
+        "file": "gx03-393dp-light-redacted.png",
+        "height_px": 2620,
+        "locale_rtl_accepted": false,
+        "masked_bottom_px": 100,
+        "masked_top_px": 100,
+        "raw_sha256_local_only": "965e67f682a9ec9aa2d49fbaba78071ce7c1b1256923f84d7162cdd46f762f8b",
+        "redacted_sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+        "redacted_size_bytes": 150483,
+        "redaction_scope": "status_and_navigation_bands_only",
+        "screen_context": "offline-clean-emulator",
+        "theme_requested": "light",
+        "width_dp": 393,
+        "width_px": 1179
+      },
+      {
+        "accessibility_accepted": false,
+        "ancillary_png_metadata_removed": true,
+        "density_dpi": 480,
+        "file": "gx03-393dp-dark-redacted.png",
+        "height_px": 2620,
+        "locale_rtl_accepted": false,
+        "masked_bottom_px": 100,
+        "masked_top_px": 100,
+        "raw_sha256_local_only": "8a9a9409c9c1b36e997278c0a401ef4ec7cd20c61edd4dc5036bbfd77deaab4f",
+        "redacted_sha256": "f6537b9ff4758dc9bb68509ed2ff3f77029043b08d043ccc2101affb3bb210d2",
+        "redacted_size_bytes": 150483,
+        "redaction_scope": "status_and_navigation_bands_only",
+        "screen_context": "offline-clean-emulator",
+        "theme_requested": "dark",
+        "width_dp": 393,
+        "width_px": 1179
+      }
+    ],
+    "source_sha": "ff9e67661a76e0114a025c5e516524750ba30e88",
+    "source_tree": "648ba25d3fc15b0fecec9ad097eb7fc3dc4235a0",
+    "systemui_callbacks": {
+      "add_callback": true,
+      "api": 36,
+      "click_callback": true,
+      "diagnostic_states_remain_non_active": true,
+      "physical_oem_qualified": false,
+      "real_systemui_shell": true,
+      "remove_callback": true,
+      "root_execution_asserted": false,
+      "shell_exit_alone_never_proves_callback": true,
+      "user_data_recorded": false
+    },
+    "theme_qualified": false,
+    "tile_assertions": {
+      "failed_cases": 0,
+      "matched": {
+        "Gx04TilesInstrumentedTest": [
+          "allFiveTilesHaveSystemOnlyManifestPermission",
+          "allTileServicesAreBoundToQuickSettingsAction",
+          "durablePendingBlocksRepeatedTapAcrossReload",
+          "hostileEventNamesRejectedBeforeLaunch",
+          "noConfiguredRestoreRootActionAndAllEventActionsAllowlisted",
+          "r08EventTilesRequireConfiguredAuthenticatedUnpausedState",
+          "r08MatrixForbidsAnyActionDuringPendingFailureOrRecovery",
+          "r08RecoveryCannotBeAcknowledgedWhileCommandPending",
+          "r08RestoreDefaultsAlwaysRequiresSeparateAppConfirmation",
+          "r10SettingsFiveTileFallbackSurvivesActivityRecreation",
+          "r10SystemUiCallbackCountersCannotAuthenticateRootlessTiles",
+          "runtimeSettingsActivityRendersAllFiveTileRequests",
+          "unsafeAndUnconfiguredTilesNeverClaimActive",
+          "unverifiedTilesCannotLaunchRootCommands",
+          "verifiedCompletionRequiresTerminalHistoryAndNewerEvidence"
+        ]
+      },
+      "required_testcases": 15,
+      "skipped_cases": 0,
+      "testcase_identifiers_verified": true,
+      "total_testcases": 15,
+      "xml_files": 1
+    }
+  },
+  "original_cases_accepted": [],
+  "original_cases_preserved": 131,
+  "original_findings_preserved": 26,
+  "original_tasks_preserved": 178,
+  "physical_root_qualified": false,
+  "release_qualified": false,
+  "schema": "xbs-r08-r10-ui01/v1"
+}

@@ -30,8 +30,9 @@ abstract class XbsActivity extends AppCompatActivity {
             getWindow().setNavigationBarContrastEnforced(false);
         }
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        controller.setAppearanceLightStatusBars(false);
-        controller.setAppearanceLightNavigationBars(false);
+        boolean light = !AppPalette.isDark(this);
+        controller.setAppearanceLightStatusBars(light);
+        controller.setAppearanceLightNavigationBars(light);
     }
 
     protected final void setXbsContentView(View root) {
@@ -50,7 +51,7 @@ abstract class XbsActivity extends AppCompatActivity {
             );
             return windowInsets;
         });
-        String paneTitle = AccessibilityUiPolicy.screenTitle(getClass());
+        String paneTitle = this instanceof MainActivity ? getString(R.string.app_name) : AccessibilityUiPolicy.screenTitle(getClass());
         UiQualityReport.AccessibilityResult accessibility = AccessibilityUiPolicy.apply(this, root, paneTitle);
         UiQualityStore.recordAccessibility(this, accessibility);
         super.setContentView(root);
