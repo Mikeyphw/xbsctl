@@ -1,6 +1,8 @@
 package io.github.mikeceead.xbscompanion;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.ViewModelProvider;
+import android.content.Context;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -56,6 +58,58 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private TextView validationSummary;
     private boolean validationBound;
     private boolean saving;
+    private EditorSession session;
+    private EditorBackend backend;
+    private int pendingPicker;
+    private String pendingPickerText;
+
+    private boolean live(){return !isDestroyed()&&!isFinishing();}
+    private Map<String,View> draftControls(){
+        Map<String,View> controls=new LinkedHashMap<>();
+        String[] keys={"name","allow","deny","proc","handleCustom","disableCustom","inheritAllow","inheritDeny","inheritProc","keep","quit","handleProc","lowRam","killWifi","apps","gms","doze","handleCores","disableCores"};
+        View[] views={name,allow,deny,proc,handleCoresCustom,disableCoresCustom,inheritAllow,inheritDeny,inheritProc,keepOnCharge,quit,handleProc,lowRam,killWifi,handleApps,handleGms,doze,handleCores,disableCores};
+        for(int i=0;i<keys.length;i++) if(views[i]!=null && !(i==0&&(template||(!clone&&builtIn)))) controls.put(keys[i],views[i]);
+        return controls;
+    }
+    private JSONObject draftSnapshot(){
+        JSONObject draft=session.snapshot();
+        if(config!=null&&event!=null&&name!=null){
+            EditorSession.put(draft,"config",config.toString());
+            EditorSession.put(draft,"event",event.toString());
+            EditorSession.put(draft,"fields",EditorSession.capture(draftControls()));
+        }
+        EditorSession.put(draft,"picker",pendingPicker);
+        EditorSession.put(draft,"pickerText",pendingPickerText==null?"":pendingPickerText);
+        return draft;
+    }
+    @Override protected void onSaveInstanceState(Bundle out){
+        if(session!=null&&!session.save(out,draftSnapshot()))toast(session.problem());
+        super.onSaveInstanceState(out);
+    }
+    private void cancelEditor(){
+        if(session!=null&&session.busy()){toast("Wait for the current transaction to finish");return;}
+        finish();
+    }
+    private void restoreEditor(JSONObject draft){
+        try{
+            config=new JSONObject(draft.getString("config"));event=new JSONObject(draft.getString("event"));
+            JSONObject t=config.getJSONObject("events").optJSONObject("template");
+            render("","","",resolvePath("allowlist",t),resolvePath("denylist",t),resolvePath("proc_file",t));
+            validationBound=false;EditorSession.restore(draftControls(),draft.optJSONObject("fields"));validationBound=true;
+            applyPendingPicker();validateDraft(false);AccessibilityUiPolicy.apply(this,content,"Event editor");
+        }catch(Exception invalid){error("Saved event draft could not be read. Reopen the editor before saving.");}
+    }
+    private void setBusy(boolean busy){
+        saving=busy;content.setVisibility(busy?View.INVISIBLE:View.VISIBLE);
+        if(busy){validationSummary.setText("Saving event; do not repeat the transaction…");setSaveEnabled(false);}
+        else if(session.blocked()){validationSummary.setText(session.problem());setSaveEnabled(false);}
+        else validateDraft(false);
+    }
+    private void onMutationResult(XbsConfigApi.Result result){
+        if(!live())return;
+        if(result.ok){session.clear();toast("Event saved in transaction "+result.message);finish();}
+        else{setBusy(false);validationSummary.setText(result.message);toast(result.message);}
+    }
 
     @Override protected void onCreate(Bundle state){
         super.onCreate(state);
@@ -72,11 +126,16 @@ public final class XbsEventEditorActivity extends XbsActivity {
         }
         builtIn=XbsConfigApi.isBuiltInEvent(originalName);
         capabilities=XbsCapabilityRegistry.cached(this);
-        build();
-        load();
+        backend=EditorBackendProvider.get();
+        session=new ViewModelProvider(this).get(EditorSession.class);
+        session.initialize(this,state,"event:"+originalName+":"+clone+":"+template);
+        JSONObject draft=session.snapshot();pendingPicker=draft.optInt("picker",0);pendingPickerText=draft.optString("pickerText","");
+        build();registerXbsBackHandler(this::cancelEditor);
+        if(draft.has("config"))restoreEditor(draft);else if(session.blocked())error(session.problem());else load();
+        setBusy(session.busy());session.attach(this::onMutationResult);
     }
 
-    @Override protected void onDestroy(){executor.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){if(session!=null){session.detach();if(isFinishing()&&!session.busy())session.clear();}executor.shutdownNow();super.onDestroy();}
 
     private void build(){
         ui=new UiKit(this);
@@ -110,8 +169,9 @@ public final class XbsEventEditorActivity extends XbsActivity {
         LinearLayout foot=new LinearLayout(this);
         foot.setOrientation(LinearLayout.HORIZONTAL);
         foot.setPadding(ui.dp(16),ui.dp(4),ui.dp(16),ui.dp(10));
-        Button cancelButton=ui.secondaryButton("Cancel",v->finish());
+        Button cancelButton=ui.secondaryButton("Cancel",v->cancelEditor());
         saveButton=ui.button(template?"Validate and save template":"Validate and save event",ui.palette.green,v->save());
+        saveButton.setId(R.id.xbs_event_save);
         LinearLayout.LayoutParams cancelParams=new LinearLayout.LayoutParams(0,-2,1);
         cancelParams.setMargins(0,0,ui.dp(4),0);
         foot.addView(cancelButton,cancelParams);
@@ -124,13 +184,14 @@ public final class XbsEventEditorActivity extends XbsActivity {
     }
 
     private void load(){
+        if(session.blocked()||session.busy())return;
         saving=false;
         validationBound=false;
         setSaveEnabled(false);
         content.removeAllViews();
         LinearLayout card=ui.surface();card.addView(ui.text("Loading event profile…",17,ui.palette.text,true));content.addView(card);
         executor.execute(()->{
-            XbsConfigApi.Result result=XbsConfigApi.load(this,false);
+            XbsConfigApi.Result result=backend.load(getApplicationContext(),false);
             if(!result.ok){runOnUiThread(()->error(result.message));return;}
             config=result.config;
             JSONObject events=config.optJSONObject("events");
@@ -146,10 +207,10 @@ public final class XbsEventEditorActivity extends XbsActivity {
             String allowPath=resolvePath("allowlist",templateObj);
             String denyPath=resolvePath("denylist",templateObj);
             String procPath=resolvePath("proc_file",templateObj);
-            String allowText=XbsConfigApi.readText(this,allowPath,false);
-            String denyText=XbsConfigApi.readText(this,denyPath,false);
-            String procText=XbsConfigApi.readText(this,procPath,false);
-            runOnUiThread(()->render(allowText,denyText,procText,allowPath,denyPath,procPath));
+            String allowText=backend.readText(getApplicationContext(),allowPath,false);
+            String denyText=backend.readText(getApplicationContext(),denyPath,false);
+            String procText=backend.readText(getApplicationContext(),procPath,false);
+            runOnUiThread(()->{if(live()){render(allowText,denyText,procText,allowPath,denyPath,procPath);applyPendingPicker();AccessibilityUiPolicy.apply(this,content,"Event editor");}});
         });
     }
 
@@ -159,6 +220,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     }
 
     private void error(String message){
+        if(!live())return;
         saving=false;
         validationBound=false;
         setSaveEnabled(false);
@@ -168,12 +230,13 @@ public final class XbsEventEditorActivity extends XbsActivity {
         card.addView(ui.text(ResultFormatter.notificationText(message),13,ui.palette.muted,false));
         card.addView(ui.button("Check root and retry",ui.palette.orange,v->executor.execute(()->{
             RootStatus status=XbsRootApi.checkRoot(this,true);
-            runOnUiThread(()->{toast(status.summary());load();});
+            runOnUiThread(()->{if(live()){toast(status.summary());load();}});
         })));
         content.addView(card);
     }
 
     private void render(String allowText,String denyText,String procText,String allowPath,String denyPath,String procPath){
+        validationBound=false;
         content.removeAllViews();
         capabilities=XbsCapabilityRegistry.cached(this);
         XbsCompatibilityReport compatibility=capabilities.report;
@@ -186,7 +249,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
         content.addView(ui.sectionTitle("Identity"));
         LinearLayout identity=ui.surface();
         String suggested=clone?(originalName+"_copy"):originalName;
-        name=ui.input(suggested,"Event name",false);
+        name=ui.input(suggested,"Event name",false);name.setId(R.id.xbs_event_name);
         boolean protectedIdentity=template||(!clone&&builtIn);
         name.setEnabled(!protectedIdentity);
         identity.addView(ui.text("Event name",13,ui.palette.muted,true));
@@ -209,7 +272,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
         inheritAllow=ui.toggle("Inherit template allowlist",!template&&!event.has("allowlist"));
         inheritAllow.setEnabled(!template);
         allowCard.addView(inheritAllow);
-        allow=ui.input(allowText,"One package per line",true);allow.setMinLines(7);allowCard.addView(allow);
+        allow=ui.input(allowText,"One package per line",true);allow.setId(R.id.xbs_event_allow);allow.setMinLines(7);allowCard.addView(allow);
         Button allowPicker=ui.secondaryButton("Select installed apps",v->openAppPicker(PICK_ALLOW,"Select allowlisted apps",allow));
         allowPicker.setEnabled(supportsField("allowlist"));
         allowCard.addView(allowPicker);
@@ -329,12 +392,12 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private void bindCoreInput(Spinner spinner,EditText input){
         spinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
             public void onItemSelected(android.widget.AdapterView<?> parent,View view,int position,long id){
-                input.setEnabled("custom".equals(choiceValue(spinner)));
+                input.setEnabled(spinner.isEnabled()&&"custom".equals(choiceValue(spinner)));
                 validateDraft(false);
             }
             public void onNothingSelected(android.widget.AdapterView<?> parent){input.setEnabled(false);validateDraft(false);}
         });
-        input.setEnabled("custom".equals(choiceValue(spinner)));
+        input.setEnabled(spinner.isEnabled()&&"custom".equals(choiceValue(spinner)));
     }
 
     private String choiceValue(Spinner spinner){
@@ -373,11 +436,19 @@ public final class XbsEventEditorActivity extends XbsActivity {
         if(result!=RESULT_OK||data==null)return;
         if(request==PICK_ALLOW||request==PICK_DENY){
             ArrayList<String> selected=data.getStringArrayListExtra(AppPickerActivity.EXTRA_SELECTED);
-            if(selected!=null){StringBuilder out=new StringBuilder();for(String value:selected)out.append(value).append('\n');(request==PICK_ALLOW?allow:deny).setText(out.toString());}
+            if(selected!=null){StringBuilder out=new StringBuilder();for(String value:selected)out.append(value).append('\n');pendingPicker=request;pendingPickerText=out.toString();}
         }else if(request==PICK_PROCESS){
             String rules=data.getStringExtra(ProcessMonitorActivity.EXTRA_RULES);
-            if(rules!=null&&!rules.isEmpty())proc.setText(mergeRules(proc.getText().toString(),rules));
+            if(rules!=null&&!rules.isEmpty()){pendingPicker=request;pendingPickerText=rules;}
         }
+        applyPendingPicker();
+    }
+    private void applyPendingPicker(){
+        if(!validationBound||saving||pendingPicker==0)return;
+        if(pendingPicker==PICK_ALLOW&&allow!=null)allow.setText(pendingPickerText);
+        else if(pendingPicker==PICK_DENY&&deny!=null)deny.setText(pendingPickerText);
+        else if(pendingPicker==PICK_PROCESS&&proc!=null)proc.setText(mergeRules(proc.getText().toString(),pendingPickerText));
+        pendingPicker=0;pendingPickerText=null;
     }
 
     private void bindValidation(){
@@ -401,7 +472,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private void bindToggleValidation(SwitchCompat toggle,EditText field){
         if(toggle==null)return;
         toggle.setOnCheckedChangeListener((button,on)->{
-            if(field!=null)field.setEnabled(!on);
+            if(field!=null)field.setEnabled(!on&&toggle.isEnabled());
             validateDraft(false);
         });
     }
@@ -415,7 +486,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     }
 
     private XbsEventDraftValidator.Result validateDraft(boolean focusFirstError){
-        if(!validationBound||saving)return new XbsEventDraftValidator.Result(new ArrayList<>());
+        if(!validationBound||saving||session.blocked())return new XbsEventDraftValidator.Result(new ArrayList<>());
         EditorState state=captureState();
         XbsEventDraftValidator.Result result=XbsEventDraftValidator.validate(state.validation);
         applyValidation(result,focusFirstError);
@@ -491,6 +562,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private static String text(EditText field){return field==null?"":field.getText().toString();}
 
     private void save(){
+        if(saving||session.busy()||session.blocked()||!validationBound)return;
         EditorState state=captureState();
         XbsEventDraftValidator.Result result=XbsEventDraftValidator.validate(state.validation);
         applyValidation(result,true);
@@ -524,40 +596,33 @@ public final class XbsEventEditorActivity extends XbsActivity {
     }
 
     private void performSave(EditorState state){
-        saving=true;
-        validationBound=false;
-        setSaveEnabled(false);
-        if(saveButton!=null)saveButton.setText(R.string.xbs_saving);
-        content.removeAllViews();
-        LinearLayout card=ui.surface();card.addView(ui.text("Saving event…",17,ui.palette.text,true));content.addView(card);
-        executor.execute(()->{
-            try{
-                JSONObject workingConfig=new JSONObject(config.toString());
-                JSONObject events=workingConfig.getJSONObject("events");
-                JSONObject updated=new JSONObject();
-                Map<String,String> files=new LinkedHashMap<>();
-                if(!template)putBehavior(updated,state);
-                bind(updated,files,state.target,"allowlist",".allowlist",state.inheritAllow,state.allowValue);
-                bind(updated,files,state.target,"denylist",".denylist",state.inheritDeny,state.denyValue);
-                bind(updated,files,state.target,"proc_file",".proc",state.inheritProc,state.procValue);
-                java.util.Iterator<String> keys=event.keys();
-                while(keys.hasNext()){
-                    String key=keys.next();
-                    if((!MANAGED_KEYS.contains(key)||!supportsField(key))&&!updated.has(key))updated.put(key,event.get(key));
-                }
-                events.put(state.target,updated);
-                if(!template&&!clone&&!originalName.isEmpty()&&!originalName.equals(state.target)){
-                    if(!XbsConfigApi.isCustomEvent(originalName))throw new IllegalStateException("Protected event identity changed unexpectedly");
-                    events.remove(originalName);
-                }
-                XbsConfigApi.Result result=XbsConfigApi.save(this,workingConfig,files,true);
-                runOnUiThread(()->{
-                    saving=false;
-                    if(result.ok){toast("Event saved in transaction "+result.message);finish();}
-                    else{toast(result.message);load();}
-                });
-            }catch(Exception exception){runOnUiThread(()->{saving=false;toast(exception.getMessage());load();});}
-        });
+        if(saving||session.busy()||session.blocked())return;
+        try{
+            JSONObject workingConfig=EditorSession.copy(config);
+            JSONObject events=workingConfig.getJSONObject("events");
+            JSONObject updated=new JSONObject();Map<String,String> files=new LinkedHashMap<>();
+            if(!template)putBehavior(updated,state);
+            bind(updated,files,state.target,"allowlist",".allowlist",state.inheritAllow,state.allowValue);
+            bind(updated,files,state.target,"denylist",".denylist",state.inheritDeny,state.denyValue);
+            bind(updated,files,state.target,"proc_file",".proc",state.inheritProc,state.procValue);
+            java.util.Iterator<String> keys=event.keys();
+            while(keys.hasNext()){
+                String key=keys.next();
+                if((!MANAGED_KEYS.contains(key)||!supportsField(key))&&!updated.has(key))updated.put(key,event.get(key));
+            }
+            events.put(state.target,updated);
+            if(!template&&!clone&&!originalName.isEmpty()&&!originalName.equals(state.target)){
+                if(!XbsConfigApi.isCustomEvent(originalName))throw new IllegalStateException("Protected event identity changed unexpectedly");
+                events.remove(originalName);
+            }
+            Context app=getApplicationContext();EditorBackend targetBackend=backend;String base=config.toString();
+            if(session.start(draftSnapshot(),()->{
+                XbsConfigApi.Result fresh=targetBackend.load(app,true);
+                if(!fresh.ok)return fresh;
+                if(!base.equals(fresh.config.toString()))return XbsConfigApi.Result.error("Configuration changed since this draft opened. Keep the draft and review the current configuration before saving.");
+                return targetBackend.save(app,workingConfig,files);
+            }))setBusy(true);else toast(session.problem().isEmpty()?"Another editor transaction is active":session.problem());
+        }catch(Exception exception){toast(exception.getMessage());}
     }
 
     private void putBehavior(JSONObject target,EditorState state)throws Exception{
@@ -642,6 +707,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
 
     private void setSaveEnabled(boolean enabled){
         if(saveButton==null)return;
+        enabled=enabled&&session!=null&&!session.blocked()&&!session.busy();
         saveButton.setEnabled(enabled);
         saveButton.setAlpha(enabled?1f:0.45f);
         if(!saving)saveButton.setText(template?R.string.xbs_validate_save_template:R.string.xbs_validate_save_event);

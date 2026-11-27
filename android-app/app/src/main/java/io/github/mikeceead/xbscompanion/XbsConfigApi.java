@@ -81,13 +81,30 @@ final class XbsConfigApi {
     static Result restoreDefaultEssentials(Context context, String targetPath) {
         String path = targetPath == null || targetPath.trim().isEmpty() ? LIST_DIR + "/essentials.allowlist" : targetPath;
         if (!XbsConfigTransaction.isManagedListPath(path)) return Result.error("Essentials path is outside the managed XBS list directory");
+        Result defaults=readDefaultEssentials(context);
+        if(!defaults.ok)return defaults;
+        Result saved = writeText(context, path, defaults.message);
+        return saved.ok ? Result.ok(saved.config, "Default essentials restored with rollback protection") : saved;
+    }
+
+    static Result readDefaultEssentials(Context context) {
         String fallback = "android\ncom.android.systemui\ncom.android.settings\ncom.android.launcher3\ncom.google.android.gms\ncom.android.vending\ncom.android.phone\ncom.google.android.providers.media.module\n";
         XbsRootApi.CommandOutput out = XbsRootApi.runRoot(XbsRuntimeResolver.resolveDefaultEssentials("ESSENTIALS_SOURCE")
             + "if [ -f \"$ESSENTIALS_SOURCE\" ]; then cat \"$ESSENTIALS_SOURCE\"; fi");
         if (out.exitCode != 0) return Result.error(out.error.isEmpty() ? out.stdout : out.error);
-        String value = out.stdout.trim().isEmpty() ? fallback : out.stdout;
-        Result saved = writeText(context, path, value);
-        return saved.ok ? Result.ok(saved.config, "Default essentials restored with rollback protection") : saved;
+        return Result.ok(null,out.stdout.trim().isEmpty() ? fallback : out.stdout);
+    }
+
+    static String essentialsPathError(JSONObject config, String path) {
+        Set<String> paths=new LinkedHashSet<>();
+        JSONObject events=config.optJSONObject("events");
+        if(events!=null){java.util.Iterator<String> names=events.keys();while(names.hasNext()){
+            JSONObject event=events.optJSONObject(names.next());
+            if(event!=null)for(String key:new String[]{"allowlist","denylist","proc_file"}){
+                String value=event.optString(key,"").trim();if(!value.isEmpty())paths.add(value);
+            }
+        }}
+        return EssentialsDraftPolicy.pathError(LIST_DIR,path,paths);
     }
 
     static Result save(JSONObject config, Map<String,String> files, boolean reload){ return save(null, config, files, Collections.emptySet(), reload); }
@@ -102,6 +119,8 @@ final class XbsConfigApi {
             if(header==null||events==null)return Result.error("Config must contain header and events objects");
             if(header.optInt("version",2)!=2)return Result.error("Only XBS config version 2 is supported");
             for (String builtIn : BUILT_IN_EVENTS) if (!events.has(builtIn)) return Result.error("Built-in event cannot be removed: " + builtIn);
+            String essentialsError=essentialsPathError(config,header.optString("essentials_allowlist",LIST_DIR+"/essentials.allowlist"));
+            if(!essentialsError.isEmpty())return Result.error(essentialsError);
             String eventError=validateEvents(events);if(!eventError.isEmpty())return Result.error(eventError);
             XbsConfigTransaction.Plan plan = XbsConfigTransaction.create(config, safeFiles, safeDeletes, reload);
             XbsRootApi.CommandOutput out = XbsConfigTransaction.execute(plan);

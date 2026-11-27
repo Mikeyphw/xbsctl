@@ -35,7 +35,7 @@ def audit(root,hosted=False):
     from gx06_stack_gate import reviewed_stage, stage_branch, stage_base_branch, hosted_branch, validate_hosted_context, HF01_TREE, MAIN_TREE
     branch=hosted_branch(os.environ) if hosted else git(root,'symbolic-ref','--short','HEAD')
     stage=reviewed_stage(root)
-    need(stage in ('AGG','FIX','HF01','INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN') and branch==stage_branch(stage),'AGG_UNREVIEWED_BRANCH')
+    need(stage in ('AGG','FIX','HF01','INT01','INT01_MAIN','UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN','UI02','UI02_MAIN') and branch==stage_branch(stage),'AGG_UNREVIEWED_BRANCH')
     head=git(root,'rev-parse','HEAD')
     need(re.fullmatch('[a-f0-9]{40}',head) is not None,'AGG_INVALID_HEAD')
     need(not git(root,'status','--porcelain','--untracked-files=all'),'AGG_DIRTY_WORKTREE')
@@ -55,6 +55,12 @@ def audit(root,hosted=False):
         candidate=git(root,'rev-parse','HEAD^2') if stage=='INT01_MAIN' else head
         preview=git(root,'merge-tree','--write-tree',MAIN_SHA,candidate)
         need(preview==git(root,'rev-parse',candidate+'^{tree}'),'INT01_CANDIDATE_MERGE_PREVIEW_DRIFT')
+    elif stage in ('UI02','UI02_MAIN'):
+        from gx06_stack_gate import UI01_MERGED_HEAD,UI01_MERGED_TREE
+        need(git(root,'rev-parse',UI01_MERGED_HEAD+'^{tree}')==UI01_MERGED_TREE,'UI02_PINNED_MAIN_TREE_DRIFT')
+        candidate=git(root,'rev-parse','HEAD^2') if stage=='UI02_MAIN' else head
+        preview=git(root,'merge-tree','--write-tree',UI01_MERGED_HEAD,candidate)
+        need(preview==git(root,'rev-parse',candidate+'^{tree}'),'UI02_CANDIDATE_MERGE_PREVIEW_DRIFT')
     elif stage in ('UI01','UI01_MAIN','UI01_HF01','UI01_HF01_MAIN'):
         from gx06_stack_gate import INTEGRATED_MAIN_HEAD
         candidate=git(root,'rev-parse','HEAD^2') if stage in ('UI01_MAIN','UI01_HF01_MAIN') else head
@@ -65,7 +71,7 @@ def audit(root,hosted=False):
     if hosted:
         validate_hosted_context(root,os.environ,stage=stage,head=head)
     print('XBS_AGGREGATE_SOURCE_INTEGRITY_PASS sha='+head+' parent='+R08R10_HEAD+' main='+MAIN_SHA+' preview='+preview+' release=false',flush=True)
-    return {'head':head,'source':'SHA_AND_BLOB_PINNED','merge_applied':stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN'),'aggregate_ci_qualified':False,
+    return {'head':head,'source':'SHA_AND_BLOB_PINNED','merge_applied':stage in ('INT01_MAIN','UI01_MAIN','UI01_HF01_MAIN','UI02_MAIN'),'aggregate_ci_qualified':False,
             'release_qualified':False,'physical_root_qualified':False}
 
 def main():

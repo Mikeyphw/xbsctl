@@ -281,6 +281,11 @@ def execute(args):
         report['gx10_presentation_assertions']=junit_receipt(RESULTS,{presentation_class:set(presentation_methods)})
         need(report['gx10_presentation_assertions']['total_testcases']==len(presentation_methods),
              'GX10_UNREVIEWED_OR_DUPLICATE_PRESENTATION_EXECUTION')
+        from gx10_editor import CLASS as editor_class,METHODS as editor_methods
+        gradle_test('io.github.mikeceead.xbscompanion.Gx10EditorInstrumentedTest')
+        report['gx10_editor_assertions']=junit_receipt(RESULTS,{editor_class:set(editor_methods)})
+        need(report['gx10_editor_assertions']['total_testcases']==len(editor_methods),
+             'GX10_UNREVIEWED_OR_DUPLICATE_EDITOR_EXECUTION')
         # GX04: actual API36 instrumented package/TileService security checks.
         # Mandatory, never synthetic SystemUI acceptance or root qualification.
         gradle_test('io.github.mikeceead.xbscompanion.Gx04TilesInstrumentedTest')
