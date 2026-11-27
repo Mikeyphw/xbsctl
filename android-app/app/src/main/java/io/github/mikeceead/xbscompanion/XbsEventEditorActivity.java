@@ -47,6 +47,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private UiKit ui;
     private LinearLayout content;
     private JSONObject config,event;
+    private final Map<String,String> listPreimages=new LinkedHashMap<>();
     private String originalName;
     private boolean clone,template,builtIn;
     private XbsCapabilityRegistry capabilities;
@@ -58,6 +59,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private TextView validationSummary;
     private boolean validationBound;
     private boolean saving;
+    private AlertDialog saveConfirmation;
     private EditorSession session;
     private EditorBackend backend;
     private int pendingPicker;
@@ -76,6 +78,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
         if(config!=null&&event!=null&&name!=null){
             EditorSession.put(draft,"config",config.toString());
             EditorSession.put(draft,"event",event.toString());
+            EditorSession.put(draft,"listPreimages",new JSONObject(listPreimages));
             EditorSession.put(draft,"fields",EditorSession.capture(draftControls()));
         }
         EditorSession.put(draft,"picker",pendingPicker);
@@ -93,6 +96,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private void restoreEditor(JSONObject draft){
         try{
             config=new JSONObject(draft.getString("config"));event=new JSONObject(draft.getString("event"));
+            JSONObject preimages=draft.getJSONObject("listPreimages");listPreimages.clear();java.util.Iterator<String> paths=preimages.keys();while(paths.hasNext()){String path=paths.next();String generation=preimages.getString(path);if(!XbsConfigTransaction.isManagedListPath(path)||!RootFileSnapshot.validPreimage(generation))throw new IllegalArgumentException("Invalid saved list preimage");listPreimages.put(path,generation);}
             JSONObject t=config.getJSONObject("events").optJSONObject("template");
             render("","","",resolvePath("allowlist",t),resolvePath("denylist",t),resolvePath("proc_file",t));
             validationBound=false;EditorSession.restore(draftControls(),draft.optJSONObject("fields"));validationBound=true;
@@ -191,7 +195,7 @@ public final class XbsEventEditorActivity extends XbsActivity {
         content.removeAllViews();
         LinearLayout card=ui.surface();card.addView(ui.text("Loading event profile…",17,ui.palette.text,true));content.addView(card);
         executor.execute(()->{
-            XbsConfigApi.Result result=backend.load(getApplicationContext(),false);
+            XbsConfigApi.Result result=backend.load(getApplicationContext(),true);
             if(!result.ok){runOnUiThread(()->error(result.message));return;}
             config=result.config;
             JSONObject events=config.optJSONObject("events");
@@ -207,10 +211,16 @@ public final class XbsEventEditorActivity extends XbsActivity {
             String allowPath=resolvePath("allowlist",templateObj);
             String denyPath=resolvePath("denylist",templateObj);
             String procPath=resolvePath("proc_file",templateObj);
-            String allowText=backend.readText(getApplicationContext(),allowPath,false);
-            String denyText=backend.readText(getApplicationContext(),denyPath,false);
-            String procText=backend.readText(getApplicationContext(),procPath,false);
-            runOnUiThread(()->{if(live()){render(allowText,denyText,procText,allowPath,denyPath,procPath);applyPendingPicker();AccessibilityUiPolicy.apply(this,content,"Event editor");}});
+            RootFileSnapshot allowBefore=backend.readList(getApplicationContext(),allowPath);
+            RootFileSnapshot denyBefore=backend.readList(getApplicationContext(),denyPath);
+            RootFileSnapshot procBefore=backend.readList(getApplicationContext(),procPath);
+            if(!allowBefore.ok||!denyBefore.ok||!procBefore.ok){runOnUiThread(()->error("A managed list could not be read safely: "+allowBefore.message+" "+denyBefore.message+" "+procBefore.message));return;}
+            Map<String,String> preimages=new LinkedHashMap<>();
+            if(!allowPath.isEmpty())preimages.put(allowPath,allowBefore.generation);
+            if(!denyPath.isEmpty())preimages.put(denyPath,denyBefore.generation);
+            if(!procPath.isEmpty())preimages.put(procPath,procBefore.generation);
+            String allowText=allowBefore.text,denyText=denyBefore.text,procText=procBefore.text;
+            runOnUiThread(()->{if(live()){listPreimages.clear();listPreimages.putAll(preimages);render(allowText,denyText,procText,allowPath,denyPath,procPath);applyPendingPicker();AccessibilityUiPolicy.apply(this,content,"Event editor");}});
         });
     }
 
@@ -562,33 +572,37 @@ public final class XbsEventEditorActivity extends XbsActivity {
     private static String text(EditText field){return field==null?"":field.getText().toString();}
 
     private void save(){
-        if(saving||session.busy()||session.blocked()||!validationBound)return;
+        if(saving||session.busy()||session.blocked()||!validationBound||saveConfirmation!=null)return;
         EditorState state=captureState();
         XbsEventDraftValidator.Result result=XbsEventDraftValidator.validate(state.validation);
         applyValidation(result,true);
         if(result.hasErrors())return;
         if(result.hasWarnings()){
-            new AlertDialog.Builder(this)
+            AlertDialog dialog=new AlertDialog.Builder(this)
                 .setTitle("Review event warnings")
                 .setMessage(result.warningText(8))
                 .setNegativeButton("Keep editing",null)
-                .setPositiveButton("Continue",(dialog,which)->confirmReplacementOrSave(state))
-                .show();
+                .setPositiveButton("Continue",(d,which)->confirmReplacementOrSave(state))
+                .create();showSaveConfirmation(dialog);
             return;
         }
         confirmReplacementOrSave(state);
+    }
+
+    private void showSaveConfirmation(AlertDialog dialog){
+        saveConfirmation=dialog;dialog.setOnDismissListener(d->{if(saveConfirmation==dialog)saveConfirmation=null;});dialog.show();
     }
 
     private void confirmReplacementOrSave(EditorState state){
         try{
             JSONObject events=config.getJSONObject("events");
             if(!template&&events.has(state.target)&&(!state.target.equals(originalName)||clone)){
-                new AlertDialog.Builder(this)
+                AlertDialog dialog=new AlertDialog.Builder(this)
                     .setTitle("Replace existing event?")
                     .setMessage(state.target+" already exists. Its configuration and managed lists will be replaced transactionally.")
                     .setNegativeButton("Cancel",null)
-                    .setPositiveButton("Replace",(dialog,which)->performSave(state))
-                    .show();
+                    .setPositiveButton("Replace",(d,which)->performSave(state))
+                    .create();showSaveConfirmation(dialog);
                 return;
             }
         }catch(Exception exception){toast(exception.getMessage());return;}
@@ -610,17 +624,33 @@ public final class XbsEventEditorActivity extends XbsActivity {
                 String key=keys.next();
                 if((!MANAGED_KEYS.contains(key)||!supportsField(key))&&!updated.has(key))updated.put(key,event.get(key));
             }
+            for(String path:files.keySet()){
+                if(path.equals(workingConfig.getJSONObject("header").optString("essentials_allowlist",XbsConfigApi.LIST_DIR+"/essentials.allowlist")))throw new IllegalArgumentException("Event cannot overwrite the protected essentials file");
+                java.util.Iterator<String> owners=events.keys();while(owners.hasNext()){
+                    String owner=owners.next();if(owner.equals(state.target)||(!clone&&owner.equals(originalName)))continue;
+                    JSONObject other=events.optJSONObject(owner);if(other==null)continue;
+                    for(String key:new String[]{"allowlist","denylist","proc_file"})if(path.equals(other.optString(key,"")))throw new IllegalArgumentException("Managed list belongs to another event: "+owner);
+                }
+            }
             events.put(state.target,updated);
             if(!template&&!clone&&!originalName.isEmpty()&&!originalName.equals(state.target)){
                 if(!XbsConfigApi.isCustomEvent(originalName))throw new IllegalStateException("Protected event identity changed unexpectedly");
                 events.remove(originalName);
             }
-            Context app=getApplicationContext();EditorBackend targetBackend=backend;String base=config.toString();
+            Context app=getApplicationContext();EditorBackend targetBackend=backend;String base=config.toString();Map<String,String> expected=new LinkedHashMap<>(listPreimages);
             if(session.start(draftSnapshot(),()->{
                 XbsConfigApi.Result fresh=targetBackend.load(app,true);
                 if(!fresh.ok)return fresh;
                 if(!base.equals(fresh.config.toString()))return XbsConfigApi.Result.error("Configuration changed since this draft opened. Keep the draft and review the current configuration before saving.");
-                return targetBackend.save(app,workingConfig,files);
+                Map<String,String> writePreimages=new LinkedHashMap<>();
+                for(String path:files.keySet()){
+                    RootFileSnapshot current=targetBackend.readList(app,path);if(!current.ok)return XbsConfigApi.Result.error(current.message);
+                    String before=expected.get(path);
+                    if(before==null)before="-";
+                    if(!before.equals(current.generation))return XbsConfigApi.Result.error("Managed list changed or already exists: "+path+". Keep the draft and review the list before saving.");
+                    writePreimages.put(path,before);
+                }
+                return targetBackend.save(app,workingConfig,files,fresh.generation,writePreimages);
             }))setBusy(true);else toast(session.problem().isEmpty()?"Another editor transaction is active":session.problem());
         }catch(Exception exception){toast(exception.getMessage());}
     }

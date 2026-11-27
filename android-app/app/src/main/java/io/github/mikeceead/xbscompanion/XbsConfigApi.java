@@ -18,6 +18,7 @@ final class XbsConfigApi {
     static final String BACKUP_DIR = EXTERNAL_STORAGE_ROOT + "/.config/xbs/backups";
     static final Set<String> BUILT_IN_EVENTS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
         "template", "boot", "charging", "screen_off", "low_power", "manual")));
+    private static final String CONFIG_ROOT = RootFileSnapshot.parent(CONFIG);
     private static final String CONFIG_CACHE = "xbs_config_v2";
     private static final long CONFIG_CACHE_AGE = 15_000L;
     private XbsConfigApi(){}
@@ -43,29 +44,36 @@ final class XbsConfigApi {
             String cached = XbsCache.get(context, CONFIG_CACHE, CONFIG_CACHE_AGE);
             if (cached != null) try { return Result.ok(new JSONObject(cached)); } catch (Exception ignored) {}
         }
-        String shell="if [ ! -s "+q(CONFIG)+" ]; then " + xbs("--json init") + " >/dev/null 2>&1 || true; fi; cat "+q(CONFIG);
-        XbsRootApi.CommandOutput out=XbsRootApi.runRoot(shell);
-        if(out.exitCode!=0)return Result.error(out.error.isEmpty()?out.stdout:out.error);
+        RootFileSnapshot snapshot=readSnapshot(CONFIG,RootFileSnapshot.CONFIG_LIMIT);
+        if(!snapshot.ok)return Result.error(snapshot.message);
+        if(!snapshot.present)return Result.error("XBS configuration is missing; initialize XBS explicitly before editing.");
         try {
-            JSONObject config = new JSONObject(out.stdout);
-            if (context != null) XbsCache.put(context, CONFIG_CACHE, config.toString());
-            return Result.ok(config);
-        } catch(Exception e){return Result.error("Invalid XBS config: "+e.getMessage());}
+            JSONObject config=new JSONObject(snapshot.text);
+            if(context!=null)XbsCache.put(context,CONFIG_CACHE,config.toString());
+            return Result.loaded(config,snapshot.generation);
+        }catch(Exception e){return Result.error("Invalid XBS config: "+e.getMessage());}
     }
 
-    static String readText(String path){ return readText(null, path, true); }
-
-    static String readText(Context context, String path, boolean force){
-        if(path==null||path.trim().isEmpty())return "";
-        String cacheKey = "file_" + Integer.toHexString(path.hashCode());
-        if (context != null && !force) {
-            String cached = XbsCache.get(context, cacheKey, 30_000L);
-            if (cached != null) return cached;
-        }
-        XbsRootApi.CommandOutput out=XbsRootApi.runRoot("if [ -f "+q(path)+" ]; then cat "+q(path)+"; fi");
-        String value = out.exitCode==0?out.stdout:"";
-        if (context != null && out.exitCode == 0) XbsCache.put(context, cacheKey, value);
-        return value;
+    private static RootFileSnapshot readSnapshot(String path,int limit){
+        try{
+            XbsRootApi.CommandOutput out=XbsRootApi.runRootSnapshot(RootFileSnapshot.readShell(path,CONFIG_ROOT,LIST_DIR,limit));
+            if(out.exitCode!=0)return RootFileSnapshot.error("Managed file read refused ("+out.exitCode+"): "+(out.error.isEmpty()?out.stdout:out.error));
+            return RootFileSnapshot.decode(out.stdout,limit);
+        }catch(IllegalArgumentException invalid){return RootFileSnapshot.error(invalid.getMessage());}
+    }
+    static RootFileSnapshot readList(String path){
+        if(path==null||path.isEmpty())return RootFileSnapshot.absent();
+        if(!XbsConfigTransaction.isManagedListPath(path))return RootFileSnapshot.error("List path is outside the managed XBS list directory");
+        return readSnapshot(path,RootFileSnapshot.LIST_LIMIT);
+    }
+    static String readText(String path){return readText(null,path,true);}
+    static String readText(Context context,String path,boolean force){
+        if(!XbsConfigTransaction.isManagedListPath(path))return "";
+        String key="file_"+Integer.toHexString(path.hashCode());
+        if(context!=null&&!force){String cached=XbsCache.get(context,key,30_000L);if(cached!=null)return cached;}
+        RootFileSnapshot snapshot=readList(path);
+        if(snapshot.ok&&context!=null)XbsCache.put(context,key,snapshot.text);
+        return snapshot.ok?snapshot.text:"";
     }
 
     static Result writeText(Context context, String path, String text) {
@@ -74,7 +82,9 @@ final class XbsConfigApi {
         if (!loaded.ok) return loaded;
         Map<String, String> files = new LinkedHashMap<>();
         files.put(path, normalizeLines(text));
-        Result saved = save(context, loaded.config, files, Collections.emptySet(), false);
+        RootFileSnapshot before=readList(path);
+        if(!before.ok)return Result.error(before.message);
+        Result saved = save(context, loaded.config, files, Collections.emptySet(), false, loaded.generation, Collections.singletonMap(path,before.generation));
         return saved.ok ? Result.ok(loaded.config, "List saved in transaction " + saved.message) : saved;
     }
 
@@ -83,7 +93,10 @@ final class XbsConfigApi {
         if (!XbsConfigTransaction.isManagedListPath(path)) return Result.error("Essentials path is outside the managed XBS list directory");
         Result defaults=readDefaultEssentials(context);
         if(!defaults.ok)return defaults;
-        Result saved = writeText(context, path, defaults.message);
+        Result loaded=load(context,true);if(!loaded.ok)return loaded;
+        String invalid=essentialsPathError(loaded.config,path);if(!invalid.isEmpty())return Result.error(invalid);
+        RootFileSnapshot before=readList(path);if(!before.ok)return Result.error(before.message);
+        Result saved=save(context,loaded.config,Collections.singletonMap(path,normalizeLines(defaults.message)),Collections.emptySet(),false,loaded.generation,Collections.singletonMap(path,before.generation));
         return saved.ok ? Result.ok(saved.config, "Default essentials restored with rollback protection") : saved;
     }
 
@@ -107,10 +120,8 @@ final class XbsConfigApi {
         return EssentialsDraftPolicy.pathError(LIST_DIR,path,paths);
     }
 
-    static Result save(JSONObject config, Map<String,String> files, boolean reload){ return save(null, config, files, Collections.emptySet(), reload); }
-    static Result save(Context context, JSONObject config, Map<String,String> files, boolean reload){ return save(context, config, files, Collections.emptySet(), reload); }
-
-    static Result save(Context context, JSONObject config, Map<String,String> files, Set<String> deletes, boolean reload){
+    static Result save(Context context, JSONObject config, Map<String,String> files, Set<String> deletes, boolean reload,
+                       String expectedConfig, Map<String,String> expectedLists){
         try{
             if(config==null)return Result.error("Config is missing");
             Map<String,String> safeFiles=files==null?Collections.emptyMap():files;
@@ -122,10 +133,11 @@ final class XbsConfigApi {
             String essentialsError=essentialsPathError(config,header.optString("essentials_allowlist",LIST_DIR+"/essentials.allowlist"));
             if(!essentialsError.isEmpty())return Result.error(essentialsError);
             String eventError=validateEvents(events);if(!eventError.isEmpty())return Result.error(eventError);
-            XbsConfigTransaction.Plan plan = XbsConfigTransaction.create(config, safeFiles, safeDeletes, reload);
+            XbsConfigTransaction.Plan plan = XbsConfigTransaction.create(config, safeFiles, safeDeletes, reload, expectedConfig, expectedLists);
             XbsRootApi.CommandOutput out = XbsConfigTransaction.execute(plan);
             if(out.exitCode!=0){
                 String detail=out.error.isEmpty()?out.stdout:out.error;
+                if(out.exitCode==77)return Result.error("Configuration or list changed before the transaction acquired its lock; keep the draft and reload before saving.");
                 if(context!=null)XbsConfigTransactionStore.save(context,XbsConfigTransaction.latest());
                 return Result.error("Configuration transaction is not confirmed; inspect the durable recovery journal: "+detail);
             }
@@ -173,7 +185,18 @@ final class XbsConfigApi {
             events.remove(name);
             Set<String> deletes=new LinkedHashSet<>();
             if(deleteManagedFiles)for(String path:paths)if(XbsConfigTransaction.isManagedListPath(path))deletes.add(path);
-            Result saved=save(context, loaded.config,new LinkedHashMap<>(),deletes,true);
+            Map<String,String> preimages=new LinkedHashMap<>();
+            Set<String> retained=new LinkedHashSet<>();
+            JSONObject header=loaded.config.optJSONObject("header");
+            if(header!=null)retained.add(header.optString("essentials_allowlist",LIST_DIR+"/essentials.allowlist"));
+            java.util.Iterator<String> remaining=events.keys();while(remaining.hasNext()){
+                JSONObject other=events.optJSONObject(remaining.next());if(other!=null)for(String key:new String[]{"allowlist","denylist","proc_file"})retained.add(other.optString(key,""));
+            }
+            for(String path:deletes){
+                if(retained.contains(path))return Result.error("Cannot delete a shared or protected list: "+path+"; choose Keep list files.");
+                RootFileSnapshot before=readList(path);if(!before.ok)return Result.error(before.message);preimages.put(path,before.generation);
+            }
+            Result saved=save(context, loaded.config,new LinkedHashMap<>(),deletes,true,loaded.generation,preimages);
             if (context != null && saved.ok) invalidate(context, paths);
             return saved;
         }catch(Exception e){return Result.error(e.getMessage());}
@@ -229,10 +252,11 @@ final class XbsConfigApi {
     static String q(String value){return "'"+(value==null?"":value).replace("'","'\\''")+"'";}
 
     static final class Result{
-        final boolean ok;final JSONObject config;final String message;
-        private Result(boolean ok,JSONObject config,String message){this.ok=ok;this.config=config;this.message=message==null?"":message;}
-        static Result ok(JSONObject config){return new Result(true,config,"");}
-        static Result ok(JSONObject config,String message){return new Result(true,config,message);}
-        static Result error(String message){return new Result(false,null,message);}
+        final boolean ok;final JSONObject config;final String message,generation;
+        private Result(boolean ok,JSONObject config,String message,String generation){this.ok=ok;this.config=config;this.message=message==null?"":message;this.generation=generation;}
+        static Result loaded(JSONObject config,String generation){return new Result(true,config,"",generation);}
+        static Result ok(JSONObject config){return new Result(true,config,"","");}
+        static Result ok(JSONObject config,String message){return new Result(true,config,message,"");}
+        static Result error(String message){return new Result(false,null,message,"");}
     }
 }

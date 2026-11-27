@@ -292,4 +292,48 @@ class Ui02MergeTests(unittest.TestCase):
         self.commit('unreviewed child',{'ui02':'another'})
         with self.assertRaises(Refused):reviewed_stage(self.root)
 
+class Ui03MergeTests(unittest.TestCase):
+    git=HistoryTests.git
+    commit=HistoryTests.commit
+    at=HistoryTests.at
+    merge=MainMergeTests.merge
+    def setUp(self):
+        Ui02MergeTests.setUp(self)
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        previous=self.next
+        self.prior=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        ctx=patch.multiple(g,UI02_PUBLISHED_HEAD=previous,UI02_MERGED_HEAD=self.prior,
+                           UI02_MERGED_TREE=self.git('rev-parse','HEAD^{tree}'),UI03_CHANGED_PATHS=frozenset({'ui03'}))
+        ctx.start();self.addCleanup(ctx.stop)
+        self.next=self.commit('UI03',{'ui03':'editors'})
+    def test_candidate_and_merge(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,UI03_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'UI03')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':UI03_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.next,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+        head=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        self.assertEqual(reviewed_stage(self.root),'UI03_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+    def test_extra_path_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.prior);self.commit('drift',{'ui03':'editors','evil':'bad'})
+        with self.assertRaisesRegex(Refused,'CHANGED_PATHS_DRIFT UI03'):reviewed_stage(self.root)
+    def test_prior_tree_refused(self):
+        from unittest.mock import patch
+        from gx06_stack_gate import reviewed_stage,Refused
+        with patch('gx06_stack_gate.UI02_MERGED_TREE','0'*40),self.assertRaisesRegex(Refused,'UI03_PREVIOUS_TREE_DRIFT'):
+            reviewed_stage(self.root)
+    def test_unreviewed_merge_tree_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.prior,self.next,self.git('rev-parse',self.prior+'^{tree}'))
+        with self.assertRaisesRegex(Refused,'UI03_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+    def test_extra_child_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.commit('unreviewed child',{'ui03':'another'})
+        with self.assertRaises(Refused):reviewed_stage(self.root)
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -264,7 +264,7 @@ public final class XbsConfigActivity extends XbsActivity {
         if(session.start(snapshot(),()->{
             XbsConfigApi.Result fresh=b.load(app,true);if(!fresh.ok)return fresh;
             if(!base.equals(fresh.config.toString()))return XbsConfigApi.Result.error("Configuration changed since this draft opened. Discard and reload or keep editing; no save was dispatched.");
-            return b.save(app,proposed,new LinkedHashMap<>());
+            return b.save(app,proposed,new LinkedHashMap<>(),fresh.generation,java.util.Collections.emptyMap());
         }))setBusy(true);else status(session.problem());
     }
     private void runCtl(String action,String event,boolean destructive){String command="XBSctl --json "+action+" "+SuiteAction.shellQuote(event);runCommand("event_"+action,action+" event",command,destructive);}

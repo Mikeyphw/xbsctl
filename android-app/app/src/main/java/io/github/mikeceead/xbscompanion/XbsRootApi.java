@@ -82,6 +82,7 @@ final class XbsRootApi {
     }
 
     static CommandOutput runRoot(String shell) { return runRoot(shell, 30, MAX_OUTPUT); }
+    static CommandOutput runRootSnapshot(String shell) { return runRoot(shell, 45, 3_000_000); }
     static CommandOutput runRootLarge(String shell) { return runRoot(shell, 45, MAX_LARGE_OUTPUT); }
     static CommandOutput runRootLarge(String shell, int timeoutSeconds) { return runRoot(shell, timeoutSeconds, MAX_LARGE_OUTPUT); }
 
