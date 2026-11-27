@@ -96,7 +96,7 @@ PNG=b'\x89PNG\r\n\x1a\n'
 def chunk(kind:bytes,payload:bytes)->bytes:
     return struct.pack('>I',len(payload))+kind+payload+struct.pack('>I',zlib.crc32(kind+payload)&0xffffffff)
 
-def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
+def redact_png(raw:bytes, expected_width:int, band:int=100, *, expected_height:int|None=None, side_band:int=0)->tuple[bytes,dict]:
     """Decode RGB/RGBA 8bpp PNG, strip ancillary metadata, mask status/navigation bands.
 
     We explicitly refuse unknown formats rather than output an unsanitized image.
@@ -121,7 +121,9 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
     w,h,depth,mode,comp,filt,inter=struct.unpack('>IIBBBBB',ihdr)
     need(w==expected_width and 1000<=h<=3600 and depth==8 and mode in (2,6)
          and comp==filt==inter==0,'UNSUPPORTED_OR_WRONG_SCREENSHOT_DIMENSIONS')
-    need(h>band*3,'PNG_TOO_SHORT_FOR_REDACTION')
+    need(h>band*3 and 0<=side_band<w//3,'PNG_TOO_SHORT_FOR_REDACTION')
+    need(expected_height is None or h==expected_height,'PNG_HEIGHT_DRIFT')
+    need(not side_band or (expected_height is not None and w>h),'PNG_SIDE_BAND_REQUIRES_EXACT_LANDSCAPE')
     bpp=3 if mode==2 else 4;stride=w*bpp
     expected_size=h*(stride+1)
     try:
@@ -152,11 +154,15 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
             # Opaque black avoids transparent status/nav regions revealing stale imagery.
             current=bytearray((0,0,0,255) if bpp==4 else (0,0,0))*w
         else:
-            nonzero += sum(x!=0 for x in current[:128])
+            nonzero += sum(x!=0 for x in current[side_band*bpp:side_band*bpp+128])
+            if side_band:
+                mask=bytearray((0,0,0,255) if bpp==4 else (0,0,0))*side_band
+                current[:side_band*bpp]=mask
+                current[-side_band*bpp:]=mask
             # Sample the decoded content, never the masked bars or compressed bytes.
             # Integer luma, conservative bounds; no claim about every individual pixel.
             if row%24==0:
-                for column in range(24,w-24,24):
+                for column in range(side_band+24,w-side_band-24,24):
                     i=column*bpp
                     if bpp==4 and current[i+3]!=255: continue
                     luma=(2126*current[i]+7152*current[i+1]+722*current[i+2])//10000
@@ -171,7 +177,10 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
           'redacted_sha256':sha(output),'redacted_size_bytes':len(output),
           'ancillary_png_metadata_removed':True,
           'content_samples':content_samples,'light_samples':light_samples,'dark_samples':dark_samples}
-    need(meta['width_dp'] in (360,393),'SCREENSHOT_DP_WIDTH_DRIFT')
+    if side_band:
+        meta.update({'masked_left_px':side_band,'masked_right_px':side_band,
+                     'short_edge_dp':h//3})
+    need((h//3 if side_band else meta['width_dp']) in (360,393),'SCREENSHOT_DP_WIDTH_DRIFT')
     return output,meta
 
 def validate_identity(head:str,runid:str,attempt:str,api:int,serial:str,qemu:str,abi:str):

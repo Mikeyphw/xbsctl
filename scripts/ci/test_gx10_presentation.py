@@ -81,6 +81,68 @@ class PresentationTests(unittest.TestCase):
                 try:
                     with self.subTest(old=old),self.assertRaises(Refused):validate_layout_repair(root)
                 finally:path.write_text(source)
+    def test_arabic_window_real_labels_and_mirrored_order(self):
+        from gx10_presentation import NAV_AR
+        root=ET.fromstring(xml_fixture())
+        for i,node in enumerate(root.findall('node')):
+            name=node.get('resource-id').rsplit('/',1)[-1]
+            if name=='xbs_main_title':node.set('text',NAV_AR['overview'])
+            else:
+                node.set('content-desc',NAV_AR[name.removeprefix('xbs_nav_')]);node.set('focusable','true')
+                node.set('bounds',f'[{(5-i)*200},2100][{(5-i)*200+180},2300]')
+        data=ET.tostring(root)
+        self.assertEqual(validate_window_xml(data,1080,2400,require_focus=True,locale='ar')['window_nodes_verified'],6)
+        with self.assertRaises(Refused):validate_window_xml(data,1080,2400,locale='en')
+        root.findall('node')[1].set('bounds','[0,2100][180,2300]')
+        with self.assertRaises(Refused):validate_window_xml(ET.tostring(root),1080,2400,locale='ar')
+
+    def test_landscape_matrix_and_strict_negatives(self):
+        from gx10_landscape import VARIANTS,validate_landscape_matrix
+        rows=[]
+        for i,(short,theme,font) in enumerate(sorted(VARIANTS)):
+            row=capture(short,theme)
+            h,w=WIDTHS[short]
+            row.update(width_px=w,height_px=h,width_dp=w//3,short_edge_dp=short,
+                orientation='landscape',font_scale_percent=font,font_scale_observed_percent=font,
+                masked_left_px=180,masked_right_px=180,navigation_focusability_verified=True,
+                redacted_sha256=format(i+10000,'064x'))
+            row['navigation_bounds']={k:[v[1],v[0],v[3],v[2]] for k,v in row['navigation_bounds'].items()}
+            rows.append(row)
+        self.assertEqual(validate_landscape_matrix(rows)['verified_landscape_variants'],5)
+        for key,value in [('orientation','portrait'),('masked_left_px',0),('font_scale_observed_percent',0),
+                          ('navigation_focusability_verified',False),('width_px',1080),('height_px',2400),
+                          ('redacted_sha256','bad'),('foreground_verified',False)]:
+            bad=copy.deepcopy(rows);bad[0][key]=value
+            with self.subTest(key=key),self.assertRaises(Refused):validate_landscape_matrix(bad)
+        with self.assertRaises(Refused):validate_landscape_matrix(rows[:-1])
+        with self.assertRaises(Refused):validate_landscape_matrix(rows+[rows[0]])
+    def test_landscape_actual_decoded_pixels_and_side_redaction(self):
+        w,h=2400,1080
+        raw=PNG+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'tEXt',b'private\x00fixture')+chunk(b'IDAT',zlib.compress((b'\0'+bytes([240])*w*3)*h))+chunk(b'IEND',b'')
+        redacted,meta=redact_png(raw,w,180,expected_height=h,side_band=180)
+        self.assertEqual(meta['light_samples'],meta['content_samples'])
+        self.assertEqual(meta['short_edge_dp'],360)
+        self.assertNotIn(b'tEXt',redacted)
+        pos=8; data=[]
+        while pos<len(redacted):
+            size=struct.unpack_from('>I',redacted,pos)[0];kind=redacted[pos+4:pos+8]
+            if kind==b'IDAT':data.append(redacted[pos+8:pos+8+size])
+            pos+=12+size
+        pixels=zlib.decompress(b''.join(data));stride=w*3+1
+        self.assertEqual(set(pixels[:stride*180]),{0})
+        row=pixels[200*stride:201*stride]
+        self.assertEqual(set(row[:1+180*3]),{0})
+        self.assertEqual(set(row[-180*3:]),{0})
+        self.assertEqual(set(row[1+180*3:-180*3]),{240})
+        with self.assertRaises(Refused):redact_png(raw,w,180,expected_height=h+1,side_band=180)
+        with self.assertRaises(Refused):redact_png(raw,w,180,side_band=180)
+    def test_window_focusability_is_actual_evidence(self):
+        raw=xml_fixture()
+        with self.assertRaises(Refused):validate_window_xml(raw,1080,2400,require_focus=True)
+        root=ET.fromstring(raw)
+        for node in root.iter('node'):
+            if 'xbs_nav_' in node.get('resource-id',''):node.set('focusable','true')
+        self.assertEqual(validate_window_xml(ET.tostring(root),1080,2400,require_focus=True)['window_nodes_verified'],6)
     def test_real_java_policy(self):
         # No Android SDK or Gradle: exercise the actual Java policy with the JDK.
         source=ROOT/'android-app/app/src/main/java/io/github/mikeceead/xbscompanion/ThemePalettePolicy.java'

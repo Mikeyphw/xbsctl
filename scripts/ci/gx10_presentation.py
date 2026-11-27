@@ -11,9 +11,11 @@ METHODS=frozenset({
     'realRotationPreservesSelectedTabAndMeasuredInsets',
     'arabicMainNavigationMirrorsAndExposesLocalizedLabels',
     'tileSettingsOfflineSelectionAndResetCancellationDoNotDispatch',
+    'allNavigationTabsHaveAccessibleActionsAndRealScroll',
 })
 NAV={'overview':'Overview','events':'Events','processes':'Processes','activity':'Activity','settings':'Settings'}
 WIDTHS={360:(1080,2400),393:(1179,2620)}
+NAV_AR={'overview':'نظرة عامة','events':'الأحداث','processes':'العمليات','activity':'النشاط','settings':'الإعدادات'}
 
 
 def validate_foreground(output: str) -> None:
@@ -23,15 +25,17 @@ def validate_foreground(output: str) -> None:
     need(bool(matches) and all(actual.search(line) for line in matches),'GX10_MAIN_ACTIVITY_NOT_RESUMED')
 
 
-def validate_window_xml(raw: bytes, width: int, height: int) -> dict:
+def validate_window_xml(raw: bytes, width: int, height: int, *, require_focus: bool=False, locale: str='en') -> dict:
     """Verify actual navigation/title nodes and fully in-window bounds; publish no raw XML."""
     need(isinstance(raw,bytes) and 0<len(raw)<=512_000 and b'<!DOCTYPE' not in raw.upper()
          and b'<!ENTITY' not in raw.upper(),'GX10_WINDOW_XML_UNSAFE')
     try: root=ET.fromstring(raw)
     except ET.ParseError as exc: raise Refused('GX10_WINDOW_XML_MALFORMED') from exc
     need(root.tag=='hierarchy','GX10_WINDOW_XML_NOT_HIERARCHY')
-    expected={PKG+':id/xbs_main_title':'Overview'}
-    expected.update({PKG+':id/xbs_nav_'+k:v for k,v in NAV.items()})
+    need(locale in ('en','ar'),'GX10_UNREVIEWED_LOCALE')
+    labels=NAV_AR if locale=='ar' else NAV
+    expected={PKG+':id/xbs_main_title':labels['overview']}
+    expected.update({PKG+':id/xbs_nav_'+k:v for k,v in labels.items()})
     observed={}
     for node in root.iter('node'):
         rid=node.get('resource-id','')
@@ -47,8 +51,13 @@ def validate_window_xml(raw: bytes, width: int, height: int) -> dict:
             need(node.get('content-desc')==expected[rid] and node.get('clickable')=='true'
                  and node.get('enabled')=='true','GX10_NAVIGATION_LABEL_OR_ACTION_MISSING')
             need(x2-x1>=144 and y2-y1>=144,'GX10_NAVIGATION_MEASURED_TARGET_TOO_SMALL')
+            if require_focus:
+                need(node.get('focusable')=='true','GX10_NAVIGATION_NOT_ACCESSIBILITY_FOCUSABLE')
         observed[rid]=[x1,y1,x2,y2]
     need(set(observed)==set(expected),'GX10_REQUIRED_WINDOW_NODES_MISSING')
+    if locale=='ar':
+        need(observed[PKG+':id/xbs_nav_overview'][0]>observed[PKG+':id/xbs_nav_settings'][0],
+             'GX10_RTL_NAVIGATION_NOT_MIRRORED')
     return {'window_nodes_verified':len(observed),'window_xml_sha256':sha(raw),
             'navigation_bounds':{k.rsplit('/',1)[1]:v for k,v in observed.items()},
             'raw_window_xml_published':False}

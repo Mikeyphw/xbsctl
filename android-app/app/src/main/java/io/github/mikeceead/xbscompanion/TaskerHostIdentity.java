@@ -48,6 +48,7 @@ final class TaskerHostIdentity {
                 signatures = legacy;
             }
             if (signatures == null || signatures.length == 0) return invalid("missing_signing_certificate");
+            if (signatures.length != 1) return invalid("ambiguous_signing_certificates");
             return new TaskerHostIdentity(packageName, digest(signatures[0].toByteArray()), true, "");
         } catch (PackageManager.NameNotFoundException error) {
             return invalid("host_not_installed");
