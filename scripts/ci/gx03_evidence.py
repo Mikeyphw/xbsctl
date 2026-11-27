@@ -103,7 +103,7 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
     Does not inspect or claim to redact any secrets in the app content itself;
     fixture runs in a disposable emulator without accounts.
     """
-    need(raw.startswith(PNG),'PNG_SIGNATURE_INVALID')
+    need(isinstance(raw,bytes) and len(raw)<=40_000_000 and raw.startswith(PNG),'PNG_SIGNATURE_INVALID')
     pos=8;chunks=[];found_end=False
     while pos<len(raw):
         need(pos+12<=len(raw),'PNG_CHUNK_TRUNCATED')
@@ -123,9 +123,15 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
          and comp==filt==inter==0,'UNSUPPORTED_OR_WRONG_SCREENSHOT_DIMENSIONS')
     need(h>band*3,'PNG_TOO_SHORT_FOR_REDACTION')
     bpp=3 if mode==2 else 4;stride=w*bpp
-    encoded=zlib.decompress(b''.join(ids))
-    need(len(encoded)==h*(stride+1),'PNG_DECOMPRESSED_LENGTH_MISMATCH')
+    expected_size=h*(stride+1)
+    try:
+        decoder=zlib.decompressobj()
+        encoded=decoder.decompress(b''.join(ids),expected_size+1)
+    except zlib.error as exc: raise Refused('PNG_DECOMPRESSION_INVALID') from exc
+    need(len(encoded)==expected_size and decoder.eof and not decoder.unconsumed_tail
+         and not decoder.unused_data,'PNG_DECOMPRESSED_LENGTH_MISMATCH')
     prev=bytearray(stride);filtered=[];p=0;nonzero=0
+    light_samples=dark_samples=content_samples=0
     for row in range(h):
         kind=encoded[p];p+=1;source=encoded[p:p+stride];p+=stride
         need(kind<=4,'PNG_FILTER_UNSUPPORTED')
@@ -147,13 +153,24 @@ def redact_png(raw:bytes, expected_width:int, band:int=100)->tuple[bytes,dict]:
             current=bytearray((0,0,0,255) if bpp==4 else (0,0,0))*w
         else:
             nonzero += sum(x!=0 for x in current[:128])
+            # Sample the decoded content, never the masked bars or compressed bytes.
+            # Integer luma, conservative bounds; no claim about every individual pixel.
+            if row%24==0:
+                for column in range(24,w-24,24):
+                    i=column*bpp
+                    if bpp==4 and current[i+3]!=255: continue
+                    luma=(2126*current[i]+7152*current[i+1]+722*current[i+2])//10000
+                    content_samples+=1
+                    light_samples+=luma>=180
+                    dark_samples+=luma<=75
         filtered.append(b'\x00'+current)
     need(nonzero>0,'PNG_UNEXPECTEDLY_BLANK')
     output=PNG+chunk(b'IHDR',ihdr)+chunk(b'IDAT',zlib.compress(b''.join(filtered),6))+chunk(b'IEND',b'')
     meta={'width_px':w,'height_px':h,'density_dpi':480,'width_dp':w//3,
           'masked_top_px':band,'masked_bottom_px':band,'raw_sha256_local_only':sha(raw),
           'redacted_sha256':sha(output),'redacted_size_bytes':len(output),
-          'ancillary_png_metadata_removed':True}
+          'ancillary_png_metadata_removed':True,
+          'content_samples':content_samples,'light_samples':light_samples,'dark_samples':dark_samples}
     need(meta['width_dp'] in (360,393),'SCREENSHOT_DP_WIDTH_DRIFT')
     return output,meta
 

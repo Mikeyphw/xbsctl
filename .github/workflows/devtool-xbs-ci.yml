@@ -83,6 +83,7 @@ jobs:
           python3 -B scripts/ci/gx03_contract_audit.py . --hosted
           python3 -B scripts/ci/test_gx03_hosted.py
           python3 -B scripts/ci/test_r08_r10_acceptance.py
+          python3 -B scripts/ci/test_gx10_presentation.py
           python3 -B scripts/ci/test_aggregate_integration.py
           XBS_EXPECTED_HEAD_SHA="${{ github.event.pull_request.head.sha || github.sha }}" python3 -B scripts/ci/aggregate_integration.py --repo . --hosted
       - name: XBS contracts

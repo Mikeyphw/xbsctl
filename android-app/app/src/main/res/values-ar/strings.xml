@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name">رفيق XBS</string>
+    <string name="tasker_action_name">إجراء رفيق XBS</string>
+    <string name="tasker_event_name">حدث رفيق XBS</string>
+    <string name="tasker_state_name">حالة رفيق XBS</string>
+    <string name="tasker_condition_name">شرط رفيق XBS</string>
+    <string name="notification_channel_name">نتائج أوامر XBS</string>
+    <string name="notification_channel_description">نتائج إجراءات XBS اليدوية وإجراءات Tasker</string>
+    <string name="notification_runtime_channel_name">حالة تشغيل XBS</string>
+    <string name="notification_runtime_channel_description">حالة الخدمة الأمامية لتشغيل XBS والأحداث النشطة</string>
+    <string name="notification_alerts_channel_name">أحداث XBS المهمة</string>
+    <string name="notification_alerts_channel_description">الوضع الآمن وإخفاقات التشغيل وأخطاء التحقق</string>
+    <string name="xbs_loading_apps">جارٍ تحميل التطبيقات المثبتة…</string>
+    <string name="xbs_loading_apps_refresh">جارٍ تحديث التطبيقات المثبتة…</string>
+    <string name="xbs_nav_button_label">%1$s\n%2$s</string>
+    <string name="xbs_status_line">%1$s  ·  %2$s</string>
+    <string name="xbs_app_picker_summary">%1$s · %2$s · %3$s%4$s</string>
+    <string name="xbs_app_picker_summary_detail"> · %1$s · %2$s</string>
+    <string name="xbs_process_summary">%1$s · %2$s · ذاكرة ظاهرة %3$s · عينة %4$s</string>
+    <string name="xbs_read_only_path">%1$s: %2$s</string>
+    <string name="xbs_read_only_path_empty">موروث / يحدد عند الحفظ</string>
+    <string name="xbs_saving">جارٍ الحفظ…</string>
+    <string name="xbs_validate_save_template">التحقق من القالب وحفظه</string>
+    <string name="xbs_validate_save_event">التحقق من الحدث وحفظه</string>
+    <string name="xbs_sort_cpu">الترتيب: المعالج</string>
+    <string name="xbs_sort_ram">الترتيب: الذاكرة</string>
+    <string name="xbs_sort_name">الترتيب: الاسم</string>
+    <string name="xbs_main_brand">رفيق XBS</string>
+    <string name="xbs_page_overview">نظرة عامة</string>
+    <string name="xbs_page_events">الأحداث</string>
+    <string name="xbs_page_processes">العمليات</string>
+    <string name="xbs_page_activity">النشاط</string>
+    <string name="xbs_page_settings">الإعدادات</string>
+    <string name="xbs_subtitle_overview">حالة تشغيل XBS المباشرة والأحداث المتزامنة وعناصر التحكم الأساسية.</string>
+    <string name="xbs_subtitle_events">إدارة ملفات أحداث XBS المضمنة المحمية والمخصصة.</string>
+    <string name="xbs_subtitle_processes">المعالج والذاكرة وملكية التطبيقات وقواعد XBS للعمليات المباشرة بصلاحيات الجذر.</string>
+    <string name="xbs_subtitle_activity">انتقالات حالة التشغيل ونتائج الأوامر التقنية.</string>
+    <string name="xbs_subtitle_settings">صلاحيات الجذر والتخزين المؤقت والإشعارات وسلوك Tasker والمراقبة.</string>
+    <plurals name="xbs_cached_apps">
+        <item quantity="zero">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+        <item quantity="one">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+        <item quantity="two">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+        <item quantity="few">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+        <item quantity="many">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+        <item quantity="other">عدد التطبيقات المخزنة مؤقتًا: %d</item>
+    </plurals>
+    <plurals name="xbs_selected_apps">
+        <item quantity="zero">عدد التطبيقات المحددة: %d</item>
+        <item quantity="one">عدد التطبيقات المحددة: %d</item>
+        <item quantity="two">عدد التطبيقات المحددة: %d</item>
+        <item quantity="few">عدد التطبيقات المحددة: %d</item>
+        <item quantity="many">عدد التطبيقات المحددة: %d</item>
+        <item quantity="other">عدد التطبيقات المحددة: %d</item>
+    </plurals>
+    <plurals name="xbs_shown_apps">
+        <item quantity="zero">عدد التطبيقات المعروضة: %d</item>
+        <item quantity="one">عدد التطبيقات المعروضة: %d</item>
+        <item quantity="two">عدد التطبيقات المعروضة: %d</item>
+        <item quantity="few">عدد التطبيقات المعروضة: %d</item>
+        <item quantity="many">عدد التطبيقات المعروضة: %d</item>
+        <item quantity="other">عدد التطبيقات المعروضة: %d</item>
+    </plurals>
+    <plurals name="xbs_user_apps">
+        <item quantity="zero">عدد تطبيقات المستخدم: %d</item>
+        <item quantity="one">عدد تطبيقات المستخدم: %d</item>
+        <item quantity="two">عدد تطبيقات المستخدم: %d</item>
+        <item quantity="few">عدد تطبيقات المستخدم: %d</item>
+        <item quantity="many">عدد تطبيقات المستخدم: %d</item>
+        <item quantity="other">عدد تطبيقات المستخدم: %d</item>
+    </plurals>
+    <plurals name="xbs_system_apps">
+        <item quantity="zero">عدد تطبيقات النظام: %d</item>
+        <item quantity="one">عدد تطبيقات النظام: %d</item>
+        <item quantity="two">عدد تطبيقات النظام: %d</item>
+        <item quantity="few">عدد تطبيقات النظام: %d</item>
+        <item quantity="many">عدد تطبيقات النظام: %d</item>
+        <item quantity="other">عدد تطبيقات النظام: %d</item>
+    </plurals>
+    <plurals name="xbs_shown_processes">
+        <item quantity="zero">عدد العمليات المعروضة: %d</item>
+        <item quantity="one">عدد العمليات المعروضة: %d</item>
+        <item quantity="two">عدد العمليات المعروضة: %d</item>
+        <item quantity="few">عدد العمليات المعروضة: %d</item>
+        <item quantity="many">عدد العمليات المعروضة: %d</item>
+        <item quantity="other">عدد العمليات المعروضة: %d</item>
+    </plurals>
+    <plurals name="xbs_total_processes">
+        <item quantity="zero">عدد العمليات: %d</item>
+        <item quantity="one">عدد العمليات: %d</item>
+        <item quantity="two">عدد العمليات: %d</item>
+        <item quantity="few">عدد العمليات: %d</item>
+        <item quantity="many">عدد العمليات: %d</item>
+        <item quantity="other">عدد العمليات: %d</item>
+    </plurals>
+</resources>
