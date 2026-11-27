@@ -96,6 +96,37 @@ class PresentationTests(unittest.TestCase):
         root.findall('node')[1].set('bounds','[0,2100][180,2300]')
         with self.assertRaises(Refused):validate_window_xml(ET.tostring(root),1080,2400,locale='ar')
 
+    def test_adaptive_rail_geometry_and_negative_controls(self):
+        from gx10_presentation import NAV_AR
+        def window(locale, side):
+            root=ET.fromstring(xml_fixture())
+            x=1920 if side=='right' else 30
+            for i,node in enumerate(root.findall('node')):
+                name=node.get('resource-id').rsplit('/',1)[-1]
+                if name=='xbs_main_title':
+                    node.set('text',(NAV_AR if locale=='ar' else NAV)['overview'])
+                    node.set('bounds','[30,50][1850,150]' if side=='right' else '[550,50][2350,150]')
+                else:
+                    node.set('content-desc',(NAV_AR if locale=='ar' else NAV)[name.removeprefix('xbs_nav_')]);node.set('focusable','true')
+                    y=30+(i-1)*195
+                    node.set('bounds',f'[{x},{y}][{x+420},{y+180}]')
+            return root
+        for locale,side in [('en','left'),('ar','right')]:
+            root=window(locale,side)
+            data=ET.tostring(root)
+            result=validate_window_xml(data,2400,1080,require_focus=True,locale=locale,navigation_layout='rail')
+            self.assertEqual(result['navigation_layout'],'rail')
+            self.assertIs(result['rtl_navigation_verified'],locale=='ar')
+            with self.assertRaises(Refused):validate_window_xml(data,2400,1080,locale=locale,navigation_layout='row')
+            with self.assertRaises(Refused):validate_window_xml(ET.tostring(window(locale,'right' if side=='left' else 'left')),2400,1080,locale=locale,navigation_layout='rail')
+            nodes=root.findall('node'); first,last=nodes[1].get('bounds'),nodes[-1].get('bounds')
+            nodes[1].set('bounds',last);nodes[-1].set('bounds',first)
+            with self.assertRaisesRegex(Refused,'RAIL_ORDER_DRIFT'):validate_window_xml(ET.tostring(root),2400,1080,locale=locale,navigation_layout='rail')
+        # The original endpoint-only check accepted a scrambled middle tab.
+        root=ET.fromstring(xml_fixture());nodes=root.findall('node')
+        nodes[2].set('bounds',nodes[3].get('bounds'))
+        with self.assertRaises(Refused):validate_window_xml(ET.tostring(root),1080,2400)
+
     def test_landscape_matrix_and_strict_negatives(self):
         from gx10_landscape import VARIANTS,validate_landscape_matrix
         rows=[]
@@ -106,12 +137,16 @@ class PresentationTests(unittest.TestCase):
                 orientation='landscape',font_scale_percent=font,font_scale_observed_percent=font,
                 masked_left_px=180,masked_right_px=180,navigation_focusability_verified=True,
                 redacted_sha256=format(i+10000,'064x'))
-            row['navigation_bounds']={k:[v[1],v[0],v[3],v[2]] for k,v in row['navigation_bounds'].items()}
+            row.update(locale_observed='en',locale_requested='en',navigation_layout='rail',
+                       navigation_geometry_verified=True,rtl_navigation_verified=False)
+            row['navigation_bounds']={'xbs_main_title':[550,40,w-30,140],
+                **{'xbs_nav_'+key:[30,30+j*195,450,210+j*195] for j,key in enumerate(NAV)}}
             rows.append(row)
         self.assertEqual(validate_landscape_matrix(rows)['verified_landscape_variants'],5)
         for key,value in [('orientation','portrait'),('masked_left_px',0),('font_scale_observed_percent',0),
                           ('navigation_focusability_verified',False),('width_px',1080),('height_px',2400),
-                          ('redacted_sha256','bad'),('foreground_verified',False)]:
+                          ('redacted_sha256','bad'),('foreground_verified',False),('navigation_layout','row'),
+                          ('locale_observed','ar'),('navigation_geometry_verified',False),('rtl_navigation_verified',True)]:
             bad=copy.deepcopy(rows);bad[0][key]=value
             with self.subTest(key=key),self.assertRaises(Refused):validate_landscape_matrix(bad)
         with self.assertRaises(Refused):validate_landscape_matrix(rows[:-1])

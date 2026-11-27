@@ -1,7 +1,7 @@
 """Actual API36 landscape capture evidence, independent of portrait and physical acceptance."""
 from __future__ import annotations
 from gx03_evidence import need
-from gx10_presentation import WIDTHS, validate_capture
+from gx10_presentation import WIDTHS, validate_capture, validate_navigation_geometry
 
 VARIANTS=frozenset((w,t,100) for w in WIDTHS for t in ('light','dark')) | {(393,'light',130)}
 
@@ -20,6 +20,11 @@ def validate_landscape_capture(meta: dict, short_edge: int, theme: str, font_per
     checked=dict(meta,width_px=h,height_px=w,width_dp=short_edge)
     bounds=meta.get('navigation_bounds')
     need(isinstance(bounds,dict),'GX10_LANDSCAPE_BOUNDS_MISSING')
+    locale=meta.get('locale_observed')
+    need(locale in ('en','ar') and locale==meta.get('locale_requested') and
+         meta.get('navigation_layout')=='rail' and meta.get('navigation_geometry_verified') is True and
+         meta.get('rtl_navigation_verified') is (locale=='ar'),'GX10_LANDSCAPE_NAVIGATION_EVIDENCE_INVALID')
+    validate_navigation_geometry(bounds,'rail',locale)
     rotated={}
     for key,rect in bounds.items():
         need(type(rect) is list and len(rect)==4,'GX10_LANDSCAPE_BOUNDS_INVALID')

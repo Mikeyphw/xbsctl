@@ -129,7 +129,8 @@ def screenshot(serial,width,theme,out,*,landscape=False,font_percent=100,locale=
         need(dump.returncode==0,'GX10_WINDOW_DUMP_FAILED')
         tree=adb(serial,'exec-out','cat',remote,bytes_mode=True,check=False)
         need(tree.returncode==0,'GX10_WINDOW_XML_UNAVAILABLE')
-        window=validate_window_xml(tree.stdout,pixels,height,require_focus=landscape or locale=='ar',locale=locale)
+        window=validate_window_xml(tree.stdout,pixels,height,require_focus=landscape or locale=='ar',
+                                   locale=locale,navigation_layout='rail' if landscape else 'row')
     finally:
         removed=adb(serial,'shell','rm','-f',remote,check=False)
         need(removed.returncode==0,'GX10_PRIVATE_WINDOW_XML_CLEANUP_FAILED')
@@ -149,7 +150,7 @@ def screenshot(serial,width,theme,out,*,landscape=False,font_percent=100,locale=
     meta.update(window)
     meta.update({'file':target.name,'theme_requested':theme,'theme_observed':theme,
                  'foreground_verified':True,'screen_context':'offline-clean-emulator',
-                 'locale_requested':locale,'locale_observed':observed_locale,'rtl_navigation_verified':locale=='ar',
+                 'locale_requested':locale,'locale_observed':observed_locale,
                  'locale_rtl_accepted':False,'accessibility_accepted':False,
                  'redaction_scope':'status_and_navigation_bands_only'})
     if landscape:
