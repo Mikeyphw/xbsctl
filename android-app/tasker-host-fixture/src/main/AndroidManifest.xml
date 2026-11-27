@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.mikeceead.xbsfixture.untrusted" android:versionCode="1" android:versionName="1.0-test-only">
+    <uses-sdk android:minSdkVersion="34" android:targetSdkVersion="36" />
+    <queries>
+        <package android:name="io.github.mikeceead.xbscompanion" />
+        <package android:name="net.dinglisch.android.taskerm" />
+        <package android:name="io.github.mikeceead.xbsfixture.untrusted" />
+    </queries>
+    <application android:label="XBS hosted sender fixture" android:allowBackup="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name="io.github.mikeceead.xbsfixture.HostActivity" android:exported="true" />
+    </application>
+</manifest>

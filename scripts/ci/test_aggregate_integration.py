@@ -336,4 +336,136 @@ class Ui03MergeTests(unittest.TestCase):
         self.commit('unreviewed child',{'ui03':'another'})
         with self.assertRaises(Refused):reviewed_stage(self.root)
 
+class Ui04MergeTests(unittest.TestCase):
+    git=HistoryTests.git
+    commit=HistoryTests.commit
+    at=HistoryTests.at
+    merge=MainMergeTests.merge
+    def setUp(self):
+        Ui03MergeTests.setUp(self)
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        previous=self.next
+        self.prior=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        ctx=patch.multiple(g,UI03_PUBLISHED_HEAD=previous,UI03_MERGED_HEAD=self.prior,
+                           UI03_MERGED_TREE=self.git('rev-parse','HEAD^{tree}'),UI04_CHANGED_PATHS=frozenset({'ui04'}))
+        ctx.start();self.addCleanup(ctx.stop)
+        self.next=self.commit('UI04',{'ui04':'editors'})
+    def test_candidate_and_merge(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,UI04_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'UI04')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':UI04_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.next,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+        head=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        self.assertEqual(reviewed_stage(self.root),'UI04_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+    def test_extra_path_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.prior);self.commit('drift',{'ui04':'editors','evil':'bad'})
+        with self.assertRaisesRegex(Refused,'CHANGED_PATHS_DRIFT UI04'):reviewed_stage(self.root)
+    def test_prior_tree_refused(self):
+        from unittest.mock import patch
+        from gx06_stack_gate import reviewed_stage,Refused
+        with patch('gx06_stack_gate.UI03_MERGED_TREE','0'*40),self.assertRaisesRegex(Refused,'UI04_PREVIOUS_TREE_DRIFT'):
+            reviewed_stage(self.root)
+    def test_unreviewed_merge_tree_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.prior,self.next,self.git('rev-parse',self.prior+'^{tree}'))
+        with self.assertRaisesRegex(Refused,'UI04_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+    def test_extra_child_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.commit('unreviewed child',{'ui04':'another'})
+        with self.assertRaises(Refused):reviewed_stage(self.root)
+
+class Ui04HotfixTests(unittest.TestCase):
+    git=HistoryTests.git
+    commit=HistoryTests.commit
+    at=HistoryTests.at
+    merge=MainMergeTests.merge
+    def setUp(self):
+        Ui04MergeTests.setUp(self)
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        self.published=self.next
+        ctx=patch.multiple(g,UI04_PUBLISHED_HEAD=self.published,
+                           UI04_PUBLISHED_TREE=self.git('rev-parse','HEAD^{tree}'),
+                           UI04_HF01_CHANGED_PATHS=frozenset({'hf01'}))
+        ctx.start();self.addCleanup(ctx.stop)
+        self.next=self.commit('UI04 HF01',{'hf01':'active lifecycle'})
+    def test_candidate_and_merge(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,UI04_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'UI04_HF01')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':UI04_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.next,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+        head=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        self.assertEqual(reviewed_stage(self.root),'UI04_HF01_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+    def test_preimage_tree_drift(self):
+        from unittest.mock import patch
+        from gx06_stack_gate import reviewed_stage,Refused
+        with patch('gx06_stack_gate.UI04_PUBLISHED_TREE','0'*40),self.assertRaisesRegex(Refused,'UI04_HF01_PREIMAGE_TREE_DRIFT'):
+            reviewed_stage(self.root)
+    def test_extra_path_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.published);self.commit('drift',{'hf01':'repair','evil':'bad'})
+        with self.assertRaisesRegex(Refused,'CHANGED_PATHS_DRIFT UI04_HF01'):reviewed_stage(self.root)
+    def test_extra_child_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.commit('unreviewed child',{'hf01':'another'})
+        with self.assertRaises(Refused):reviewed_stage(self.root)
+    def test_merge_tree_drift(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.prior,self.next,self.git('rev-parse',self.prior+'^{tree}'))
+        with self.assertRaisesRegex(Refused,'UI04_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+
+class Ui04SecondHotfixTests(unittest.TestCase):
+    git=HistoryTests.git
+    commit=HistoryTests.commit
+    at=HistoryTests.at
+    merge=MainMergeTests.merge
+    def setUp(self):
+        Ui04HotfixTests.setUp(self)
+        from unittest.mock import patch
+        import gx06_stack_gate as g
+        self.hf01=self.next
+        ctx=patch.multiple(g,UI04_HF01_PUBLISHED_HEAD=self.hf01,
+                           UI04_HF01_PUBLISHED_TREE=self.git('rev-parse','HEAD^{tree}'),
+                           UI04_HF02_CHANGED_PATHS=frozenset({'hf02'}))
+        ctx.start();self.addCleanup(ctx.stop)
+        self.next=self.commit('UI04 HF02',{'hf02':'adaptive rail'})
+    def test_candidate_and_merge(self):
+        from gx06_stack_gate import reviewed_stage,validate_hosted_context,UI04_BRANCH
+        self.assertEqual(reviewed_stage(self.root),'UI04_HF02')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'pull_request','GITHUB_HEAD_REF':UI04_BRANCH,
+             'GITHUB_BASE_REF':'main','XBS_EXPECTED_HEAD_SHA':self.next,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+        head=self.merge(self.prior,self.next,self.git('rev-parse',self.next+'^{tree}'))
+        self.assertEqual(reviewed_stage(self.root),'UI04_HF02_MAIN')
+        env={'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'push','GITHUB_REF':'refs/heads/main',
+             'GITHUB_SHA':head,'XBS_EXPECTED_HEAD_SHA':head,'GITHUB_RUN_ID':'4','GITHUB_RUN_ATTEMPT':'1'}
+        self.assertEqual(validate_hosted_context(self.root,env),('4','1'))
+    def test_preimage_tree_drift(self):
+        from unittest.mock import patch
+        from gx06_stack_gate import reviewed_stage,Refused
+        with patch('gx06_stack_gate.UI04_HF01_PUBLISHED_TREE','0'*40),self.assertRaisesRegex(Refused,'UI04_HF02_PREIMAGE_TREE_DRIFT'):
+            reviewed_stage(self.root)
+    def test_extra_path_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.at(self.hf01);self.commit('drift',{'hf02':'repair','evil':'bad'})
+        with self.assertRaisesRegex(Refused,'CHANGED_PATHS_DRIFT UI04_HF02'):reviewed_stage(self.root)
+    def test_extra_child_refused(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.commit('unreviewed child',{'hf02':'another'})
+        with self.assertRaises(Refused):reviewed_stage(self.root)
+    def test_merge_tree_drift(self):
+        from gx06_stack_gate import reviewed_stage,Refused
+        self.merge(self.prior,self.next,self.git('rev-parse',self.prior+'^{tree}'))
+        with self.assertRaisesRegex(Refused,'UI04_MERGE_TREE_DRIFT'):reviewed_stage(self.root)
+
 if __name__=='__main__':unittest.main(verbosity=2)

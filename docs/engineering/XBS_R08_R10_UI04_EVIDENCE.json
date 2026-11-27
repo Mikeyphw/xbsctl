@@ -1,0 +1,52 @@
+{
+  "hosted_ui04": "PENDING",
+  "original_case_count": 131,
+  "original_cases_accepted": [],
+  "original_finding_count": 26,
+  "original_task_count": 178,
+  "physical_qualification": "PENDING_EXTERNAL",
+  "prior_main_ci": {
+    "artifacts": [
+      {
+        "bytes_independently_verified": false,
+        "github_reported_sha256": "d3e57c74168b53f2a18c8f2074a557d665261489ced6698e0b7c5a0633e2ec1d",
+        "id": 15208083826,
+        "size": 5660473
+      },
+      {
+        "bytes_independently_verified": false,
+        "github_reported_sha256": "ea947457916fb359e21957339e0ef4134954a527e5299e47c3d4e3bc3d519ae8",
+        "id": 15207974060,
+        "size": 9069730
+      },
+      {
+        "bytes_independently_verified": false,
+        "github_reported_sha256": "9324108502b178d62ce5e83884de0003f49af98521842f35095ac67f78226592",
+        "id": 15207513256,
+        "size": 6533661
+      },
+      {
+        "bytes_independently_verified": false,
+        "github_reported_sha256": "227e15836b6ea461b1b4eb30c6f6b064f322c047d1337e7658fc7a8569c5b53d",
+        "id": 15206989217,
+        "size": 376
+      }
+    ],
+    "conclusion": "success",
+    "event": "push",
+    "head_sha": "634512931f41bbe4046519e147e377f993eb8521",
+    "jobs": {
+      "android-companion-api36": "success",
+      "android-companion-debug": "skipped",
+      "android-companion-jvm": "success",
+      "go-contract": "success"
+    },
+    "run_id": 46020259685
+  },
+  "prior_pr": 41,
+  "prior_pr_head": "211dc3134e80a82040af3568e68ac79f2da74c1c",
+  "repository": "Mikeyphw/xbsctl",
+  "schema": "xbs-ui04-preimage-evidence/v1",
+  "source_commit": "634512931f41bbe4046519e147e377f993eb8521",
+  "source_tree": "341bea3c3905005d43c4fc45eadfb88025f19bd7"
+}

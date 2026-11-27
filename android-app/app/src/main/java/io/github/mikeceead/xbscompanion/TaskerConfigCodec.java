@@ -76,14 +76,14 @@ final class TaskerConfigCodec {
         if (identityUnavailable) {
             return legacySenderPolicy(Build.VERSION.SDK_INT, TaskerAuthorization.trustedHost(context, expectedPackage));
         }
-        if (sender == null || !sender.equals(expectedPackage)) return false;
-        if (senderUid == INVALID_UID) return true;
-        try { return context.getPackageManager().getPackageUid(expectedPackage, 0) == senderUid; }
+        if (sender == null || !sender.equals(expectedPackage) || senderUid < 0) return false;
+        try { return TaskerSenderPolicy.matches(Build.VERSION.SDK_INT, sender, senderUid,
+            expectedPackage, context.getPackageManager().getPackageUid(expectedPackage, 0), false); }
         catch (android.content.pm.PackageManager.NameNotFoundException error) { return false; }
     }
 
     static boolean legacySenderPolicy(int apiLevel, boolean trustedPinnedHost) {
-        return apiLevel >= 26 && apiLevel < 34 && trustedPinnedHost;
+        return TaskerSenderPolicy.matches(apiLevel, "", INVALID_UID, TaskerHostIdentity.TASKER, INVALID_UID, trustedPinnedHost);
     }
 
     static final class ParseResult {

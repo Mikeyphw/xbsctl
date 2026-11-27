@@ -16,4 +16,15 @@ public class TaskerConfigCodecPolicyTest {
         assertFalse(TaskerConfigCodec.legacySenderPolicy(36, true));
         assertFalse(TaskerConfigCodec.legacySenderPolicy(25, true));
     }
+    @Test public void completeSenderIdentityRequiredOnModernApis() {
+        String expected = "net.dinglisch.android.taskerm";
+        for (int api : new int[]{34,36}) {
+            assertTrue(TaskerSenderPolicy.matches(api,expected,12000,expected,12000,false));
+            assertFalse(TaskerSenderPolicy.matches(api,expected,-1,expected,12000,true));
+            assertFalse(TaskerSenderPolicy.matches(api,"",12000,expected,12000,true));
+            assertFalse(TaskerSenderPolicy.matches(api,expected,12001,expected,12000,true));
+            assertFalse(TaskerSenderPolicy.matches(api,"evil.example",12000,expected,12000,true));
+            assertFalse(TaskerSenderPolicy.matches(api,expected,12000,expected,-1,true));
+        }
+    }
 }

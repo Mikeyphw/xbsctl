@@ -90,12 +90,27 @@ def pair(serial,identity,apksigner,aapt):
         need(sha(dst.read_bytes())==results[kind]['sha256'],'STAGED_APK_SHA256_DRIFT '+kind)
     return results
 
-def screenshot(serial,width,theme,out):
+def app_locale(serial):
+    result=adb(serial,'shell','cmd','locale','get-app-locales',PKG)
+    match=re.fullmatch(r'Locales for '+re.escape(PKG)+r' for user \d+ are \[([A-Za-z0-9,-]*)\]',result.stdout.strip())
+    need(match is not None,'GX10_APP_LOCALE_QUERY_INVALID')
+    return match.group(1)
+
+
+def screenshot(serial,width,theme,out,*,landscape=False,font_percent=100,locale='en'):
     from gx10_presentation import WIDTHS,validate_foreground,validate_window_xml,validate_capture
-    need(width in WIDTHS and theme in ('light','dark'),'SCREENSHOT_REQUEST_INVALID')
+    need(width in WIDTHS and theme in ('light','dark') and locale in ('en','ar'),'SCREENSHOT_REQUEST_INVALID')
     pixels,height=WIDTHS[width]
     adb(serial,'shell','wm','size',str(pixels)+'x'+str(height))
     adb(serial,'shell','wm','density','480')
+    adb(serial,'shell','wm','user-rotation','lock','1' if landscape else '0')
+    adb(serial,'shell','settings','put','system','font_scale',str(font_percent/100))
+    adb(serial,'shell','cmd','locale','set-app-locales',PKG,'--locales',locale)
+    observed_locale=app_locale(serial)
+    need(observed_locale==locale,'GX10_APP_LOCALE_NOT_OBSERVED')
+    font=adb(serial,'shell','settings','get','system','font_scale').stdout.strip()
+    need(float(font)*100==font_percent,'GX10_FONT_SCALE_NOT_OBSERVED')
+    if landscape: pixels,height=height,pixels
     mode='yes' if theme=='dark' else 'no'
     adb(serial,'shell','cmd','uimode','night',mode)
     observed=adb(serial,'shell','cmd','uimode','night',check=False)
@@ -114,7 +129,8 @@ def screenshot(serial,width,theme,out):
         need(dump.returncode==0,'GX10_WINDOW_DUMP_FAILED')
         tree=adb(serial,'exec-out','cat',remote,bytes_mode=True,check=False)
         need(tree.returncode==0,'GX10_WINDOW_XML_UNAVAILABLE')
-        window=validate_window_xml(tree.stdout,pixels,height)
+        window=validate_window_xml(tree.stdout,pixels,height,require_focus=landscape or locale=='ar',
+                                   locale=locale,navigation_layout='rail' if landscape else 'row')
     finally:
         removed=adb(serial,'shell','rm','-f',remote,check=False)
         need(removed.returncode==0,'GX10_PRIVATE_WINDOW_XML_CLEANUP_FAILED')
@@ -126,15 +142,26 @@ def screenshot(serial,width,theme,out):
     state=adb(serial,'shell','dumpsys','activity','activities',check=False)
     need(state.returncode==0,'GX10_FOREGROUND_QUERY_FAILED')
     validate_foreground(state.stdout)
-    redacted,meta=redact_png(capture.stdout,pixels,band=180)
-    target=out/('gx03-'+str(width)+'dp-'+theme+'-redacted.png')
+    redacted,meta=redact_png(capture.stdout,pixels,band=180,expected_height=height,side_band=180 if landscape else 0)
+    suffix=('-landscape-font'+str(font_percent)) if landscape else ''
+    if locale=='ar':suffix+='-ar'
+    target=out/('gx03-'+str(width)+'dp-'+theme+suffix+'-redacted.png')
     need(not target.exists(),'GX10_STALE_SCREENSHOT_REFUSED')
     meta.update(window)
     meta.update({'file':target.name,'theme_requested':theme,'theme_observed':theme,
                  'foreground_verified':True,'screen_context':'offline-clean-emulator',
+                 'locale_requested':locale,'locale_observed':observed_locale,
                  'locale_rtl_accepted':False,'accessibility_accepted':False,
                  'redaction_scope':'status_and_navigation_bands_only'})
-    validate_capture(meta,width,theme)
+    if landscape:
+        from gx10_landscape import validate_landscape_capture
+        meta.update({'orientation':'landscape','font_scale_percent':font_percent,
+                     'font_scale_observed_percent':int(float(font)*100),
+                     'navigation_focusability_verified':True,
+                     'redaction_scope':'status_navigation_and_side_bands'})
+        validate_landscape_capture(meta,width,theme,font_percent)
+    else:
+        validate_capture(meta,width,theme)
     target.write_bytes(redacted)
     need(target.is_file() and sha(target.read_bytes())==meta['redacted_sha256'],
          'REDACTED_SCREENSHOT_HASH_MISMATCH')
@@ -256,7 +283,10 @@ def process_death(serial):
     return {'stage_a':first,'stage_b':second,'host_force_stop_executed':True,
             'old_process_pid_observed':bool(oldpid),'post_kill_absent':True,
             'root_command_effects_executed':False,'outcome':'real-process-death-tested',
-            'claimed_no_automatic_replay':False}
+            'claimed_no_automatic_replay':False,
+            'tile_persisted_pending_and_no_duplicate_dispatch_tested':True,
+            'tile_expiry_and_failure_tested':True,'tile_external_cache_observation_tested':True,
+            'tile_real_rooted_daemon_tested':False}
 
 def execute(args):
     serial,identity=host_identity(args.api)
@@ -331,6 +361,8 @@ def execute(args):
         install_verified_pair_for_stage(serial,report['apk_pair'])
         report['gx04_systemui_callbacks']=gx04_systemui_probe(serial)
         report['process_death']=process_death(serial)
+        from gx10_tasker_fixture import collect as collect_tasker
+        report['gx10_tasker_host']=collect_tasker(ROOT,serial,identity,adb,run,apksigner,aapt)
         # GX05: real per-invocation cold-start and total-PSS measurements.
         # No battery savings, wakeup rate, physical-root or signing claim.
         from gx05_hosted_measure import collect as gx05_collect
@@ -364,21 +396,39 @@ def execute(args):
         print('GX05_ROOTLESS_SECURITY_PERFORMANCE_PASS source='+identity['source_sha']+
             ' run='+identity['github_run_id']+' attempt='+identity['github_run_attempt']+
             ' samples=7 physical_qualified=false release_qualified=false',flush=True)
-        captures=[]
+        from gx10_landscape import VARIANTS,validate_landscape_matrix
+        captures=[];landscape_captures=[]
+        original_locale=app_locale(serial)
+        original_font=adb(serial,'shell','settings','get','system','font_scale').stdout.strip()
+        need(original_font=='null' or re.fullmatch(r'[0-9]+(?:\.[0-9]+)?',original_font) is not None,'GX10_ORIGINAL_FONT_SCALE_INVALID')
         try:
             for width in (360,393):
                 for theme in ('light','dark'):
                     captures.append(screenshot(serial,width,theme,out))
+            for width,theme,font in sorted(VARIANTS):
+                landscape_captures.append(screenshot(serial,width,theme,out,landscape=True,font_percent=font))
+            rtl_capture=screenshot(serial,393,'light',out,landscape=True,locale='ar')
+            need(rtl_capture['rtl_navigation_verified'] and rtl_capture['locale_observed']=='ar' and
+                 rtl_capture['redacted_sha256'] not in {x['redacted_sha256'] for x in captures+landscape_captures},
+                 'GX10_RTL_CAPTURE_NOT_DISTINCT')
         finally:
             # Changes were made only to a disposable emulator; restore global settings.
             restored=[adb(serial,'shell',*command,check=False) for command in
-                      [('wm','size','reset'),('wm','density','reset'),('cmd','uimode','night','auto')]]
-            need(all(x.returncode==0 for x in restored),'GX10_EMULATOR_SETTING_RESTORE_FAILED')
+                      [('wm','user-rotation','free'),('wm','size','reset'),('wm','density','reset'),('cmd','uimode','night','auto'),
+                       (('settings','delete','system','font_scale') if original_font=='null' else
+                        ('settings','put','system','font_scale',original_font))]]
+            locale_restore=['cmd','locale','set-app-locales',PKG]
+            if original_locale:locale_restore+=['--locales',original_locale]
+            restored.append(adb(serial,'shell',*locale_restore,check=False))
+            need(all(x.returncode==0 for x in restored) and app_locale(serial)==original_locale,'GX10_EMULATOR_SETTING_RESTORE_FAILED')
         report['gx10_capture_matrix']=validate_matrix(captures)
+        report['gx10_landscape_matrix']=validate_landscape_matrix(landscape_captures)
         report['screenshots']=captures
+        report['landscape_screenshots']=landscape_captures
+        report['rtl_landscape_screenshot']=rtl_capture
         report['journey_scope']='MainActivity five tabs, hostile navigation, real external process death'
         report['original_cases_accepted']=[]
-        report['remaining_cases']='Editor CRUD, full localization/accessibility, landscape screenshots, remaining tile/runtime assertions and other R10 cases remain open; original case acceptance is separate'
+        report['remaining_cases']='Full editor CRUD, localization, TalkBack/OEM accessibility, actual Tasker distribution/host and physical root/OEM behavior remain separately gated; original case acceptance is separate'
     elif args.mode=='compat':
         need(args.api in COMPAT,'COMPAT_API_MUST_BE_26_OR_34')
         report['compat_assertions']=junit_receipt(RESULTS,COMPAT[args.api])
@@ -411,16 +461,16 @@ def gx04_systemui_counts(serial):
     return values
 
 def gx04_systemui_probe(serial):
-    """Rootless SystemUI add/click/remove: verify callbacks, never shell exit alone.
+    """Observe five real callbacks for an ACTIVE_TILE, not passive panel opening.
 
-    A freshly installed app has no authenticated XBS daemon; its tile must
-    remain visually non-active yet allow an app-diagnostic click. This is not
-    evidence that any privileged command was executed.
+    Android active-mode tiles receive a listening window on click (or explicit
+    requestListeningState), ending after their update. Expanding QS alone is
+    not a trigger. Use one click and fresh pre-click counters; never dispatch a
+    second click to compensate for missing asynchronous callback evidence.
     """
     import time
     service=PKG+'/.XbsPauseTileService'
     before=gx04_systemui_counts(serial)
-    observed={}
     commands=[]
     last_counts=dict(before)
     def statusbar(command,component=False):
@@ -428,13 +478,14 @@ def gx04_systemui_probe(serial):
         result=adb(serial,*args,check=False)
         need(result.returncode==0,'GX04_SYSTEMUI_COMMAND_REFUSED '+command+' '+(result.stderr or '')[-300:])
         commands.append(command)
-    def wait_delta(marker,intervals=80):
+    def wait_delta(marker,baseline,intervals=80,*,exactly_one=False):
         nonlocal last_counts
         for _ in range(intervals):
             last_counts=gx04_systemui_counts(serial)
-            if last_counts.get(marker,0)>before.get(marker,0):
-                observed[marker]=last_counts[marker]
-                return True
+            delta=last_counts.get(marker,0)-baseline.get(marker,0)
+            need(delta>=0,'GX04_SYSTEMUI_COUNTER_REGRESSED '+marker)
+            if exactly_one:need(delta<=1,'GX04_SYSTEMUI_DUPLICATE_CALLBACK '+marker)
+            if delta>0:return True
             time.sleep(0.25)
         return False
     added=False
@@ -443,35 +494,43 @@ def gx04_systemui_probe(serial):
         need(check.returncode==0 and check.stdout.strip()=='true','GX04_SYSTEMUI_NOT_SUPPORTED')
         statusbar('add-tile',True)
         added=True
-        need(wait_delta('added_PAUSE'),
+        need(wait_delta('added_PAUSE',before),
              'GX04_SYSTEMUI_CALLBACK_MISSING added_PAUSE counts='+repr(last_counts))
-        # SystemUI may not dispatch clicks until QS is expanded/listening;
-        # do not infer a click from exit code 0 (shell call is asynchronous).
         statusbar('expand-settings')
+        # Allow the asynchronous initial tile publication/panel transition to
+        # settle. Neither delay nor shell exit constitutes callback evidence.
         time.sleep(1)
+        click_before=gx04_systemui_counts(serial)
         statusbar('click-tile',True)
-        if not wait_delta('clicked_PAUSE',intervals=64):
-            # Bound one fresh UI activation/retry; no root operation is permitted
-            # because a fresh emulator lacks an authenticated daemon snapshot.
-            statusbar('collapse')
-            statusbar('expand-settings')
-            time.sleep(1)
-            statusbar('click-tile',True)
-            need(wait_delta('clicked_PAUSE',intervals=64),
-                 'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts)+
-                 ' commands='+repr(commands))
+        need(wait_delta('listening_PAUSE',click_before),
+             'GX04_SYSTEMUI_START_LISTENING_CALLBACK_MISSING counts='+repr(last_counts))
+        need(wait_delta('clicked_PAUSE',click_before,exactly_one=True),
+             'GX04_SYSTEMUI_CALLBACK_MISSING clicked_PAUSE counts='+repr(last_counts))
+        # The active-mode update may have already ended its listening window;
+        # observe its fresh stop rather than attributing it to panel collapse.
+        statusbar('collapse')
+        need(wait_delta('stopped_PAUSE',click_before),
+             'GX04_SYSTEMUI_STOP_LISTENING_CALLBACK_MISSING counts='+repr(last_counts))
+        click_after=gx04_systemui_counts(serial)
+        need(click_after.get('clicked_PAUSE',0)==click_before.get('clicked_PAUSE',0)+1,
+             'GX04_SYSTEMUI_DUPLICATE_OR_LOST_CLICK')
+        remove_before=click_after
     finally:
         if added:
             statusbar('remove-tile',True)
         statusbar('collapse')
-    need(wait_delta('removed_PAUSE'),
+    need(wait_delta('removed_PAUSE',remove_before),
          'GX04_SYSTEMUI_REMOVE_CALLBACK_MISSING counts='+repr(last_counts))
-    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true',flush=True)
+    print('GX04_SYSTEMUI_ROOTLESS_CALLBACKS_PASS added=true clicked=true removed=true listening=true stopped=true',flush=True)
     return {'real_systemui_shell':True,'add_callback':True,'click_callback':True,
-            'remove_callback':True,'api':36,'user_data_recorded':False,
+            'remove_callback':True,'start_listening_callback':True,'stop_listening_callback':True,'api':36,'user_data_recorded':False,
             'physical_oem_qualified':False,'root_execution_asserted':False,
             'shell_exit_alone_never_proves_callback':True,
-            'diagnostic_states_remain_non_active':True}
+            'diagnostic_states_remain_non_active':True,
+            'tile_mode':'active','listening_trigger':'systemui_click',
+            'click_dispatch_count':commands.count('click-tile'),
+            'fresh_click_callback_deltas':{key:click_after.get(key,0)-click_before.get(key,0)
+                 for key in ('listening_PAUSE','clicked_PAUSE','stopped_PAUSE')}}
 
 
 if __name__=='__main__':

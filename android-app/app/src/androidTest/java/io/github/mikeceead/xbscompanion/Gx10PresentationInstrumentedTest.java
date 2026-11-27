@@ -130,6 +130,7 @@ public final class Gx10PresentationInstrumentedTest {
             AccessibilityNodeInfo node=nav.createAccessibilityNodeInfo();
             assertTrue(node.isClickable() && node.isFocusable() && node.isVisibleToUser());
             assertEquals(a.getString(LABELS[i]),String.valueOf(node.getContentDescription()));
+            assertEquals(a.getString(LABELS[i]).contentEquals(title.getText()),node.isSelected());
         }
         assertTrue(a.findViewById(R.id.xbs_main_scroll).getHeight()>0);
     }
@@ -229,6 +230,30 @@ public final class Gx10PresentationInstrumentedTest {
             automation.setRotation(UiAutomation.ROTATION_UNFREEZE);
             AppSettings.setPage(app(),0);
         }
+    }
+    @Test public void allNavigationTabsHaveAccessibleActionsAndRealScroll() {
+        int before=RunStore.all(app()).size();
+        try(ActivityScenario<MainActivity> scenario=launch()) {
+            waitForLayout(scenario);
+            for(int index=0;index<NAV.length;index++) {
+                final int page=index;
+                onView(withId(NAV[page])).perform(click());
+                waitForLayout(scenario);
+                scenario.onActivity(a->{
+                    assertNavigation(a);
+                    assertEquals(a.getString(LABELS[page]),((TextView)a.findViewById(R.id.xbs_main_title)).getText().toString());
+                });
+                AtomicBoolean scrollable=new AtomicBoolean(false);
+                scenario.onActivity(a->scrollable.set(a.findViewById(R.id.xbs_main_scroll).canScrollVertically(1)));
+                if(scrollable.get()) {
+                    onView(withId(R.id.xbs_main_scroll)).perform(swipeUp());
+                    scenario.onActivity(a->assertTrue("Real scroll gesture made no progress",a.findViewById(R.id.xbs_main_scroll).getScrollY()>0));
+                }
+            }
+            onView(withId(R.id.xbs_nav_overview)).perform(click());
+            scenario.onActivity(a->assertEquals(a.getString(LABELS[0]),((TextView)a.findViewById(R.id.xbs_main_title)).getText().toString()));
+        } finally { AppSettings.setPage(app(),0); }
+        assertEquals(before,RunStore.all(app()).size());
     }
     private static void assertTileViewport(XbsTileSettingsActivity a) {
         View root=a.findViewById(R.id.xbs_tile_settings_root);

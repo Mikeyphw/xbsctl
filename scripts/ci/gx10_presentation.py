@@ -11,9 +11,11 @@ METHODS=frozenset({
     'realRotationPreservesSelectedTabAndMeasuredInsets',
     'arabicMainNavigationMirrorsAndExposesLocalizedLabels',
     'tileSettingsOfflineSelectionAndResetCancellationDoNotDispatch',
+    'allNavigationTabsHaveAccessibleActionsAndRealScroll',
 })
 NAV={'overview':'Overview','events':'Events','processes':'Processes','activity':'Activity','settings':'Settings'}
 WIDTHS={360:(1080,2400),393:(1179,2620)}
+NAV_AR={'overview':'نظرة عامة','events':'الأحداث','processes':'العمليات','activity':'النشاط','settings':'الإعدادات'}
 
 
 def validate_foreground(output: str) -> None:
@@ -23,15 +25,45 @@ def validate_foreground(output: str) -> None:
     need(bool(matches) and all(actual.search(line) for line in matches),'GX10_MAIN_ACTIVITY_NOT_RESUMED')
 
 
-def validate_window_xml(raw: bytes, width: int, height: int) -> dict:
+def validate_navigation_geometry(bounds: dict, layout: str, locale: str) -> None:
+    """Verify the actual layout's reading order, not just two endpoint positions.
+
+    Compact navigation mirrors horizontally. Expanded navigation is a vertical
+    rail whose start edge mirrors, while its semantic order remains top-to-bottom.
+    Coordinates are the measured accessibility bounds, never requested geometry.
+    """
+    need(layout in ('row','rail') and locale in ('en','ar'),'GX10_NAVIGATION_GEOMETRY_INVALID')
+    keys=['xbs_nav_'+k for k in NAV]
+    need(isinstance(bounds,dict) and set(bounds)=={'xbs_main_title',*keys},'GX10_CAPTURE_BOUNDS_INVENTORY')
+    for rect in bounds.values():
+        need(type(rect) is list and len(rect)==4 and all(type(v) is int for v in rect)
+             and 0<=rect[0]<rect[2] and 0<=rect[1]<rect[3],'GX10_NAVIGATION_GEOMETRY_INVALID')
+    buttons=[bounds[k] for k in keys]
+    title=bounds['xbs_main_title']
+    if layout=='row':
+        need(max(r[1] for r in buttons)<min(r[3] for r in buttons),'GX10_NAVIGATION_ROW_MISALIGNED')
+        ordered=buttons if locale=='en' else list(reversed(buttons))
+        need(all(a[2]<=b[0] for a,b in zip(ordered,ordered[1:])),
+             'GX10_RTL_NAVIGATION_NOT_MIRRORED' if locale=='ar' else 'GX10_LTR_NAVIGATION_ORDER_DRIFT')
+    else:
+        need(max(r[0] for r in buttons)<min(r[2] for r in buttons),'GX10_NAVIGATION_RAIL_MISALIGNED')
+        need(all(a[3]<=b[1] for a,b in zip(buttons,buttons[1:])),'GX10_NAVIGATION_RAIL_ORDER_DRIFT')
+        correct_side=(min(r[0] for r in buttons)>=title[2] if locale=='ar'
+                      else max(r[2] for r in buttons)<=title[0])
+        need(correct_side,'GX10_RTL_NAVIGATION_NOT_MIRRORED' if locale=='ar' else 'GX10_LTR_RAIL_WRONG_SIDE')
+
+
+def validate_window_xml(raw: bytes, width: int, height: int, *, require_focus: bool=False, locale: str='en', navigation_layout: str='row') -> dict:
     """Verify actual navigation/title nodes and fully in-window bounds; publish no raw XML."""
     need(isinstance(raw,bytes) and 0<len(raw)<=512_000 and b'<!DOCTYPE' not in raw.upper()
          and b'<!ENTITY' not in raw.upper(),'GX10_WINDOW_XML_UNSAFE')
     try: root=ET.fromstring(raw)
     except ET.ParseError as exc: raise Refused('GX10_WINDOW_XML_MALFORMED') from exc
     need(root.tag=='hierarchy','GX10_WINDOW_XML_NOT_HIERARCHY')
-    expected={PKG+':id/xbs_main_title':'Overview'}
-    expected.update({PKG+':id/xbs_nav_'+k:v for k,v in NAV.items()})
+    need(locale in ('en','ar'),'GX10_UNREVIEWED_LOCALE')
+    labels=NAV_AR if locale=='ar' else NAV
+    expected={PKG+':id/xbs_main_title':labels['overview']}
+    expected.update({PKG+':id/xbs_nav_'+k:v for k,v in labels.items()})
     observed={}
     for node in root.iter('node'):
         rid=node.get('resource-id','')
@@ -47,10 +79,15 @@ def validate_window_xml(raw: bytes, width: int, height: int) -> dict:
             need(node.get('content-desc')==expected[rid] and node.get('clickable')=='true'
                  and node.get('enabled')=='true','GX10_NAVIGATION_LABEL_OR_ACTION_MISSING')
             need(x2-x1>=144 and y2-y1>=144,'GX10_NAVIGATION_MEASURED_TARGET_TOO_SMALL')
+            if require_focus:
+                need(node.get('focusable')=='true','GX10_NAVIGATION_NOT_ACCESSIBILITY_FOCUSABLE')
         observed[rid]=[x1,y1,x2,y2]
     need(set(observed)==set(expected),'GX10_REQUIRED_WINDOW_NODES_MISSING')
+    bounds={k.rsplit('/',1)[1]:v for k,v in observed.items()}
+    validate_navigation_geometry(bounds,navigation_layout,locale)
     return {'window_nodes_verified':len(observed),'window_xml_sha256':sha(raw),
-            'navigation_bounds':{k.rsplit('/',1)[1]:v for k,v in observed.items()},
+            'navigation_bounds':bounds,'navigation_layout':navigation_layout,
+            'navigation_geometry_verified':True,'rtl_navigation_verified':locale=='ar',
             'raw_window_xml_published':False}
 
 
